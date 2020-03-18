@@ -76,9 +76,9 @@ namespace MapspeopleConsumer {
             List<Dataset> datasets= JsonConvert.DeserializeObject<List<Dataset>>(datasetJsonstr);
             string datasetId = datasets[0].Id;
             //Console.WriteLine(datasetId);
-            // Console.ReadLine();
-            
-            var geodataRequest = new RestRequest("/{datasetId}/api/geodata/", Method.GET);
+            //Console.ReadLine();
+
+            var geodataRequest = new RestRequest($"/{datasetId}/api/geodata/", Method.GET);
             geodataRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
             var geodataResponse = client.Execute(geodataRequest);
             jsonstr = geodataResponse.Content;
