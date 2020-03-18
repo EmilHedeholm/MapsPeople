@@ -7,21 +7,23 @@ using System.Threading.Tasks;
 using ConsumerAzure.JsonModel;
 using DataModels;
 using Newtonsoft.Json;
+using RestSharp;
 
 namespace ConsumerAzure {
     class Program {
+
+        static List<RootObject> filteredData = new List<RootObject>();
+
         //TODO: make this better polling and not garbage as it is right now
         static void Main(string[] args) {
-          while (true) {
+            while (true) {
                 Thread.Sleep(3000);
                 List<Location> data = GetData();
-                foreach (Location l in data) {
-                    Console.WriteLine(l.Id);
+                if (!(data.Count == 0)) {
+                    SendData(data);
                 }
             }
         }
-
-
 
         private static List<Location> GetData() {
             string jsonstr;
@@ -32,31 +34,76 @@ namespace ConsumerAzure {
             }
             List<RootObject> sources = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
 
-            return ConvertFromJsonToInternalModel(sources);
+            FilterData(sources);
+            return ConvertFromJsonToInternalModel(filteredData);
         }
 
         private static List<Location> ConvertFromJsonToInternalModel(List<RootObject> sources) {
             List<Location> locations = new List<Location>();
-            foreach(RootObject r in sources) {
+            foreach (RootObject r in sources) {
                 Location location = new Location();
                 location.Id = r.spaceRefId;
-                location.Sources = new List<Source>();
-                foreach(LastReport lr in r.lastReports) {
+
+                foreach (LastReport lr in r.lastReports) {
                     Source source = new Source();
-                    State state = new State();
-                    state.MotionDetected = lr.motionDetected;
-                    state.PersonCount = lr.personCount;
-                    state.SignsOfLife = state.SignsOfLife;
-                    string json = JsonConvert.SerializeObject(state);
+                    string MotionDetected = lr.motionDetected.ToString();
+                    string PersonCount = lr.personCount.ToString();
+                    string SignsOfLife = lr.signsOfLife.ToString();
+                    source.State.Add("MotionDetected", MotionDetected);
+                    source.State.Add("PersonCount", PersonCount);
+                    source.State.Add("SignsOfLife", SignsOfLife);
+
                     source.Id = lr.id;
                     source.Type = "Occupancy";
-                    source.State = json;
                     source.TimeStamp = lr.timeStamp;
                     location.Sources.Add(source);
                 }
                 locations.Add(location);
             }
             return (locations);
+        }
+
+        private static void FilterData(List<RootObject> rawData) {
+            List<RootObject> temp = new List<RootObject>();
+            foreach (RootObject r in rawData) {
+                foreach (RootObject rO in filteredData) {
+                    if (r.id.Equals(rO.id)) {
+                        foreach (LastReport l in r.lastReports) {
+                            foreach (LastReport lr in rO.lastReports) {
+                                if (l.id.Equals(lr.id)) {
+                                    if (!(l.motionDetected.Equals(lr.motionDetected))) {
+                                        if (!temp.Contains(r)) {
+                                            temp.Add(r);
+                                        }
+                                    }
+                                    if (!(l.personCount.Equals(lr.personCount))) {
+                                        if (!temp.Contains(r)) {
+                                            temp.Add(r);
+                                        }
+                                    }
+                                    if (!(l.signsOfLife.Equals(lr.signsOfLife))) {
+                                        if (!temp.Contains(r)) {
+                                            temp.Add(r);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            filteredData.Clear();
+            filteredData.AddRange(temp);
+        }
+
+        private static void SendData(List<Location> locations) {
+            var client = new RestClient();
+            client.BaseUrl = new Uri("");
+            string json = JsonConvert.SerializeObject(locations);
+            var request = new RestRequest(Method.POST);
+            request.AddParameter("application/json; charset=utf-8", json, ParameterType.RequestBody);
+            request.RequestFormat = DataFormat.Json;
+            var response = client.Execute(request);
         }
     }
 }
