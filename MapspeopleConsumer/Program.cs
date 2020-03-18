@@ -71,10 +71,12 @@ namespace MapspeopleConsumer {
             testRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
 
             var something = client.Execute(testRequest);
-           
-            using (StreamReader sr = new StreamReader(response.GetResponseStream())) {
-                jsonstr = sr.ReadToEnd();
-            }
+            jsonstr = something.Content;
+
+
+            //using (StreamReader sr = new StreamReader(something.GetResponseStream())) {
+                //jsonstr = sr.ReadToEnd();
+            //}
             List<RootObject> sources = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
 
             return ConvertFromJsonToInternalModel(sources);
