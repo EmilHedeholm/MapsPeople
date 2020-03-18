@@ -12,7 +12,7 @@ namespace DataModels {
         public DateTime TimeStamp { get; set; }
 
         public Source(){
-            State = new List<string>();
+            State = new Dictionary<string, string>();
         }
     }
 }
