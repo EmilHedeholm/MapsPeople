@@ -17,26 +17,26 @@ namespace MapspeopleConsumer {
         static void Main(string[] args) {
             while (true) {
                 Thread.Sleep(3000);
-                List<Location> data = GetData();
-                foreach (Location l in data) {
-                    Console.WriteLine(l.Id);
-                }
+                string data = GetData();
+               // foreach (Location l in data) {
+                    //Console.WriteLine(l.Id);
+                //}
 
-                var client = new RestClient();
+                //var client = new RestClient();
 
-                var response = testMethod(client);
+                //var response = testMethod(client);
 
-                client.BaseUrl = new Uri("https://integration.mapsindoors.com");
+                //client.BaseUrl = new Uri("https://integration.mapsindoors.com");
 
-                var testRequest = new RestRequest("/api/dataset/", Method.GET);
+                //var testRequest = new RestRequest("/api/dataset/", Method.GET);
 
-                testRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
+                //testRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
 
-                var something = client.Execute(testRequest);
+                //var something = client.Execute(testRequest);
 
 
-                Console.WriteLine(something.Content);
-                Console.ReadLine();
+                //Console.WriteLine(data);
+                //Console.ReadLine();
 
             }
         }
@@ -56,7 +56,7 @@ namespace MapspeopleConsumer {
             return response.Data;
         }
 
-        private static List<Location> GetData() {
+        private static string GetData() {
             string jsonstr;
             //var request = WebRequest.Create("https://integration.mapsindoors.com") as HttpWebRequest;        
             //var response = request.GetResponse();
@@ -71,39 +71,45 @@ namespace MapspeopleConsumer {
             testRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
 
             var something = client.Execute(testRequest);
-            jsonstr = something.Content;
-
-
+            string datasetJsonstr = something.Content;
+            List<Dataset> datasets= JsonConvert.DeserializeObject<List<Dataset>>(datasetJsonstr);
+            string datasetId = datasets[0].Id;
+            var geodataRequest = new RestRequest("datasetId/api/dataset/", Method.GET);
+            geodataRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
+            var geodataResponse = client.Execute(geodataRequest);
+            jsonstr = geodataResponse.Content;
+            Console.WriteLine(jsonstr);
+            Console.ReadLine();
             //using (StreamReader sr = new StreamReader(something.GetResponseStream())) {
-                //jsonstr = sr.ReadToEnd();
+            //jsonstr = sr.ReadToEnd();
             //}
-            List<RootObject> sources = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
+            //List<Dataset> sources = JsonConvert.DeserializeObject<List<Dataset>>(jsonstr);
 
-            return ConvertFromJsonToInternalModel(sources);
+            return jsonstr;
         }
 
-        private static List<Location> ConvertFromJsonToInternalModel(List<RootObject> sources) {
-            List<Location> locations = new List<Location>();
-            foreach (RootObject r in sources) {
-                Location location = new Location();
-                location.Id = r.spaceRefId;
-                location.Sources = new List<Source>();
-                foreach (LastReport lr in r.lastReports) {
-                    Source source = new Source();
-                    State state = new State();
-                    state.MotionDetected = lr.motionDetected;
-                    state.PersonCount = lr.personCount;
-                    state.SignsOfLife = state.SignsOfLife;
-                    string json = JsonConvert.SerializeObject(state);
-                    source.Id = lr.id;
-                    source.Type = "Occupancy";
-                    source.State = json;
-                    source.TimeStamp = lr.timeStamp;
-                    location.Sources.Add(source);
-                }
-                locations.Add(location);
-            }
-            return (locations);
-        }
+        //private static List<Location> ConvertFromJsonToInternalModel(List<Dataset> sources) {
+        //    List<Location> locations = new List<Location>();
+        //    foreach (Dataset d in sources) {
+        //        Location location = new Location();
+        //        location.Id = d.Id;
+        //        location.Sources = new List<Source>();
+        //        foreach (LastReport lr in r.lastReports) {
+        //            Source source = new Source();
+        //            State state = new State();
+        //            state.MotionDetected = lr.motionDetected;
+        //            state.PersonCount = lr.personCount;
+        //            state.SignsOfLife = state.SignsOfLife;
+        //            string json = JsonConvert.SerializeObject(state);
+        //            source.Id = lr.id;
+        //            source.Type = "Occupancy";
+        //            //source.State = json;
+        //            source.TimeStamp = lr.timeStamp;
+        //            location.Sources.Add(source);
+        //        }
+        //        locations.Add(location);
+        //    }
+        //    return (locations);
+        //}
     }
 }

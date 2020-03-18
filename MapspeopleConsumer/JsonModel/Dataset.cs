@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace MapspeopleConsumer.JsonModel {
     class Dataset {
 
-        public int Id { get; set; }
+        public string Id { get; set; }
         public string  Name { get; set; }
         public List<string> AvailableLanguages { get; set; }
         public string BaseLanguage { get; set; }
