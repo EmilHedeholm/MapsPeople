@@ -15,7 +15,7 @@ namespace ConsumerAzure {
         static List<RootObject> filteredData = new List<RootObject>();
 
         //TODO: make this better polling and not garbage as it is right now
-        static void Main(string[] args) {
+        static void Main() {
             while (true) {
                 Thread.Sleep(3000);
                 List<Location> data = GetData();
@@ -42,20 +42,20 @@ namespace ConsumerAzure {
             List<Location> locations = new List<Location>();
             foreach (RootObject r in sources) {
                 Location location = new Location();
-                location.Id = r.spaceRefId;
+                location.Id = r.SpaceRefId;
 
-                foreach (LastReport lr in r.lastReports) {
+                foreach (LastReport lr in r.LastReports) {
                     Source source = new Source();
-                    string MotionDetected = lr.motionDetected.ToString();
-                    string PersonCount = lr.personCount.ToString();
-                    string SignsOfLife = lr.signsOfLife.ToString();
+                    string MotionDetected = lr.MotionDetected.ToString();
+                    string PersonCount = lr.PersonCount.ToString();
+                    string SignsOfLife = lr.SignsOfLife.ToString();
                     source.State.Add("MotionDetected", MotionDetected);
                     source.State.Add("PersonCount", PersonCount);
                     source.State.Add("SignsOfLife", SignsOfLife);
 
-                    source.Id = lr.id;
+                    source.Id = lr.Id;
                     source.Type = "Occupancy";
-                    source.TimeStamp = lr.timeStamp;
+                    source.TimeStamp = lr.TimeStamp;
                     location.Sources.Add(source);
                 }
                 locations.Add(location);
@@ -67,21 +67,21 @@ namespace ConsumerAzure {
             List<RootObject> temp = new List<RootObject>();
             foreach (RootObject r in rawData) {
                 foreach (RootObject rO in filteredData) {
-                    if (r.id.Equals(rO.id)) {
-                        foreach (LastReport l in r.lastReports) {
-                            foreach (LastReport lr in rO.lastReports) {
-                                if (l.id.Equals(lr.id)) {
-                                    if (!(l.motionDetected.Equals(lr.motionDetected))) {
+                    if (r.Id.Equals(rO.Id)) {
+                        foreach (LastReport l in r.LastReports) {
+                            foreach (LastReport lr in rO.LastReports) {
+                                if (l.Id.Equals(lr.Id)) {
+                                    if (!(l.MotionDetected.Equals(lr.MotionDetected))) {
                                         if (!temp.Contains(r)) {
                                             temp.Add(r);
                                         }
                                     }
-                                    if (!(l.personCount.Equals(lr.personCount))) {
+                                    if (!(l.PersonCount.Equals(lr.PersonCount))) {
                                         if (!temp.Contains(r)) {
                                             temp.Add(r);
                                         }
                                     }
-                                    if (!(l.signsOfLife.Equals(lr.signsOfLife))) {
+                                    if (!(l.SignsOfLife.Equals(lr.SignsOfLife))) {
                                         if (!temp.Contains(r)) {
                                             temp.Add(r);
                                         }

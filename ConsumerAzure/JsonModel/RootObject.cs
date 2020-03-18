@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace ConsumerAzure.JsonModel {
     public class RootObject {
-        public int id { get; set; }
-        public string spaceRefId { get; set; }
-        public string name { get; set; }
-        public string spaceType { get; set; }
-        public List<LastReport> lastReports { get; set; }
+        public int Id { get; set; }
+        public string SpaceRefId { get; set; }
+        public string Name { get; set; }
+        public string SpaceType { get; set; }
+        public List<LastReport> LastReports { get; set; }
     }
 }

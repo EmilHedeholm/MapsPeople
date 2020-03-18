@@ -52,7 +52,6 @@
   <ItemGroup>
     <Compile Include="JsonModel\LastReport.cs" />
     <Compile Include="JsonModel\RootObject.cs" />
-    <Compile Include="JsonModel\State.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
