@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MapspeopleConsumer.TokenModel;
+using RestSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,6 +9,38 @@ using System.Threading.Tasks;
 namespace MapspeopleConsumer {
     class Program {
         static void Main(string[] args) {
+            var client = new RestClient();
+
+            var response = testMethod(client);
+
+            client.BaseUrl = new Uri("https://integration.mapsindoors.com");
+
+            var testRequest = new RestRequest("/api/dataset/", Method.GET);
+
+            testRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
+
+            var something = client.Execute(testRequest);
+
+
+            Console.WriteLine(something.Content);
+            Console.ReadLine();
+
+        }
+
+        public static Token testMethod(RestClient client)
+        {
+            client.BaseUrl = new Uri("https://auth.mapsindoors.com/connect/token");
+
+            var request = new RestRequest(Method.POST);
+
+            string encodedBody = string.Format("grant_type=password&client_id=client&username=1061951@ucn.dk&password=T40M51zt4MF0f9NV");
+
+            request.AddParameter("application/x-www-form-urlencoded", encodedBody, ParameterType.RequestBody);
+            request.AddParameter("Content-Type", "application/x-www-form-urlencoded", ParameterType.HttpHeader);
+
+            var response = client.Execute<Token>(request);
+
+            return response.Data;
         }
     }
 }
