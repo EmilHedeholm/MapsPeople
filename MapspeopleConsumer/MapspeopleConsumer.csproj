@@ -61,5 +61,11 @@
   <ItemGroup>
     <Folder Include="JsonModel\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DataModels\DataModels.csproj">
+      <Project>{1372fd92-3251-46bc-8109-fc2f9222246c}</Project>
+      <Name>DataModels</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

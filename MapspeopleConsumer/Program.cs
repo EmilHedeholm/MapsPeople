@@ -1,32 +1,43 @@
-﻿using MapspeopleConsumer.TokenModel;
+﻿using DataModels;
+using MapspeopleConsumer.TokenModel;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MapspeopleConsumer {
     class Program {
         static void Main(string[] args) {
-            var client = new RestClient();
+            while (true) {
+                Thread.Sleep(3000);
+                List<Location> data = GetData();
+                foreach (Location l in data) {
+                    Console.WriteLine(l.Id);
+                }
 
-            var response = testMethod(client);
+                var client = new RestClient();
 
-            client.BaseUrl = new Uri("https://integration.mapsindoors.com");
+                var response = testMethod(client);
 
-            var testRequest = new RestRequest("/api/dataset/", Method.GET);
+                client.BaseUrl = new Uri("https://integration.mapsindoors.com");
 
-            testRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
+                var testRequest = new RestRequest("/api/dataset/", Method.GET);
 
-            var something = client.Execute(testRequest);
+                testRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
+
+                var something = client.Execute(testRequest);
 
 
-            Console.WriteLine(something.Content);
-            Console.ReadLine();
+                Console.WriteLine(something.Content);
+                Console.ReadLine();
 
+            }
         }
-
         public static Token testMethod(RestClient client)
         {
             client.BaseUrl = new Uri("https://auth.mapsindoors.com/connect/token");
@@ -41,6 +52,18 @@ namespace MapspeopleConsumer {
             var response = client.Execute<Token>(request);
 
             return response.Data;
+        }
+
+        private static List<Location> GetData() {
+            string jsonstr;
+            var request = WebRequest.Create("https://mi-ucn-live-data.azurewebsites.net/occupancy?datasetid=6fbb3035c7e2436ba335edac") as HttpWebRequest;
+            var response = request.GetResponse();
+            using (StreamReader sr = new StreamReader(response.GetResponseStream())) {
+                jsonstr = sr.ReadToEnd();
+            }
+            List<RootObject> sources = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
+
+            return ConvertFromJsonToInternalModel(sources);
         }
     }
 }
