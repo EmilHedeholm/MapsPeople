@@ -39,17 +39,19 @@ namespace ConsumerAzure {
             List<RootObject> sources = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
 
             FilterData(sources);
-            return ConvertFromJsonToInternalModel(filteredData);
+            return ConvertToInternalModel(filteredData);
         }
 
-        //This method Converts data in JSON format to the Internal Datamodel format. 
-        //Param: a list of json objects. 
+        //This method Converts data from the deserialized JSON to the Internal Datamodel format. 
+        //Param: a list of RootObject objects. 
         //Return: A list of locations (internal)   
-        private static List<Location> ConvertFromJsonToInternalModel(List<RootObject> sources) {
+        private static List<Location> ConvertToInternalModel(List<RootObject> sources) {
             List<Location> locations = new List<Location>();
+            //Goes through all Root objects - and makes a new Location object for each for them, and gives an ID.
             foreach (RootObject r in sources) {
                 Location location = new Location();
                 location.Id = r.SpaceRefId;
+                //Goes through the list LastReports in Root objects. - and makes a new Source object for each of them, and sets state, ID, Type and TimeStamp. 
                 foreach (LastReport lr in r.LastReports) {
                     Source source = new Source();
                     string MotionDetected = lr.MotionDetected.ToString();
@@ -61,8 +63,10 @@ namespace ConsumerAzure {
                     source.Id = lr.Id;
                     source.Type = "Occupancy";
                     source.TimeStamp = lr.TimeStamp;
+                    //Adds source to the list of sources, in a location. 
                     location.Sources.Add(source);
                 }
+                //adds location to a list of locations. 
                 locations.Add(location);
             }
             return (locations);
@@ -77,13 +81,17 @@ namespace ConsumerAzure {
             }
             //A new list that can hold the changed data, before it is added to the list filteredData. 
             List<RootObject> temp = new List<RootObject>();
+            //Goes through the raw data list. 
             foreach (RootObject r in rawData) {
+                //Goes through a list that has data that has changed. 
                 foreach (RootObject rO in filteredData) {
-                    //Checks that it is the same source. 
+                    //Checks that it is the same Root object. 
                     if (r.Id.Equals(rO.Id)) {
+                        //Goes through the list of Last reports in the Root Object, but only those that are in raw data. 
                         foreach (LastReport l in r.LastReports) {
+                            //Goes though the list of Last reports in the Root Object, but only those that are in filtered data.  
                             foreach (LastReport lr in rO.LastReports) {
-                                //Checks that it is the same source. 
+                                //Checks that it is the same last report. 
                                 if (l.Id.Equals(lr.Id)) {
                                     //If the property MotionDetected has changed. 
                                     if (!(l.MotionDetected.Equals(lr.MotionDetected))) {
