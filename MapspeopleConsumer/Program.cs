@@ -56,7 +56,7 @@ namespace MapspeopleConsumer {
             return response.Data;
         }
 
-        private static string GetData() {
+        private static List<Location> GetData() {
             string jsonstr;
             //var request = WebRequest.Create("https://integration.mapsindoors.com") as HttpWebRequest;        
             //var response = request.GetResponse();
@@ -87,33 +87,33 @@ namespace MapspeopleConsumer {
             //using (StreamReader sr = new StreamReader(something.GetResponseStream())) {
             //jsonstr = sr.ReadToEnd();
             //}
-            //List<Dataset> sources = JsonConvert.DeserializeObject<List<Dataset>>(jsonstr);
+            List<RootObject> sources = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
 
-            return jsonstr;
+            return ConvertFromJsonToInternalModel(sources);
         }
 
-        //private static List<Location> ConvertFromJsonToInternalModel(List<Dataset> sources) {
-        //    List<Location> locations = new List<Location>();
-        //    foreach (Dataset d in sources) {
-        //        Location location = new Location();
-        //        location.Id = d.Id;
-        //        location.Sources = new List<Source>();
-        //        foreach (LastReport lr in r.lastReports) {
-        //            Source source = new Source();
-        //            State state = new State();
-        //            state.MotionDetected = lr.motionDetected;
-        //            state.PersonCount = lr.personCount;
-        //            state.SignsOfLife = state.SignsOfLife;
-        //            string json = JsonConvert.SerializeObject(state);
-        //            source.Id = lr.id;
-        //            source.Type = "Occupancy";
-        //            //source.State = json;
-        //            source.TimeStamp = lr.timeStamp;
-        //            location.Sources.Add(source);
-        //        }
-        //        locations.Add(location);
-        //    }
-        //    return (locations);
-        //}
+        private static List<Location> ConvertFromJsonToInternalModel(List<RootObject> sources) {
+            List<Location> locations = new List<Location>();
+            L
+            foreach (RootObject r in sources) {
+                Location location = new Location();      
+                location.Sources = new List<Source>();
+                foreach (LastReport lr in r.lastReports) {
+                    Source source = new Source();
+                    State state = new State();
+                    state.MotionDetected = lr.motionDetected;
+                    state.PersonCount = lr.personCount;
+                    state.SignsOfLife = state.SignsOfLife;
+                    string json = JsonConvert.SerializeObject(state);
+                    source.Id = lr.id;
+                    source.Type = "Occupancy";
+                    //source.State = json;
+                    source.TimeStamp = lr.timeStamp;
+                    location.Sources.Add(source);
+                }
+                locations.Add(location);
+            }
+            return (locations);
+        }
     }
 }
