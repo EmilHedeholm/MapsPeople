@@ -53,7 +53,7 @@ namespace MapspeopleConsumer {
             return response.Data;
         }
 
-        //This method gets data from the geodata source provided by MapsPeople and has been converted to Internal Data Model by using the method ConvertFromJsonToInternalModel. 
+        //This method gets data from the geodata provided by MapsPeople. After that it returns a list of data that has been converted to Internal Data Model by using the method ConvertFromJsonToInternalModel. 
         //Return: Is a list of locations in the internal Data model format. 
         private static List<Location> GetData() {
             string jsonstr;
