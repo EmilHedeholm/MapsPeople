@@ -10,6 +10,7 @@ namespace DataModels
     {
         public string Id { get; set; }
         public string Parent { get; set; }
+        public string ExternalId { get; set; }
         public List<Source> Sources { get; set; }
 
         public Location(){
