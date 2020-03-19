@@ -21,7 +21,15 @@ namespace MapspeopleConsumer {
                 foreach (Location l in data) {
                     Console.WriteLine(l.Id);
                 }
+                //Location l1 = new Location() {
+                //    ExternalId = "S208",
+                //    Parent = "D34",
+                //    Id = "23455"
 
+                //};
+                //List<Location> locations = new List<Location>();
+                //locations.Add(l1);
+                //SendData(locations);
                 //var client = new RestClient();
 
                 //var response = testMethod(client);
@@ -99,12 +107,53 @@ namespace MapspeopleConsumer {
             foreach (RootObject r in sources) {
                 Location location = new Location();
                 location.Sources = new List<Source>();
-                location.Id = r.externalId;
+                location.Id = r.id;
+                location.ExternalId = r.externalId;
                 location.Parent = r.parentId;
                 
                 locations.Add(location);
             }
             return (locations);
+        }
+
+        private static void SendData(List<Location> locations) {
+            List<RootObject> rootObjects = ConvertFromInternalModelToGeodata(locations);
+            var client = new RestClient();
+            var response = testMethod(client);
+
+            client.BaseUrl = new Uri("https://integration.mapsindoors.com");
+
+            var testRequest = new RestRequest("/api/dataset/", Method.GET);
+
+            testRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
+
+            var something = client.Execute(testRequest);
+            string datasetJsonstr = something.Content;
+
+            List<Dataset> datasets = JsonConvert.DeserializeObject<List<Dataset>>(datasetJsonstr);
+            string datasetId = datasets[0].Id;
+            string json = JsonConvert.SerializeObject(rootObjects);
+            var postRequest = new RestRequest($"/{datasetId}/api/geodata/", Method.POST);
+            postRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
+            postRequest.AddParameter("application/json; charset=utf-8", json, ParameterType.RequestBody);
+            postRequest.RequestFormat = DataFormat.Json;
+            var postResponse = client.Execute(postRequest);
+            Console.WriteLine(json);
+            Console.ReadLine();
+
+        }
+
+        private static List<RootObject> ConvertFromInternalModelToGeodata(List<Location> locations) {
+            List<RootObject> rootObjects = new List<RootObject>();
+            foreach (Location l in locations) {
+                RootObject rootObject = new RootObject();
+                rootObject.id = l.Id;
+                rootObject.externalId = l.ExternalId;
+                rootObject.parentId = l.Parent;
+                rootObjects.Add(rootObject);
+            }
+            return (rootObjects);
+
         }
     }
 }
