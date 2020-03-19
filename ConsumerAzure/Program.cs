@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ConsumerAzure.JsonModel;
 using DataModels;
 using Newtonsoft.Json;
+using RabbitMQ.Client;
 using RestSharp;
 
 namespace ConsumerAzure {
@@ -16,7 +18,7 @@ namespace ConsumerAzure {
 
         //TODO: make this better polling and not garbage as it is right now
         static void Main() {
-            while (true) {
+           while (true) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
                 List<Location> data = GetData();
@@ -121,6 +123,7 @@ namespace ConsumerAzure {
                 filteredData.Clear();
                 filteredData.AddRange(temp);
             }
+
         }
 
         //This method sends data to the Core Controller. 
@@ -135,6 +138,32 @@ namespace ConsumerAzure {
             request.RequestFormat = DataFormat.Json;
             var response = client.Execute(request);
             Console.WriteLine(json);
+        }
+
+        private static void SendDataWithRabbitMQ(List<Location> locations) {
+            var factory = new ConnectionFactory() { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel()) {
+                channel.QueueDeclare(queue: "Consumer_Azure_Queue",
+                                     durable: true,
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: null);
+
+                var message = JsonConvert.SerializeObject(locations);
+                var body = Encoding.UTF8.GetBytes(message);
+
+                var properties = channel.CreateBasicProperties();
+                properties.Persistent = true;
+
+                channel.BasicPublish(exchange: "",
+                                     routingKey: "Consumer_Azure_Queue",
+                                     basicProperties: properties,
+                                     body: body);
+                Console.WriteLine(message);
+                Console.WriteLine();
+                Console.WriteLine();
+            }
         }
     }
 }
