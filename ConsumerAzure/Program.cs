@@ -50,7 +50,7 @@ namespace ConsumerAzure {
             //Goes through all Root objects - and makes a new Location object for each for them, and gives an ID.
             foreach (RootObject r in sources) {
                 Location location = new Location();
-                location.Id = r.SpaceRefId;
+                location.ExternalId = r.SpaceRefId;
                 //Goes through the list LastReports in Root objects. - and makes a new Source object for each of them, and sets state, ID, Type and TimeStamp. 
                 foreach (LastReport lr in r.LastReports) {
                     Source source = new Source();
