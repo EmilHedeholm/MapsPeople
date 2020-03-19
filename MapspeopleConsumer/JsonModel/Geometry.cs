@@ -7,7 +7,7 @@ using DataModels;
 
 namespace MapspeopleConsumer.JsonModel {
     public class Geometry {
-        public List<Location> coordinates { get; set; }
+        public List<object> coordinates { get; set; }
         public List<double> bbox { get; set; }
         public string type { get; set; }
 

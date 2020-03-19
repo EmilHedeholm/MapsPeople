@@ -17,10 +17,10 @@ namespace MapspeopleConsumer {
         static void Main(string[] args) {
             while (true) {
                 Thread.Sleep(3000);
-                string data = GetData();
-               // foreach (Location l in data) {
-                    //Console.WriteLine(l.Id);
-                //}
+                List<Location> data = GetData();
+                foreach (Location l in data) {
+                    Console.WriteLine(l.Id);
+                }
 
                 //var client = new RestClient();
 
@@ -82,8 +82,9 @@ namespace MapspeopleConsumer {
             geodataRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
             var geodataResponse = client.Execute(geodataRequest);
             jsonstr = geodataResponse.Content;
-            Console.WriteLine(jsonstr);
-            Console.ReadLine();
+            //Console.WriteLine(jsonstr);
+            //Console.ReadLine();
+            //return jsonstr;
             //using (StreamReader sr = new StreamReader(something.GetResponseStream())) {
             //jsonstr = sr.ReadToEnd();
             //}
@@ -94,23 +95,13 @@ namespace MapspeopleConsumer {
 
         private static List<Location> ConvertFromJsonToInternalModel(List<RootObject> sources) {
             List<Location> locations = new List<Location>();
-            L
+
             foreach (RootObject r in sources) {
-                Location location = new Location();      
+                Location location = new Location();
                 location.Sources = new List<Source>();
-                foreach (LastReport lr in r.lastReports) {
-                    Source source = new Source();
-                    State state = new State();
-                    state.MotionDetected = lr.motionDetected;
-                    state.PersonCount = lr.personCount;
-                    state.SignsOfLife = state.SignsOfLife;
-                    string json = JsonConvert.SerializeObject(state);
-                    source.Id = lr.id;
-                    source.Type = "Occupancy";
-                    //source.State = json;
-                    source.TimeStamp = lr.timeStamp;
-                    location.Sources.Add(source);
-                }
+                location.Id = r.externalId;
+                location.Parent = r.parentId;
+                
                 locations.Add(location);
             }
             return (locations);
