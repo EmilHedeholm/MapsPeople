@@ -32,7 +32,10 @@ namespace MapspeopleConsumer {
                 SendData(locations);
             }
         }
-        //This method
+
+        //This method request a token using a post Request using your credentials from Mapspeoples CMS, which gives you a token that you
+        //pass along when interacting with Mapspeoples systems
+        //Return Security Token
         public static Token testMethod(RestClient client)
         {
             client.BaseUrl = new Uri("https://auth.mapsindoors.com/connect/token");
