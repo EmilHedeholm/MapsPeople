@@ -21,22 +21,36 @@ namespace Core.Controllers
                 if (existingLocation == null) {
                     //Getting the location data from the DB via externalID.
                     existingLocation = GetLocationByExternalId(location.ExternalId);
-                    //If the existingLocation is still null, insert it into the database as is.
                     if (existingLocation == null) {
-                        InsertIntoDB(location);
-                        message = Request.CreateResponse(HttpStatusCode.Created);
-                    } else {
-                        //Combine the data from both location and existingLocation
-                        completeLocation = Map(location, existingLocation);
-                        message = Request.CreateResponse(HttpStatusCode.OK);
+                        //Going through the mapping table to find the location.
+                        existingLocation = FindLocationByMappingTable(location.Id);
                     }
                 }
-
-                
+                if (existingLocation != null) {
+                    //Combine the data from both location and existingLocation
+                    completeLocation = Map(location, existingLocation);
+                    UpdateLocation(completeLocation);
+                    //TODO: Create converting and sending functionality
+                    //var message = ConvertToExternal(location);
+                    //SendMessage(message);
+                    message = Request.CreateResponse(HttpStatusCode.OK);
+                } else {
+                    //If the existingLocation is still null, insert it into the database as is.
+                    InsertIntoDB(location);
+                    message = Request.CreateResponse(HttpStatusCode.Created);
+                }
                 
             }
 
             return message;
+        }
+
+        private Location FindLocationByMappingTable(string id) {
+            throw new NotImplementedException();
+        }
+
+        private void UpdateLocation(Location completeLocation) {
+            throw new NotImplementedException();
         }
 
         private Location GetLocationByExternalId(string externalId)
@@ -45,29 +59,41 @@ namespace Core.Controllers
         }
 
         private Location Map(Location location, Location existingLocation) {
-            if (location.Id != existingLocation.Id) {
-                //DO stuff here when the table is implemented.
+            Location completeLocation = existingLocation;
+            //Mapping locationId.
+            if (completeLocation.Id == null) {
+                completeLocation.Id = location.Id;
             }
-            if (location.Parent == null) {
-                location.Parent = existingLocation.Parent;
+            //Mapping ExternalId.
+            if (completeLocation.ExternalId == null && location.ExternalId != null) {
+                completeLocation.ExternalId = location.ExternalId;
             }
-            foreach (var source in location.Sources) {
-                foreach (var existingSource in existingLocation.Sources) {
-                    if (source.Id == existingSource.Id) {
-                        foreach (var state in source.State) {
-                            foreach (var existingState in existingSource.State) {
-                                if (state.Key.Equals(existingState.Key)) {
-                                    if (!state.Value.Equals(existingState.Value) && source.TimeStamp < existingSource.TimeStamp) {
-                                        existingSource.State[state.Key] = state.Value;
-                                    }
-
-                                }
-                            }
-                        }
+            //Mapping Parent.
+            if (completeLocation.Parent == null && location.Parent != null) {
+                completeLocation.Parent = location.Parent;
+            }
+            //Inserting new sources.
+            if(location.Sources.Count > completeLocation.Sources.Count) {
+                foreach (var source in location.Sources) {
+                    if (!completeLocation.Sources.Contains(source)){
+                        completeLocation.Sources.Add(source);
                     }
                 }
             }
-            return existingLocation;
+            //Updating states
+            List<Source> completedSources = new List<Source>();
+            foreach (var source in location.Sources) {
+                foreach (var completeSource in completeLocation.Sources) {
+                    if (source.Id == completeSource.Id && source.TimeStamp < completeSource.TimeStamp) {
+                        completedSources.Add(source);
+                    } else {
+                        completedSources.Add(completeSource);
+                    }
+                }
+            }
+            completeLocation.Sources = completedSources;
+
+            return completeLocation;
         }
 
         private bool InsertIntoDB(Location location){
