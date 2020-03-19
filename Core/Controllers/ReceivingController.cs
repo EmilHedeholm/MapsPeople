@@ -31,8 +31,8 @@ namespace Core.Controllers
                     completeLocation = Map(location, existingLocation);
                     UpdateLocation(completeLocation);
                     //TODO: Create converting and sending functionality
-                    //var message = ConvertToExternal(location);
-                    //SendMessage(message);
+                    //var external = ConvertToExternal(location);
+                    //SendMessage(external);
                     message = Request.CreateResponse(HttpStatusCode.OK);
                 } else {
                     //If the existingLocation is still null, insert it into the database as is.
