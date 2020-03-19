@@ -18,18 +18,19 @@ namespace MapspeopleConsumer {
             while (true) {
                 Thread.Sleep(3000);
                 List<Location> data = GetData();
-                foreach (Location l in data) {
-                    Console.WriteLine(l.Id);
+                if (!(data.Count == 0)) {
+                    SendData(data);
                 }
-                Location l1 = new Location() {
-                    ExternalId = "S208",
-                    Parent = "D34",
-                    Id = "23455"
+                //Location l1 = new Location() {
+                //    ExternalId = "S208",
+                //    Parent = "D34",
+                //   // Id = "23455"
 
-                };
-                List<Location> locations = new List<Location>();
-                locations.Add(l1);
-                SendData(locations);
+
+                //};
+                //List<Location> locations = new List<Location>();
+                //locations.Add(l1);
+
             }
         }
 
@@ -80,8 +81,8 @@ namespace MapspeopleConsumer {
             geodataRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
             var geodataResponse = client.Execute(geodataRequest);
             jsonstr = geodataResponse.Content;
-            Console.WriteLine(jsonstr);
-            Console.ReadLine();
+            //Console.WriteLine(jsonstr);
+            //Console.ReadLine();
            
             List<RootObject> sources = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
 
@@ -108,7 +109,7 @@ namespace MapspeopleConsumer {
 
         //This method sends data to the MapsPeople.
         //Param: Is a list of locations
-        private static void SendData(List<Location> locations) {
+        private static void SendData1(List<Location> locations) {
             List<RootObject> rootObjects = ConvertFromInternalModelToGeodata(locations);
             var client = new RestClient();
             var response = testMethod(client);
@@ -132,8 +133,9 @@ namespace MapspeopleConsumer {
             postRequest.AddParameter("application/json; charset=utf-8", json, ParameterType.RequestBody);
             postRequest.RequestFormat = DataFormat.Json;
             var postResponse = client.Execute(postRequest);
+            Console.WriteLine(postResponse.Content);
             //Console.WriteLine(json);
-            //Console.ReadLine();
+            Console.ReadLine();
 
         }
 
@@ -144,13 +146,28 @@ namespace MapspeopleConsumer {
             List<RootObject> rootObjects = new List<RootObject>();
             foreach (Location l in locations) {
                 RootObject rootObject = new RootObject();
-                rootObject.id = l.Id;
+                //rootObject.id = l.Id;
                 rootObject.externalId = l.ExternalId;
                 rootObject.parentId = l.Parent;
                 rootObjects.Add(rootObject);
             }
             return (rootObjects);
 
+        }
+
+        //This method sends data to the Core Controller. 
+        //Param: Is a list of locations. 
+        private static void SendData(List<Location> locations) {
+            var client = new RestClient();
+            //TODO: 
+            client.BaseUrl = new Uri("");
+            string json = JsonConvert.SerializeObject(locations);
+            var request = new RestRequest(Method.POST);
+            request.AddParameter("application/json; charset=utf-8", json, ParameterType.RequestBody);
+            request.RequestFormat = DataFormat.Json;
+            var response = client.Execute(request);
+            Console.WriteLine(json);
+            Console.ReadLine();
         }
     }
 }
