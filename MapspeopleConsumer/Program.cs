@@ -21,33 +21,18 @@ namespace MapspeopleConsumer {
                 foreach (Location l in data) {
                     Console.WriteLine(l.Id);
                 }
-                //Location l1 = new Location() {
-                //    ExternalId = "S208",
-                //    Parent = "D34",
-                //    Id = "23455"
+                Location l1 = new Location() {
+                    ExternalId = "S208",
+                    Parent = "D34",
+                    Id = "23455"
 
-                //};
-                //List<Location> locations = new List<Location>();
-                //locations.Add(l1);
-                //SendData(locations);
-                //var client = new RestClient();
-
-                //var response = testMethod(client);
-
-                //client.BaseUrl = new Uri("https://integration.mapsindoors.com");
-
-                //var testRequest = new RestRequest("/api/dataset/", Method.GET);
-
-                //testRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
-
-                //var something = client.Execute(testRequest);
-
-
-                //Console.WriteLine(data);
-                //Console.ReadLine();
-
+                };
+                List<Location> locations = new List<Location>();
+                locations.Add(l1);
+                SendData(locations);
             }
         }
+        //This method
         public static Token testMethod(RestClient client)
         {
             client.BaseUrl = new Uri("https://auth.mapsindoors.com/connect/token");
@@ -64,6 +49,8 @@ namespace MapspeopleConsumer {
             return response.Data;
         }
 
+        //This method gets data from the geodata source provided by MapsPeople and has been converted to Internal Data Model by using the method ConvertFromJsonToInternalModel. 
+        //Return: Is a list of locations in the internal Data model format. 
         private static List<Location> GetData() {
             string jsonstr;
             //var request = WebRequest.Create("https://integration.mapsindoors.com") as HttpWebRequest;        
@@ -90,17 +77,17 @@ namespace MapspeopleConsumer {
             geodataRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
             var geodataResponse = client.Execute(geodataRequest);
             jsonstr = geodataResponse.Content;
-            //Console.WriteLine(jsonstr);
-            //Console.ReadLine();
-            //return jsonstr;
-            //using (StreamReader sr = new StreamReader(something.GetResponseStream())) {
-            //jsonstr = sr.ReadToEnd();
-            //}
+            Console.WriteLine(jsonstr);
+            Console.ReadLine();
+           
             List<RootObject> sources = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
 
             return ConvertFromJsonToInternalModel(sources);
         }
 
+        //This method Converts data from the deserialized JSON to the Internal Datamodel format. 
+        //Param: a list of RootObject objects. 
+        //Return: A list of locations (internal) 
         private static List<Location> ConvertFromJsonToInternalModel(List<RootObject> sources) {
             List<Location> locations = new List<Location>();
 
@@ -116,6 +103,8 @@ namespace MapspeopleConsumer {
             return (locations);
         }
 
+        //This method sends data to the MapsPeople.
+        //Param: Is a list of locations
         private static void SendData(List<Location> locations) {
             List<RootObject> rootObjects = ConvertFromInternalModelToGeodata(locations);
             var client = new RestClient();
@@ -133,16 +122,21 @@ namespace MapspeopleConsumer {
             List<Dataset> datasets = JsonConvert.DeserializeObject<List<Dataset>>(datasetJsonstr);
             string datasetId = datasets[0].Id;
             string json = JsonConvert.SerializeObject(rootObjects);
+            //Console.WriteLine(json);
+            //Console.ReadLine();
             var postRequest = new RestRequest($"/{datasetId}/api/geodata/", Method.POST);
             postRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
             postRequest.AddParameter("application/json; charset=utf-8", json, ParameterType.RequestBody);
             postRequest.RequestFormat = DataFormat.Json;
             var postResponse = client.Execute(postRequest);
-            Console.WriteLine(json);
-            Console.ReadLine();
+            //Console.WriteLine(json);
+            //Console.ReadLine();
 
         }
 
+        //This method Converts data from the Internal Datamodel format to RootObject objects. 
+        //Param: a list of of locations (internal)
+        //Return: A list of RootObject objects. 
         private static List<RootObject> ConvertFromInternalModelToGeodata(List<Location> locations) {
             List<RootObject> rootObjects = new List<RootObject>();
             foreach (Location l in locations) {
