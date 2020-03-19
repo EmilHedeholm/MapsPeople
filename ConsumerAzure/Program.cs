@@ -130,7 +130,7 @@ namespace ConsumerAzure {
         //Param: Is a list of locations. 
         private static void SendData(List<Location> locations) {
             var client = new RestClient();
-            //TODO: 
+            //TODO: indtastes post adresse
             client.BaseUrl = new Uri("");
             string json = JsonConvert.SerializeObject(locations);
             var request = new RestRequest(Method.POST);
