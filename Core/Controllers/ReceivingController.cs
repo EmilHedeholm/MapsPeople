@@ -12,21 +12,36 @@ namespace Core.Controllers
         //IDataBase dataBase = new DataBase();
         public HttpResponseMessage Post([FromBody]IEnumerable<Location> locations) {
             var message = Request.CreateResponse(HttpStatusCode.BadRequest);
-            
+
             foreach (var location in locations) {
-                Location existingLocation = GetLocation(location.Id), completeLocation = null;
+                //Getting the location data from the DB via ID.
+                Location existingLocation = GetLocationById(location.Id), 
+                        completeLocation = null;
+                //Checking if the location was found in the DB, if not get it by ExternalId.
                 if (existingLocation == null) {
-                    if (location.Id != null) {
+                    //Getting the location data from the DB via externalID.
+                    existingLocation = GetLocationByExternalId(location.ExternalId);
+                    //If the existingLocation is still null, insert it into the database as is.
+                    if (existingLocation == null) {
                         InsertIntoDB(location);
                         message = Request.CreateResponse(HttpStatusCode.Created);
-                    } 
-                } else {
-                    completeLocation = Map(location, existingLocation);
-                    message = Request.CreateResponse(HttpStatusCode.OK);
+                    } else {
+                        //Combine the data from both location and existingLocation
+                        completeLocation = Map(location, existingLocation);
+                        message = Request.CreateResponse(HttpStatusCode.OK);
+                    }
                 }
+
+                
+                
             }
 
             return message;
+        }
+
+        private Location GetLocationByExternalId(string externalId)
+        {
+            throw new NotImplementedException();
         }
 
         private Location Map(Location location, Location existingLocation) {
@@ -41,9 +56,9 @@ namespace Core.Controllers
                     if (source.Id == existingSource.Id) {
                         foreach (var state in source.State) {
                             foreach (var existingState in existingSource.State) {
-                                if (state.key == existingState.key) {
-                                    if (state.value =! existingState.value) {
-                                        existingState.value = state.value;
+                                if (state.Key.Equals(existingState.Key)) {
+                                    if (!state.Value.Equals(existingState.Value) && source.TimeStamp < existingSource.TimeStamp) {
+                                        existingSource.State[state.Key] = state.Value;
                                     }
 
                                 }
@@ -60,17 +75,10 @@ namespace Core.Controllers
             // TODO: Implement this when the db is up and running.
             throw new NotImplementedException();
         }
-        private Location GetLocation(string id) {
+        private Location GetLocationById(string id) {
             //return dataBase.GetLocation(id);
             //TODO: Implement this with the DB.
-
-            // This is temporary for development purposes, delete when Database has been created.
-            List<string> states = new List<string> { "18", "77" };
-            Source source = new Source { Id = "source 1", State = states, TimeStamp = DateTime.Now, Type = "Occupancy" };
-            List<Source> sources = new List<Source>();
-            sources.Add(source);
-            Location location = new Location { Id = "Testeronies", Parent = "Parent", Sources = sources };
-            return location;
+            throw new NotImplementedException();
         }
         /*
         private List<ExternalModel> ConvertToExternal(Location location) {
