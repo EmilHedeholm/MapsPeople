@@ -16,11 +16,11 @@ namespace MapspeopleConsumer {
     class Program {
         static void Main(string[] args) {
             while (true) {
-                Thread.Sleep(3000);
-                List<Location> data = GetData();
-                 if (!(data.Count == 0)) {
-                    SendData(data);
-                 }
+                Thread.Sleep(3000);           
+                List<Location> data = GetData();             
+                if (!(data.Count == 0)) {
+                 SendData(data);
+                }
             }
         }
 
