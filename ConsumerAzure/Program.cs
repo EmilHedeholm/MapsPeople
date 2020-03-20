@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ConsumerAzure.JsonModel;
 using DataModels;
 using Newtonsoft.Json;
+using RabbitMQ.Client;
 using RestSharp;
 
 namespace ConsumerAzure {
@@ -16,7 +18,7 @@ namespace ConsumerAzure {
 
         //TODO: make this better polling and not garbage as it is right now
         static void Main() {
-            while (true) {
+           while (true) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
                 List<Location> data = GetData();
@@ -50,7 +52,8 @@ namespace ConsumerAzure {
             //Goes through all Root objects - and makes a new Location object for each for them, and gives an ID.
             foreach (RootObject r in sources) {
                 Location location = new Location();
-                location.Id = r.SpaceRefId;
+                location.ExternalId = r.SpaceRefId;
+                location.ConsumerId = 1;
                 //Goes through the list LastReports in Root objects. - and makes a new Source object for each of them, and sets state, ID, Type and TimeStamp. 
                 foreach (LastReport lr in r.LastReports) {
                     Source source = new Source();
@@ -121,13 +124,14 @@ namespace ConsumerAzure {
                 filteredData.Clear();
                 filteredData.AddRange(temp);
             }
+
         }
 
         //This method sends data to the Core Controller. 
         //Param: Is a list of locations. 
         private static void SendData(List<Location> locations) {
             var client = new RestClient();
-            //TODO: 
+            //TODO: indtastes post adresse
             client.BaseUrl = new Uri("");
             string json = JsonConvert.SerializeObject(locations);
             var request = new RestRequest(Method.POST);
@@ -135,6 +139,32 @@ namespace ConsumerAzure {
             request.RequestFormat = DataFormat.Json;
             var response = client.Execute(request);
             Console.WriteLine(json);
+        }
+
+        private static void SendDataWithRabbitMQ(List<Location> locations) {
+            var factory = new ConnectionFactory() { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel()) {
+                channel.QueueDeclare(queue: "Consumer_Azure_Queue",
+                                     durable: true,
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: null);
+
+                var message = JsonConvert.SerializeObject(locations);
+                var body = Encoding.UTF8.GetBytes(message);
+
+                var properties = channel.CreateBasicProperties();
+                properties.Persistent = true;
+
+                channel.BasicPublish(exchange: "",
+                                     routingKey: "Consumer_Azure_Queue",
+                                     basicProperties: properties,
+                                     body: body);
+                Console.WriteLine(message);
+                Console.WriteLine();
+                Console.WriteLine();
+            }
         }
     }
 }
