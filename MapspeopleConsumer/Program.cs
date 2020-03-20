@@ -18,9 +18,9 @@ namespace MapspeopleConsumer {
             while (true) {
                 Thread.Sleep(3000);
                 List<Location> data = GetData();
-                if (!(data.Count == 0)) {
+                 if (!(data.Count == 0)) {
                     SendData(data);
-                }
+                 }
             }
         }
 
@@ -75,10 +75,11 @@ namespace MapspeopleConsumer {
                 location.Id = r.id;
                 location.ExternalId = r.externalId;
                 location.Parent = r.parentId;
-                
                 locations.Add(location);
             }
+            
             return (locations);
+           
         }
 
         ////This method sends data to the MapsPeople.
