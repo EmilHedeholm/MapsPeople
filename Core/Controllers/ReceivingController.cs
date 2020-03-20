@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using Core.Models;
 using DataModels;
 
 namespace Core.Controllers
@@ -23,7 +24,8 @@ namespace Core.Controllers
                     existingLocation = GetLocationByExternalId(location.ExternalId);
                     if (existingLocation == null) {
                         //Going through the mapping table to find the location.
-                        existingLocation = FindLocationByMappingTable(location.Id);
+                        existingLocation = FindLocationByMappingTable(location);
+                        
                     }
                 }
                 if (existingLocation != null) {
@@ -45,8 +47,50 @@ namespace Core.Controllers
             return message;
         }
 
-        private Location FindLocationByMappingTable(string id) {
-            throw new NotImplementedException();
+        private Location FindLocationByMappingTable(Location location) {
+            List<MappingEntry> entries = new List<MappingEntry>();
+            entries = FillEntries(entries);
+            foreach (var entry in entries) {
+                if (location.ConsumerId == entry.ConsumerId && location.Id.Equals(entry.Id)) {
+                    location.ExternalId = entry.ExternalId;
+                }
+            }
+            return GetLocationByExternalId(location.ExternalId);
+        }
+
+        private List<MappingEntry> FillEntries(List<MappingEntry> entries) {
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "1", ExternalId = "GS202" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "2", ExternalId = "GA203" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "3", ExternalId = "GD202" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "4", ExternalId = "F210" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "5", ExternalId = "A203" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "6", ExternalId = "F205" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "7", ExternalId = "B215" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "8", ExternalId = "1.04.01" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "9", ExternalId = "G203" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "10", ExternalId = "GF202" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "11", ExternalId = "S207" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "12", ExternalId = "GF201" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "13", ExternalId = "B205" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "14", ExternalId = "E1" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "15", ExternalId = "GF203" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "16", ExternalId = "GA202" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "17", ExternalId = "B210" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "18", ExternalId = "S203" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "19", ExternalId = "B212" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "20", ExternalId = "D201" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "21", ExternalId = "B201" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "22", ExternalId = "D205" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "23", ExternalId = "1.09.01" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "24", ExternalId = "B226" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "25", ExternalId = "A215" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "26", ExternalId = "B202" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "27", ExternalId = "F220" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "28", ExternalId = "S1" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "29", ExternalId = "GB202" });
+            entries.Add(new MappingEntry { ConsumerId = 3, Id = "30", ExternalId = "1.27.04" });
+            return entries;
+
         }
 
         private void UpdateLocation(Location completeLocation) {
