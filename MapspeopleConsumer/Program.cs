@@ -17,9 +17,9 @@ namespace MapspeopleConsumer {
         static void Main(string[] args) {
             while (true) {
                 Thread.Sleep(3000);           
-                List<Location> data = GetData();             
+                List<Location> data = GetData();
                 if (!(data.Count == 0)) {
-                 SendData(data);
+                  SendData(data);
                 }
             }
         }
@@ -72,6 +72,7 @@ namespace MapspeopleConsumer {
             foreach (RootObject r in sources) {
                 Location location = new Location();
                 location.Sources = new List<Source>();
+                location.ConsumerId = 2;
                 location.Id = r.id;
                 location.ExternalId = r.externalId;
                 location.Parent = r.parentId;
