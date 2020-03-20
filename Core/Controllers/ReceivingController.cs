@@ -11,6 +11,8 @@ namespace Core.Controllers
 {
     public class ReceivingController : ApiController {
         //IDataBase dataBase = new DataBase();
+        //This post method receives location data from consumers and maps them with data from other consumers before
+        //savin the changes to database, converting to the external message format and sending it out of the system.
         public HttpResponseMessage Post([FromBody]IEnumerable<Location> locations) {
             var message = Request.CreateResponse(HttpStatusCode.BadRequest);
 
@@ -46,11 +48,12 @@ namespace Core.Controllers
 
             return message;
         }
-
+        //This method maps a locations ConsumerId and Id with data from a list and adds an ExternalId if a match is found.
         private Location FindLocationByMappingTable(Location location) {
             List<MappingEntry> entries = new List<MappingEntry>();
             entries = FillEntries(entries);
             foreach (var entry in entries) {
+                //If the location.id and location.ConsumerId matches the entry we set the location.ExternalId to the entry.ExternalId.
                 if (location.ConsumerId == entry.ConsumerId && location.Id.Equals(entry.Id)) {
                     location.ExternalId = entry.ExternalId;
                 }
@@ -101,7 +104,8 @@ namespace Core.Controllers
         {
             throw new NotImplementedException();
         }
-
+        //This method maps data from a newly received location with data pertaining to that location from the database
+        // then it merges them into a complete location, updates the sources and returns the complete location.
         private Location Map(Location location, Location existingLocation) {
             Location completeLocation = existingLocation;
             //Mapping locationId.
