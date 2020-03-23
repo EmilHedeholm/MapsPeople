@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace DatabaseAccess {
-    interface IDataAccess {
+    public interface IDataAccess {
         Location GetLocationById(string id);
         Location GetLocationByExternalId(string externalId);
         void CreateLocation(Location location);

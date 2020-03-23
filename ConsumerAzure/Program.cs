@@ -132,16 +132,16 @@ namespace ConsumerAzure {
         private static void SendData(List<Location> locations) {
             var client = new RestClient();
             //TODO: indtastes post adresse
-            client.BaseUrl = new Uri("");
+            client.BaseUrl = new Uri("https://localhost:44346/api/Receiving");
             string json = JsonConvert.SerializeObject(locations);
             var request = new RestRequest(Method.POST);
             request.AddParameter("application/json; charset=utf-8", json, ParameterType.RequestBody);
             request.RequestFormat = DataFormat.Json;
             var response = client.Execute(request);
-            Console.WriteLine(json);
+            //Console.WriteLine(json);
         }
 
-        private static void SendDataWithRabbitMQ(List<Location> locations) {
+       /* private static void SendDataWithRabbitMQ(List<Location> locations) {
             var factory = new ConnectionFactory() { HostName = "localhost" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel()) {
@@ -164,7 +164,7 @@ namespace ConsumerAzure {
                 Console.WriteLine(message);
                 Console.WriteLine();
                 Console.WriteLine();
-            }
+            }*/
         }
     }
 }

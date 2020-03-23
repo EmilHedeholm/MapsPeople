@@ -6,11 +6,12 @@ using System.Net.Http;
 using System.Web.Http;
 using Core.Models;
 using DataModels;
+using DatabaseAccess;
 
 namespace Core.Controllers
 {
     public class ReceivingController : ApiController {
-        //IDataBase dataBase = new DataBase();
+        IDataAccess dataAccess = new DataAccess();
         //This post method receives location data from consumers and maps them with data from other consumers before
         //savin the changes to database, converting to the external message format and sending it out of the system.
         public HttpResponseMessage Post([FromBody]IEnumerable<Location> locations) {
@@ -144,10 +145,10 @@ namespace Core.Controllers
             return completeLocation;
         }
 
-        private bool InsertIntoDB(Location location){
+        private void InsertIntoDB(Location location){
             //return DataBase.insert(location);
             // TODO: Implement this when the db is up and running.
-            throw new NotImplementedException();
+            dataAccess.CreateLocation(location);
         }
         private Location GetLocationById(string id) {
             //return dataBase.GetLocation(id);

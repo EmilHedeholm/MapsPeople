@@ -136,14 +136,14 @@ namespace MapspeopleConsumer {
         private static void SendData(List<Location> locations) {
             var client = new RestClient();
             //TODO: 
-            client.BaseUrl = new Uri("");
+            client.BaseUrl = new Uri("https://localhost:44346/api/Receiving");
             string json = JsonConvert.SerializeObject(locations);
             var request = new RestRequest(Method.POST);
             request.AddParameter("application/json; charset=utf-8", json, ParameterType.RequestBody);
             request.RequestFormat = DataFormat.Json;
             var response = client.Execute(request);
-            Console.WriteLine(json);
-            Console.ReadLine();
+            //Console.WriteLine(json);
+            //Console.ReadLine();
         }
     }
 }

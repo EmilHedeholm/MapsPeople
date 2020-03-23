@@ -248,6 +248,10 @@
     <Content Include="Scripts\jquery-3.4.1.min.map" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DatabaseAccess\DatabaseAccess.csproj">
+      <Project>{f93b9729-7e94-45b7-9711-b3758dae71f4}</Project>
+      <Name>DatabaseAccess</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DataModels\DataModels.csproj">
       <Project>{1372fd92-3251-46bc-8109-fc2f9222246c}</Project>
       <Name>DataModels</Name>
