@@ -164,7 +164,7 @@ namespace ConsumerAzure {
                 Console.WriteLine(message);
                 Console.WriteLine();
                 Console.WriteLine();
-            }*/
-        }
+            }
+        }*/
     }
 }

@@ -116,9 +116,52 @@ namespace DatabaseAccess
         }
 
         public Location GetLocationById(string id) {
-            throw new NotImplementedException();
+            client.Connect();
+            Location foundLocation = new Location();
+            var locations = client.Cypher
+            .Match("(location:Location {Id:{id}})")
+            .WithParams(new { id = id })
+            .Return<Location>("location")
+            .Results;
+
+            foreach (var location in locations) {
+                foundLocation = location;
+            }
+            foundLocation.Sources = GetSourcesByLocation(foundLocation);
+            client.Dispose();
+            return foundLocation;
         }
 
+        private List<Source> GetSourcesByLocation(Location location) {
+            client.Connect();
+            var sources = client.Cypher
+            .Match("(source:Source)")
+            .Where("(source)-[:Located_In]->(:Location {Id: {locationId}})")
+            .WithParams(new { locationId = location.Id })
+            .Return<Source>("(source)")
+            .Results;
+
+            foreach (var source in sources) {
+                source.State = GetStatesBySource(source);
+            }
+            return (List<Source>)sources;
+        }
+
+        private  Dictionary<string, string> GetStatesBySource(Source source) {
+            client.Connect();
+            var states = client.Cypher
+            .Match("(state:State)")
+            .Where("(state)-[:State_For]->(:Source {Id: {sourceId}})")
+            .WithParams(new { sourceId = source.Id })
+            .Return<KeyValuePair<string, string>>("(state)")
+            .Results;
+
+            Dictionary<string, string> foundStates = new Dictionary<string, string>();
+            foreach (var state in states) {
+                foundStates.Add(state.Key, state.Value);
+            }
+            return foundStates;
+        }
         public void UpdateSource(string locationId, Source source) {
             throw new NotImplementedException();
         }
