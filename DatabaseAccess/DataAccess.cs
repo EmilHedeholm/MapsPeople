@@ -112,15 +112,28 @@ namespace DatabaseAccess
         }
 
         public Location GetLocationByExternalId(string externalId) {
-            throw new NotImplementedException();
+            client.Connect();
+            Location foundLocation = new Location();
+            var locations = client.Cypher
+            .Match("(location:Location {ExternalId:{ExternalId}})")
+            .WithParams(new { ExternalId = externalId })
+            .Return<Location>("location")
+            .Results;
+
+            foreach (var location in locations) {
+                foundLocation = location;
+            }
+            foundLocation.Sources = GetSourcesByLocation(foundLocation);
+            client.Dispose();
+            return foundLocation;
         }
 
         public Location GetLocationById(string id) {
             client.Connect();
             Location foundLocation = new Location();
             var locations = client.Cypher
-            .Match("(location:Location {Id:{id}})")
-            .WithParams(new { id = id })
+            .Match("(location:Location {Id:{Id}})")
+            .WithParams(new { Id = id })
             .Return<Location>("location")
             .Results;
 
@@ -153,17 +166,58 @@ namespace DatabaseAccess
             .Match("(state:State)")
             .Where("(state)-[:State_For]->(:Source {Id: {sourceId}})")
             .WithParams(new { sourceId = source.Id })
-            .Return<KeyValuePair<string, string>>("(state)")
+            .Return<State>("(state)")
             .Results;
 
             Dictionary<string, string> foundStates = new Dictionary<string, string>();
             foreach (var state in states) {
-                foundStates.Add(state.Key, state.Value);
+                foundStates.Add(state.Property, state.value);
             }
             return foundStates;
         }
-        public void UpdateSource(string locationId, Source source) {
-            throw new NotImplementedException();
+        public void UpdateLocation(Location location) {
+            client.Connect();
+            var foundlocation = client.Cypher
+            .Match("(location:Location {Id:{id}})")
+            .Set("location.ParentId = {parentId}")
+            .Set("location.ConsumerId = {consumerId}")
+            .Set("location.ExternalId = {externalId}")
+            .WithParams(new { id = location.Id, parentId = location.Parent, consumerId = location.ConsumerId, externalId =location.ExternalId })
+            .Return<Location>("(location)")
+            .Results;
+
+            if(foundlocation.Count() == 0) {
+                foundlocation = client.Cypher
+                .Match("(location:Location {ExternalId:{externalId}})")
+                .Set("location.ParentId = {parentId}")
+                .Set("location.ConsumerId = {consumerId}")
+                .Set("location.Id = {id}")
+                .WithParams(new { externalId = location.ExternalId, parentId = location.Parent, consumerId = location.ConsumerId, id = location.Id })
+                .Return<Location>("(location)")
+                .Results;
+            }
+            if (foundlocation.Count() != 0) {
+                foreach (var source in location.Sources) {
+                    client.Cypher
+                    .Match("(source:Source {Id:{id}})")
+                    .Set("source.TimeStamp = {timeStamp}")
+                    .Set("source.Type = {type}")
+                    .WithParams(new { id = source.Id, timeStamp = source.TimeStamp, type = source.Type })
+                    .ExecuteWithoutResults();
+
+                    foreach (var state in source.State) {
+                        string stateId = location.Id + source.Id;
+                        client.Cypher
+                        .Match("(state:State {Id:{id}})")
+                        .Set("state.Property = {property}")
+                        .Set("state.Value = {value}")
+                        .WithParams(new { id = stateId, property = state.Key, value = state.Value })
+                        .ExecuteWithoutResults();
+
+                    }
+                }
+            }
+            
         }
     }
 }

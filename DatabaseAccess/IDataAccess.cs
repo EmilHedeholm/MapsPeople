@@ -10,7 +10,7 @@ namespace DatabaseAccess {
         Location GetLocationById(string id);
         Location GetLocationByExternalId(string externalId);
         void CreateLocation(Location location);
-        void UpdateSource(string locationId, Source source);
+        void UpdateLocation(Location location);
         void DeleteLocationsByConsumerId(int consumerid);
         void DeleteLocationAndSubLocations(string locationId);
     }

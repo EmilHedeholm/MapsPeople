@@ -98,12 +98,12 @@ namespace Core.Controllers
         }
 
         private void UpdateLocation(Location completeLocation) {
-            throw new NotImplementedException();
+            dataAccess.UpdateLocation(completeLocation);
         }
 
         private Location GetLocationByExternalId(string externalId)
         {
-            throw new NotImplementedException();
+            return dataAccess.GetLocationByExternalId(externalId);
         }
         //This method maps data from a newly received location with data pertaining to that location from the database
         // then it merges them into a complete location, updates the sources and returns the complete location.
@@ -153,7 +153,7 @@ namespace Core.Controllers
         private Location GetLocationById(string id) {
             //return dataBase.GetLocation(id);
             //TODO: Implement this with the DB.
-            throw new NotImplementedException();
+            return dataAccess.GetLocationById(id);
         }
         /*
         private List<ExternalModel> ConvertToExternal(Location location) {
