@@ -41,8 +41,8 @@ namespace DatabaseAccess
                 var foundSources = client.Cypher
                   .Match("(source: Source { Id: {id}})")
                   .Where("(source)-[:Located_In]->(:Location { Id: {locationId}})")
-                  .Set("source.TimeStamp = {timeStamp}")
-                  .WithParams(new { id = source.Id, locationId = location.Id, timeStamp = source.TimeStamp })
+                 // .Set("source.TimeStamp = {timeStamp}")
+                  .WithParams(new { id = source.Id, locationId = location.Id, /*timeStamp = source.TimeStamp*/ })
                   .Return<Source>("source")
                   .Results;
 
@@ -69,22 +69,24 @@ namespace DatabaseAccess
                     string stateId = location.Id + source.Id;
                     //checks if the state exists. if it does updates the value 
                     var foundStates = client.Cypher
-                      .Match("(state: State { Property: {property}})")
+                      .Match("(state: State { Id: {id}})")
                       .Where("(state)-[:State_For]->(:Source { Id: {sourceId}})")
-                      .Set("state.Value = {value}")
+                      //.Set("state.Property = {property}")
+                      //.Set("state.Value = {value}")
                       .WithParams(new {
-                          property = state.Key,
+                          id = state.Key,
                           sourceId = source.Id,
-                          value = state.Value
+                         /* property = state.Key,
+                          value = state.Value*/
                       })
                       .Return<KeyValuePair<string, string>>("state")
                       .Results;
 
                     if (foundStates.Count() == 0) {
                         client.Cypher
-                        .Create("(state:State {Property: {property}})")
+                        .Create("(state:State {Id: {id}})")
+                        .Set("state.Property = {property}")
                         .Set("state.Value = {value}")
-                        .Set("state.Id = {id}")
                         .WithParams(new { property = state.Key, value = state.Value, id = stateId })
                         .ExecuteWithoutResults();
 
@@ -113,7 +115,7 @@ namespace DatabaseAccess
 
         public Location GetLocationByExternalId(string externalId) {
             client.Connect();
-            Location foundLocation = new Location();
+            Location foundLocation = null;
             var locations = client.Cypher
             .Match("(location:Location {ExternalId:{ExternalId}})")
             .WithParams(new { ExternalId = externalId })
@@ -123,14 +125,16 @@ namespace DatabaseAccess
             foreach (var location in locations) {
                 foundLocation = location;
             }
-            foundLocation.Sources = GetSourcesByLocation(foundLocation);
+            if (foundLocation != null) {
+                foundLocation.Sources = GetSourcesByLocation(foundLocation);
+            }
             client.Dispose();
             return foundLocation;
         }
 
         public Location GetLocationById(string id) {
             client.Connect();
-            Location foundLocation = new Location();
+            Location foundLocation = null;
             var locations = client.Cypher
             .Match("(location:Location {Id:{Id}})")
             .WithParams(new { Id = id })
@@ -140,7 +144,9 @@ namespace DatabaseAccess
             foreach (var location in locations) {
                 foundLocation = location;
             }
+            if (foundLocation != null) { 
             foundLocation.Sources = GetSourcesByLocation(foundLocation);
+            }   
             client.Dispose();
             return foundLocation;
         }
@@ -200,18 +206,20 @@ namespace DatabaseAccess
                 foreach (var source in location.Sources) {
                     client.Cypher
                     .Match("(source:Source {Id:{id}})")
+                    .Where("(source)-[:Located_In]->(:Location {Id: {locationId}})")
                     .Set("source.TimeStamp = {timeStamp}")
                     .Set("source.Type = {type}")
-                    .WithParams(new { id = source.Id, timeStamp = source.TimeStamp, type = source.Type })
+                    .WithParams(new { id = source.Id, timeStamp = source.TimeStamp, type = source.Type, locationId = location.Id })
                     .ExecuteWithoutResults();
 
                     foreach (var state in source.State) {
                         string stateId = location.Id + source.Id;
                         client.Cypher
-                        .Match("(state:State {Id:{id}})")
-                        .Set("state.Property = {property}")
+                        .Match("(state:State {Property:{property}})")
+                        .Where("(state)-[:State_For]->(:Source {Id: {sourceId}})")
+                        .Set("state.Id = {id}")
                         .Set("state.Value = {value}")
-                        .WithParams(new { id = stateId, property = state.Key, value = state.Value })
+                        .WithParams(new { id = stateId, property = state.Key, value = state.Value, sourceId = source.Id})
                         .ExecuteWithoutResults();
 
                     }

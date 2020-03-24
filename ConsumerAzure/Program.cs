@@ -18,13 +18,13 @@ namespace ConsumerAzure {
 
         //TODO: make this better polling and not garbage as it is right now
         static void Main() {
-           while (true) {
+           //while (true) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
                 List<Location> data = GetData();
                 if (!(data.Count == 0)) {
                     SendData(data);
-                }
+               // }
             }
         }
 

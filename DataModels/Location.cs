@@ -15,7 +15,11 @@ namespace DataModels
         public List<Source> Sources { get; set; }
 
         public Location(){
-         Sources = new List<Source>();
-            }
+            Sources = new List<Source>();
+            Id = "0";
+            Parent = "0";
+            ExternalId = "0";
+            ConsumerId = 0;
+        }
     }
 }

@@ -13,6 +13,9 @@ namespace DataModels {
 
         public Source(){
             State = new Dictionary<string, string>();
+            Id = "0";
+            Type = "0";
+            TimeStamp = DateTime.Now;
         }
     }
 }

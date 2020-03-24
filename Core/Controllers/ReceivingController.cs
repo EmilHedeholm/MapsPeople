@@ -110,15 +110,15 @@ namespace Core.Controllers
         private Location Map(Location location, Location existingLocation) {
             Location completeLocation = existingLocation;
             //Mapping locationId.
-            if (completeLocation.Id == null) {
+            if (completeLocation.Id == "0") {
                 completeLocation.Id = location.Id;
             }
             //Mapping ExternalId.
-            if (completeLocation.ExternalId == null && location.ExternalId != null) {
+            if (completeLocation.ExternalId == "0" && location.ExternalId != "0") {
                 completeLocation.ExternalId = location.ExternalId;
             }
             //Mapping Parent.
-            if (completeLocation.Parent == null && location.Parent != null) {
+            if (completeLocation.Parent == "0" && location.Parent != "0") {
                 completeLocation.Parent = location.Parent;
             }
             //Inserting new sources.
@@ -133,7 +133,7 @@ namespace Core.Controllers
             List<Source> completedSources = new List<Source>();
             foreach (var source in location.Sources) {
                 foreach (var completeSource in completeLocation.Sources) {
-                    if (source.Id == completeSource.Id && source.TimeStamp < completeSource.TimeStamp) {
+                    if (source.Id == completeSource.Id && source.TimeStamp > completeSource.TimeStamp) {
                         completedSources.Add(source);
                     } else {
                         completedSources.Add(completeSource);
