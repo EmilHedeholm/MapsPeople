@@ -134,11 +134,12 @@ namespace ConsumerAzure {
             //TODO: indtastes post adresse
             client.BaseUrl = new Uri("https://localhost:44346/api/Receiving");
             string json = JsonConvert.SerializeObject(locations);
-            var request = new RestRequest(Method.POST);
-            request.AddParameter("application/json; charset=utf-8", json, ParameterType.RequestBody);
-            request.RequestFormat = DataFormat.Json;
-            var response = client.Execute(request);
-            //Console.WriteLine(json);
+            //var request = new RestRequest(Method.POST);
+            //request.AddParameter("application/json; charset=utf-8", json, ParameterType.RequestBody);
+            //request.RequestFormat = DataFormat.Json;
+            //var response = client.Execute(request);
+            Console.WriteLine(json);
+            Console.ReadLine();
         }
 
        /* private static void SendDataWithRabbitMQ(List<Location> locations) {

@@ -22,18 +22,22 @@ namespace DatabaseAccess
             .Set("location.ParentId = {parentId}")
             .Set("location.ExternalId = {externalId}")
             .Set("location.ConsumerId = {consumerId}")
+            .With("location")
+            .Match("(parent:Location)")
+            .Where((Location parent) => parent.Id == location.Parent)
+            .Merge("(location)-[r:Located_In]->(parent)")
             .WithParams(new { id = location.Id, parentId = location.Parent, externalId = location.ExternalId, consumerId = location.ConsumerId })
             .ExecuteWithoutResults();
 
             //creates a relation to the parent of the location that was just inserted
             //if it does not already exist otherwise nothing happens
-            client.Cypher
-            .Match("(a:Location)")
-            .Where((Location a) => a.Id == location.Id)
-            .Match("(b:Location)")
-            .Where((Location b) => b.Id == location.Parent)
-            .Merge("(a)-[r:Located_In]->(b)")
-            .ExecuteWithoutResults();
+            //client.Cypher
+            //.Match("(a:Location)")
+            //.Where((Location a) => a.Id == location.Id)
+            //.Match("(b:Location)")
+            //.Where((Location b) => b.Id == location.Parent)
+            //.Merge("(a)-[r:Located_In]->(b)")
+            //.ExecuteWithoutResults();
 
             //runs through all sources on the location
             foreach (Source source in location.Sources) {
@@ -204,23 +208,63 @@ namespace DatabaseAccess
             }
             if (foundlocation.Count() != 0) {
                 foreach (var source in location.Sources) {
-                    client.Cypher
+
+                    var foundSources = client.Cypher
                     .Match("(source:Source {Id:{id}})")
                     .Where("(source)-[:Located_In]->(:Location {Id: {locationId}})")
                     .Set("source.TimeStamp = {timeStamp}")
                     .Set("source.Type = {type}")
                     .WithParams(new { id = source.Id, timeStamp = source.TimeStamp, type = source.Type, locationId = location.Id })
-                    .ExecuteWithoutResults();
+                    .Return<Source>("(source)")
+                    .Results;
+
+                    if (foundSources.Count() == 0) {
+                        client.Cypher
+                        .Create("(source:Source {Id: {sourceId}})")
+                        .Set("source.Type = {sourceType}")
+                        .Set("source.TimeStamp = {sourceTimeStamp}")
+                        .WithParams(new { sourceId = source.Id, sourceType = source.Type, sourceTimeStamp = source.TimeStamp })
+                        .ExecuteWithoutResults();
+
+                        //creates a relation to the location the source belongs to
+                        client.Cypher
+                        .Match("(a:Source)")
+                        .Where((Source a) => a.Id == source.Id)
+                        .Match("(b:Location)")
+                        .Where((Location b) => b.Id == location.Id)
+                        .Create("(a)-[r:Located_In]->(b)")
+                        .ExecuteWithoutResults();
+                    }
 
                     foreach (var state in source.State) {
                         string stateId = location.Id + source.Id;
-                        client.Cypher
+                        var foundStates = client.Cypher
                         .Match("(state:State {Property:{property}})")
                         .Where("(state)-[:State_For]->(:Source {Id: {sourceId}})")
                         .Set("state.Id = {id}")
                         .Set("state.Value = {value}")
-                        .WithParams(new { id = stateId, property = state.Key, value = state.Value, sourceId = source.Id})
-                        .ExecuteWithoutResults();
+                        .WithParams(new { id = stateId, property = state.Key, value = state.Value, sourceId = source.Id })
+                        .Return<State>("(state)")
+                        .Results;
+
+                        if (foundStates.Count() == 0) {
+                            client.Cypher
+                            .Create("(state:State {Id: {id}})")
+                            .Set("state.Property = {property}")
+                            .Set("state.Value = {value}")
+                            .WithParams(new { property = state.Key, value = state.Value, id = stateId })
+                            .ExecuteWithoutResults();
+
+                            //creates a relation to the source the source belongs to
+                            client.Cypher
+                            .Match("(a:State)")
+                            .Where("a.Id = {id}")
+                            .WithParams(new { id = stateId })
+                            .Match("(b:Source)")
+                            .Where((Source b) => b.Id == source.Id)
+                            .Merge("(a)-[r:State_For]->(b)")
+                            .ExecuteWithoutResults();
+                        }
 
                     }
                 }

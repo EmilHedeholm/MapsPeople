@@ -142,7 +142,7 @@ namespace MapspeopleConsumer {
             request.AddParameter("application/json; charset=utf-8", json, ParameterType.RequestBody);
             request.RequestFormat = DataFormat.Json;
             var response = client.Execute(request);
-            //Console.WriteLine(json);
+            Console.WriteLine(json);
             //Console.ReadLine();
         }
     }

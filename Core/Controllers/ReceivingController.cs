@@ -22,16 +22,16 @@ namespace Core.Controllers
                 Location existingLocation = GetLocationById(location.Id), 
                         completeLocation = null;
                 //Checking if the location was found in the DB, if not get it by ExternalId.
-                if (existingLocation == null) {
+                if (existingLocation == null || existingLocation.Id.Equals("0") ) {
                     //Getting the location data from the DB via externalID.
                     existingLocation = GetLocationByExternalId(location.ExternalId);
-                    if (existingLocation == null) {
+                    if (existingLocation == null || existingLocation.Id.Equals("0")) {
                         //Going through the mapping table to find the location.
                         existingLocation = FindLocationByMappingTable(location);
                         
                     }
                 }
-                if (existingLocation != null) {
+                if (existingLocation != null && !existingLocation.Id.Equals("0")) {
                     //Combine the data from both location and existingLocation
                     completeLocation = Map(location, existingLocation);
                     UpdateLocation(completeLocation);
@@ -39,7 +39,7 @@ namespace Core.Controllers
                     //var external = ConvertToExternal(location);
                     //SendMessage(external);
                     message = Request.CreateResponse(HttpStatusCode.OK);
-                } else {
+                } else if(location.Id != "0"){
                     //If the existingLocation is still null, insert it into the database as is.
                     InsertIntoDB(location);
                     message = Request.CreateResponse(HttpStatusCode.Created);
