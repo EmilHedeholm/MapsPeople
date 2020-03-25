@@ -27,7 +27,7 @@ namespace MapspeopleConsumer {
         //This method request a token using a post Request using your credentials from Mapspeoples CMS, which gives you a token that you
         //pass along when interacting with Mapspeoples systems
         //Return Security Token
-        public static Token testMethod(RestClient client)
+        public static Token GetToken(RestClient client)
         {
             client.BaseUrl = new Uri("https://auth.mapsindoors.com/connect/token");
             var request = new RestRequest(Method.POST);
@@ -45,7 +45,7 @@ namespace MapspeopleConsumer {
             string jsonstr;  
             //This step to get datasetId from Mapspeople
             var client = new RestClient();
-            var response = testMethod(client);
+            var response = GetToken(client);
             client.BaseUrl = new Uri("https://integration.mapsindoors.com");
             var testRequest = new RestRequest("/api/dataset/", Method.GET);
             testRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
