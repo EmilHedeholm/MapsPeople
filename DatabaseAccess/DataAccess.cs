@@ -56,17 +56,21 @@ namespace DatabaseAccess
                     .Create("(source:Source {Id: {sourceId}})")
                     .Set("source.Type = {sourceType}")
                     .Set("source.TimeStamp = {sourceTimeStamp}")
+                    .With("source")
+                    .Match("(parent:Location)")
+                    .Where((Location parent) => parent.Id == location.Id)
+                    .Create("(source)-[r:Located_In]->(parent)")
                     .WithParams(new { sourceId = source.Id, sourceType = source.Type, sourceTimeStamp = source.TimeStamp })
                     .ExecuteWithoutResults();
 
                     //creates a relation to the location the source belongs to
-                    client.Cypher
-                    .Match("(a:Source)")
-                    .Where((Source a) => a.Id == source.Id)
-                    .Match("(b:Location)")
-                    .Where((Location b) => b.Id == location.Id)
-                    .Create("(a)-[r:Located_In]->(b)")
-                    .ExecuteWithoutResults();
+                    //client.Cypher
+                    //.Match("(a:Source)")
+                    //.Where((Source a) => a.Id == source.Id)
+                    //.Match("(b:Location)")
+                    //.Where((Location b) => b.Id == location.Id)
+                    //.Create("(a)-[r:Located_In]->(b)")
+                    //.ExecuteWithoutResults();
                 }
                 //runs through all the states for a source
                 foreach (var state in source.State) {
@@ -91,18 +95,22 @@ namespace DatabaseAccess
                         .Create("(state:State {Id: {id}})")
                         .Set("state.Property = {property}")
                         .Set("state.Value = {value}")
+                        .With("state")
+                        .Match("(parent:Source)")
+                        .Where((Source parent) => parent.Id == source.Id)
+                        .Merge("(state)-[r:State_For]->(parent)")
                         .WithParams(new { property = state.Key, value = state.Value, id = stateId })
                         .ExecuteWithoutResults();
 
                         //creates a relation to the source the source belongs to
-                        client.Cypher
-                        .Match("(a:State)")
-                        .Where("a.Id = {id}")
-                        .WithParams(new { id = stateId })
-                        .Match("(b:Source)")
-                        .Where((Source b) => b.Id == source.Id)
-                        .Merge("(a)-[r:State_For]->(b)")
-                        .ExecuteWithoutResults();
+                        //client.Cypher
+                        //.Match("(a:State)")
+                        //.Where("a.Id = {id}")
+                        //.WithParams(new { id = stateId })
+                        //.Match("(b:Source)")
+                        //.Where((Source b) => b.Id == source.Id)
+                        //.Merge("(a)-[r:State_For]->(b)")
+                        //.ExecuteWithoutResults();
                     }
                 }
 
@@ -196,16 +204,16 @@ namespace DatabaseAccess
             .Return<Location>("(location)")
             .Results;
 
-            if(foundlocation.Count() == 0) {
-                foundlocation = client.Cypher
-                .Match("(location:Location {ExternalId:{externalId}})")
-                .Set("location.ParentId = {parentId}")
-                .Set("location.ConsumerId = {consumerId}")
-                .Set("location.Id = {id}")
-                .WithParams(new { externalId = location.ExternalId, parentId = location.Parent, consumerId = location.ConsumerId, id = location.Id })
-                .Return<Location>("(location)")
-                .Results;
-            }
+            //if(foundlocation.Count() == 0) {
+            //    foundlocation = client.Cypher
+            //    .Match("(location:Location {ExternalId:{externalId}})")
+            //    .Set("location.ParentId = {parentId}")
+            //    .Set("location.ConsumerId = {consumerId}")
+            //    .Set("location.Id = {id}")
+            //    .WithParams(new { externalId = location.ExternalId, parentId = location.Parent, consumerId = location.ConsumerId, id = location.Id })
+            //    .Return<Location>("(location)")
+            //    .Results;
+            //}
             if (foundlocation.Count() != 0) {
                 foreach (var source in location.Sources) {
 
@@ -223,17 +231,21 @@ namespace DatabaseAccess
                         .Create("(source:Source {Id: {sourceId}})")
                         .Set("source.Type = {sourceType}")
                         .Set("source.TimeStamp = {sourceTimeStamp}")
+                        .With("source")
+                        .Match("(parent:Location)")
+                        .Where((Location parent) => parent.Id == location.Id)
+                        .Create("(source)-[r:Located_In]->(parent)")
                         .WithParams(new { sourceId = source.Id, sourceType = source.Type, sourceTimeStamp = source.TimeStamp })
                         .ExecuteWithoutResults();
 
                         //creates a relation to the location the source belongs to
-                        client.Cypher
-                        .Match("(a:Source)")
-                        .Where((Source a) => a.Id == source.Id)
-                        .Match("(b:Location)")
-                        .Where((Location b) => b.Id == location.Id)
-                        .Create("(a)-[r:Located_In]->(b)")
-                        .ExecuteWithoutResults();
+                        //client.Cypher
+                        //.Match("(a:Source)")
+                        //.Where((Source a) => a.Id == source.Id)
+                        //.Match("(b:Location)")
+                        //.Where((Location b) => b.Id == location.Id)
+                        //.Create("(a)-[r:Located_In]->(b)")
+                        //.ExecuteWithoutResults();
                     }
 
                     foreach (var state in source.State) {
@@ -252,18 +264,22 @@ namespace DatabaseAccess
                             .Create("(state:State {Id: {id}})")
                             .Set("state.Property = {property}")
                             .Set("state.Value = {value}")
+                            .With("state")
+                            .Match("(parent:Source)")
+                            .Where((Source parent) => parent.Id == source.Id)
+                            .Merge("(state)-[r:State_For]->(parent)")
                             .WithParams(new { property = state.Key, value = state.Value, id = stateId })
                             .ExecuteWithoutResults();
 
                             //creates a relation to the source the source belongs to
-                            client.Cypher
-                            .Match("(a:State)")
-                            .Where("a.Id = {id}")
-                            .WithParams(new { id = stateId })
-                            .Match("(b:Source)")
-                            .Where((Source b) => b.Id == source.Id)
-                            .Merge("(a)-[r:State_For]->(b)")
-                            .ExecuteWithoutResults();
+                            //client.Cypher
+                            //.Match("(a:State)")
+                            //.Where("a.Id = {id}")
+                            //.WithParams(new { id = stateId })
+                            //.Match("(b:Source)")
+                            //.Where((Source b) => b.Id == source.Id)
+                            //.Merge("(a)-[r:State_For]->(b)")
+                            //.ExecuteWithoutResults();
                         }
 
                     }
