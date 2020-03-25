@@ -84,6 +84,7 @@ namespace DatabaseAccess
                 }
 
             }
+            client.Dispose();
         }
 
         public void DeleteLocationAndSubLocations(string locationId) {
@@ -144,6 +145,7 @@ namespace DatabaseAccess
             foreach (var source in sources) {
                 source.State = GetStatesBySource(source);
             }
+            client.Dispose();
             return (List<Source>)sources;
         }
 
@@ -160,6 +162,7 @@ namespace DatabaseAccess
             foreach (var state in states) {
                 foundStates.Add(state.Property, state.value);
             }
+            client.Dispose();
             return foundStates;
         }
         public void UpdateLocation(Location location) {
@@ -225,7 +228,7 @@ namespace DatabaseAccess
                     }
                 }
             }
-            
+            client.Dispose();
         }
     }
 }
