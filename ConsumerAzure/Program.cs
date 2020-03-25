@@ -18,14 +18,14 @@ namespace ConsumerAzure {
 
         //TODO: make this better polling and not garbage as it is right now
         static void Main() {
-           //while (true) {
+           while (true) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
                 List<Location> data = GetData();
                 if (!(data.Count == 0)) {
                     SendData(data);
-               // }
-            }
+                }
+           }
         }
 
         //This method gets data from the test data source provided by MapsPeople, and uses the method FilterData on that data. After that it returns a list of filtered data that has been converted to Internal Data Model by using the method ConvertFromJsonToInternalModel. 
@@ -134,12 +134,11 @@ namespace ConsumerAzure {
             //TODO: indtastes post adresse
             client.BaseUrl = new Uri("https://localhost:44346/api/Receiving");
             string json = JsonConvert.SerializeObject(locations);
-            //var request = new RestRequest(Method.POST);
-            //request.AddParameter("application/json; charset=utf-8", json, ParameterType.RequestBody);
-            //request.RequestFormat = DataFormat.Json;
-            //var response = client.Execute(request);
+            var request = new RestRequest(Method.POST);
+            request.AddParameter("application/json; charset=utf-8", json, ParameterType.RequestBody);
+            request.RequestFormat = DataFormat.Json;
+            var response = client.Execute(request);
             Console.WriteLine(json);
-            Console.ReadLine();
         }
 
        /* private static void SendDataWithRabbitMQ(List<Location> locations) {
