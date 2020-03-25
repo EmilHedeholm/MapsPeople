@@ -29,15 +29,21 @@ namespace DatabaseAccess
             .WithParams(new { id = location.Id, parentId = location.Parent, externalId = location.ExternalId, consumerId = location.ConsumerId })
             .ExecuteWithoutResults();
 
-            
 
-            //runs through all sources on the location
+            CreateSources(location);
+            client.Dispose();
+        }
+
+        private void CreateSources(Location location) {
+            client.Connect();
             foreach (Source source in location.Sources) {
                 //checks if the source exists 
                 var foundSources = client.Cypher
                   .Match("(source: Source { Id: {id}})")
                   .Where("(source)-[:Located_In]->(:Location { Id: {locationId}})")
-                  .WithParams(new { id = source.Id, locationId = location.Id, /*timeStamp = source.TimeStamp*/ })
+                  .Set("source.TimeStamp = {timeStamp}")
+                  .Set("source.Type = {type}")
+                  .WithParams(new { id = source.Id, timeStamp = source.TimeStamp, type = source.Type, locationId = location.Id })
                   .Return<Source>("source")
                   .Results;
 
@@ -55,34 +61,38 @@ namespace DatabaseAccess
                     .ExecuteWithoutResults();
 
                 }
-                //runs through all the states for a source
-                foreach (var state in source.State) {
-                    string stateId = location.Id + source.Id;
-                    //checks if the state exists
-                    var foundStates = client.Cypher
-                      .Match("(state: State { Id: {id}})")
-                      .Where("(state)-[:State_For]->(:Source { Id: {sourceId}})")
-                      .WithParams(new {
-                          id = state.Key,
-                          sourceId = source.Id,
-                      })
-                      .Return<KeyValuePair<string, string>>("state")
-                      .Results;
+                string stateId = location.Id + source.Id;
+                CreateStates(source, stateId);
+            }
+            client.Dispose();
+        }
 
-                    if (foundStates.Count() == 0) {
-                        client.Cypher
-                        .Create("(state:State {Id: {id}})")
-                        .Set("state.Property = {property}")
-                        .Set("state.Value = {value}")
-                        .With("state")
-                        .Match("(parent:Source)")
-                        .Where((Source parent) => parent.Id == source.Id)
-                        .Merge("(state)-[r:State_For]->(parent)")
-                        .WithParams(new { property = state.Key, value = state.Value, id = stateId })
-                        .ExecuteWithoutResults();
-                    }
+        private void CreateStates(Source source, string stateId) {
+            client.Connect();
+            //runs through all the states for a source
+            foreach (var state in source.State) {
+                //checks if the state exists
+                var foundStates = client.Cypher
+                  .Match("(state: State { Property: {property}})")
+                  .Where("(state)-[:State_For]->(:Source { Id: {sourceId}})")
+                  .Set("state.Id = {id}")
+                  .Set("state.Value = {value}")
+                  .WithParams(new { id = stateId, property = state.Key, value = state.Value, sourceId = source.Id })
+                  .Return<KeyValuePair<string, string>>("state")
+                  .Results;
+
+                if (foundStates.Count() == 0) {
+                    client.Cypher
+                    .Create("(state:State {Id: {id}})")
+                    .Set("state.Property = {property}")
+                    .Set("state.Value = {value}")
+                    .With("state")
+                    .Match("(parent:Source)")
+                    .Where((Source parent) => parent.Id == source.Id)
+                    .Merge("(state)-[r:State_For]->(parent)")
+                    .WithParams(new { property = state.Key, value = state.Value, id = stateId })
+                    .ExecuteWithoutResults();
                 }
-
             }
             client.Dispose();
         }
@@ -168,65 +178,16 @@ namespace DatabaseAccess
         public void UpdateLocation(Location location) {
             client.Connect();
             var foundlocation = client.Cypher
-            .Match("(location:Location {Id:{id}})")
-            .Set("location.ParentId = {parentId}")
-            .Set("location.ConsumerId = {consumerId}")
-            .Set("location.ExternalId = {externalId}")
-            .WithParams(new { id = location.Id, parentId = location.Parent, consumerId = location.ConsumerId, externalId =location.ExternalId })
-            .Return<Location>("(location)")
-            .Results;
+             .Match("(location:Location {Id:{id}})")
+             .Set("location.ParentId = {parentId}")
+             .Set("location.ConsumerId = {consumerId}")
+             .Set("location.ExternalId = {externalId}")
+             .WithParams(new { id = location.Id, parentId = location.Parent, consumerId = location.ConsumerId, externalId = location.ExternalId })
+             .Return<Location>("(location)")
+             .Results;
 
             if (foundlocation.Count() != 0) {
-                foreach (var source in location.Sources) {
-
-                    var foundSources = client.Cypher
-                    .Match("(source:Source {Id:{id}})")
-                    .Where("(source)-[:Located_In]->(:Location {Id: {locationId}})")
-                    .Set("source.TimeStamp = {timeStamp}")
-                    .Set("source.Type = {type}")
-                    .WithParams(new { id = source.Id, timeStamp = source.TimeStamp, type = source.Type, locationId = location.Id })
-                    .Return<Source>("(source)")
-                    .Results;
-
-                    if (foundSources.Count() == 0) {
-                        client.Cypher
-                        .Create("(source:Source {Id: {sourceId}})")
-                        .Set("source.Type = {sourceType}")
-                        .Set("source.TimeStamp = {sourceTimeStamp}")
-                        .With("source")
-                        .Match("(parent:Location)")
-                        .Where((Location parent) => parent.Id == location.Id)
-                        .Create("(source)-[r:Located_In]->(parent)")
-                        .WithParams(new { sourceId = source.Id, sourceType = source.Type, sourceTimeStamp = source.TimeStamp })
-                        .ExecuteWithoutResults();
-                    }
-
-                    foreach (var state in source.State) {
-                        string stateId = location.Id + source.Id;
-                        var foundStates = client.Cypher
-                        .Match("(state:State {Property:{property}})")
-                        .Where("(state)-[:State_For]->(:Source {Id: {sourceId}})")
-                        .Set("state.Id = {id}")
-                        .Set("state.Value = {value}")
-                        .WithParams(new { id = stateId, property = state.Key, value = state.Value, sourceId = source.Id })
-                        .Return<State>("(state)")
-                        .Results;
-
-                        if (foundStates.Count() == 0) {
-                            client.Cypher
-                            .Create("(state:State {Id: {id}})")
-                            .Set("state.Property = {property}")
-                            .Set("state.Value = {value}")
-                            .With("state")
-                            .Match("(parent:Source)")
-                            .Where((Source parent) => parent.Id == source.Id)
-                            .Merge("(state)-[r:State_For]->(parent)")
-                            .WithParams(new { property = state.Key, value = state.Value, id = stateId })
-                            .ExecuteWithoutResults();
-                        }
-
-                    }
-                }
+                CreateSources(location);
             }
             client.Dispose();
         }
