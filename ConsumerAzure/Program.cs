@@ -14,7 +14,6 @@ using RestSharp;
 namespace ConsumerAzure {
     class Program {
 
-        static List<RootObject> filteredData = new List<RootObject>();
         static List<RootObject> oldData = new List<RootObject>();
 
         //TODO: make this better polling and not garbage as it is right now
@@ -41,7 +40,7 @@ namespace ConsumerAzure {
             //The Data is in JSON, so it is deserialized so that it will be objects instead. 
             List<RootObject> data = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
 
-            FilterData(data);
+            List<RootObject> filteredData = FilterData(data);
             return ConvertToInternalModel(filteredData);
         }
 
@@ -78,8 +77,8 @@ namespace ConsumerAzure {
 
         //This method filters data so that it only keeps data that has been changed. 
         //Param: Json String. 
-        private static void FilterData(List<RootObject> data) {
-            filteredData.Clear();
+        private static List<RootObject> FilterData(List<RootObject> data) {
+            List<RootObject> filteredData = new List<RootObject>();
             //If the list filteredData is empty then add all the data from the list rawData. 
             if (oldData.Count == 0) {
                 oldData.AddRange(data);
@@ -125,7 +124,7 @@ namespace ConsumerAzure {
             if (!(filteredData.Count == 0)) {
                 oldData = data;
             }
-
+            return filteredData;
         }
 
         //This method sends data to the Core Controller. 

@@ -71,19 +71,14 @@ namespace MapspeopleConsumer {
        
             foreach (RootObject r in sources) {
                 Location location = new Location();
-                location.Sources = new List<Source>();
                 location.ConsumerId = 2;
                 location.Id = r.id;
                 location.ExternalId = r.externalId;
                 location.ParentId = r.parentId;
                 locations.Add(location);
             }
-            
             return (locations);
-           
         }
-
-        
 
         //This method sends data to the Core Controller. 
         //Param: Is a list of locations. 
