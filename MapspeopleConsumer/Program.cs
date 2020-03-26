@@ -75,7 +75,7 @@ namespace MapspeopleConsumer {
                 location.ConsumerId = 2;
                 location.Id = r.id;
                 location.ExternalId = r.externalId;
-                location.Parent = r.parentId;
+                location.ParentId = r.parentId;
                 locations.Add(location);
             }
             
