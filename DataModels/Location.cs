@@ -9,7 +9,7 @@ namespace DataModels
     public class Location
     {
         public string Id { get; set; }
-        public string Parent { get; set; }
+        public string ParentId { get; set; }
         public string ExternalId { get; set; }
         public int ConsumerId { get; set; }
         public List<Source> Sources { get; set; }
@@ -17,7 +17,7 @@ namespace DataModels
         public Location(){
             Sources = new List<Source>();
             Id = "0";
-            Parent = "0";
+            ParentId = "0";
             ExternalId = "0";
             ConsumerId = 0;
         }

@@ -118,8 +118,8 @@ namespace Core.Controllers
                 completeLocation.ExternalId = location.ExternalId;
             }
             //Mapping Parent.
-            if (completeLocation.Parent == "0" && location.Parent != "0") {
-                completeLocation.Parent = location.Parent;
+            if (completeLocation.ParentId == "0" && location.ParentId != "0") {
+                completeLocation.ParentId = location.ParentId;
             }
             //Inserting new sources.
             if(location.Sources.Count > completeLocation.Sources.Count) {

@@ -24,9 +24,9 @@ namespace DatabaseAccess
             .Set("location.ConsumerId = {consumerId}")
             .With("location")
             .Match("(parent:Location)")
-            .Where((Location parent) => parent.Id == location.Parent)
+            .Where((Location parent) => parent.Id == location.ParentId)
             .Merge("(location)-[r:Located_In]->(parent)")
-            .WithParams(new { id = location.Id, parentId = location.Parent, externalId = location.ExternalId, consumerId = location.ConsumerId })
+            .WithParams(new { id = location.Id, parentId = location.ParentId, externalId = location.ExternalId, consumerId = location.ConsumerId })
             .ExecuteWithoutResults();
 
 
@@ -178,7 +178,7 @@ namespace DatabaseAccess
              .Set("location.ParentId = {parentId}")
              .Set("location.ConsumerId = {consumerId}")
              .Set("location.ExternalId = {externalId}")
-             .WithParams(new { id = location.Id, parentId = location.Parent, consumerId = location.ConsumerId, externalId = location.ExternalId })
+             .WithParams(new { id = location.Id, parentId = location.ParentId, consumerId = location.ConsumerId, externalId = location.ExternalId })
              .Return<Location>("(location)")
              .Results;
 
