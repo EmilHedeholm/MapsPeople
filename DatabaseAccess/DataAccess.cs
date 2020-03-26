@@ -77,8 +77,8 @@ namespace DatabaseAccess
                   .Where("(state)-[:State_For]->(:Source { Id: {sourceId}})")
                   .Set("state.Id = {id}")
                   .Set("state.Value = {value}")
-                  .WithParams(new { id = stateId, property = state.Key, value = state.Value, sourceId = source.Id })
-                  .Return<KeyValuePair<string, string>>("state")
+                  .WithParams(new { id = stateId, property = state.Property, value = state.Value, sourceId = source.Id })
+                  .Return<State>("state")
                   .Results;
 
                 if (foundStates.Count() == 0) {
@@ -90,7 +90,7 @@ namespace DatabaseAccess
                     .Match("(parent:Source)")
                     .Where((Source parent) => parent.Id == source.Id)
                     .Merge("(state)-[r:State_For]->(parent)")
-                    .WithParams(new { property = state.Key, value = state.Value, id = stateId })
+                    .WithParams(new { property = state.Property, value = state.Value, id = stateId })
                     .ExecuteWithoutResults();
                 }
             }
@@ -159,7 +159,7 @@ namespace DatabaseAccess
             return (List<Source>)sources;
         }
 
-        private  Dictionary<string, string> GetStatesBySource(Source source) {
+        private  List<State> GetStatesBySource(Source source) {
             client.Connect();
             var states = client.Cypher
             .Match("(state:State)")
@@ -168,12 +168,8 @@ namespace DatabaseAccess
             .Return<State>("(state)")
             .Results;
 
-            Dictionary<string, string> foundStates = new Dictionary<string, string>();
-            foreach (var state in states) {
-                foundStates.Add(state.Property, state.value);
-            }
             client.Dispose();
-            return foundStates;
+            return (List<State>)states;
         }
         public void UpdateLocation(Location location) {
             client.Connect();

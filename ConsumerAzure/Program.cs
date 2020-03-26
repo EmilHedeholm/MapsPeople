@@ -58,15 +58,15 @@ namespace ConsumerAzure {
                 //Goes through the list LastReports in Root objects. - and makes a new Source object for each of them, and sets state, ID, Type and TimeStamp. 
                 foreach (LastReport lr in r.LastReports) {
                     Source source = new Source();
-                    string MotionDetected = lr.MotionDetected.ToString();
-                    string PersonCount = lr.PersonCount.ToString();
-                    string SignsOfLife = lr.SignsOfLife.ToString();
-                    source.State.Add("MotionDetected", MotionDetected);
-                    source.State.Add("PersonCount", PersonCount);
-                    source.State.Add("SignsOfLife", SignsOfLife);
                     source.Id = lr.Id;
                     source.Type = "Occupancy";
                     source.TimeStamp = lr.TimeStamp;
+                    State MotionDetected = new State() { Id = location.ExternalId + source.Id, Property = "MotionDetected", Value = lr.MotionDetected.ToString() };
+                    State PersonCount = new State() { Id = location.ExternalId + source.Id, Property = "PersonCount", Value = lr.PersonCount.ToString() };
+                    State SignsOfLife = new State() { Id = location.ExternalId + source.Id, Property = "SignsOfLife", Value = lr.SignsOfLife.ToString() };
+                    source.State.Add(MotionDetected);
+                    source.State.Add(PersonCount);
+                    source.State.Add(SignsOfLife);
                     //Adds source to the list of sources, in a location. 
                     location.Sources.Add(source);
                 }
