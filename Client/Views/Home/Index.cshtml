@@ -1,0 +1,26 @@
+﻿@model List<Client.Models.Message>
+@{
+    ViewBag.Title = "Home Page";
+}
+
+    <h2>States</h2>
+    <table>
+        <tr>
+           @foreach(Client.Models.Message message in Model) {
+               foreach(Client.Models.State state in message.source.State) {
+                   <th>
+                       @state.Property
+                   </th>
+               }
+           }
+        </tr>
+        <tr>
+            @foreach (Client.Models.Message message in Model) {
+                foreach (Client.Models.State state in message.source.State) {
+                    <th>
+                        @state.Value
+                    </th>
+                }
+            }
+        </tr>
+    </table>
