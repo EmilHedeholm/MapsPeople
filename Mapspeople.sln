@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapspeopleConsumer", "Mapsp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseAccess", "DatabaseAccess\DatabaseAccess.csproj", "{F93B9729-7E94-45B7-9711-B3758DAE71F4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreForRabbitMQ", "CoreForRabbitMQ\CoreForRabbitMQ.csproj", "{299A5EC8-1433-4383-80D0-56AFFD877FC2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{F93B9729-7E94-45B7-9711-B3758DAE71F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F93B9729-7E94-45B7-9711-B3758DAE71F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F93B9729-7E94-45B7-9711-B3758DAE71F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{299A5EC8-1433-4383-80D0-56AFFD877FC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{299A5EC8-1433-4383-80D0-56AFFD877FC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{299A5EC8-1433-4383-80D0-56AFFD877FC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{299A5EC8-1433-4383-80D0-56AFFD877FC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

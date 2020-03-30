@@ -2,6 +2,7 @@
 using MapspeopleConsumer.JsonModel;
 using MapspeopleConsumer.TokenModel;
 using Newtonsoft.Json;
+using RabbitMQ.Client;
 using RestSharp;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+
 namespace MapspeopleConsumer {
     class Program {
         static void Main(string[] args) {
@@ -19,7 +21,7 @@ namespace MapspeopleConsumer {
                 Thread.Sleep(3000);           
                 List<Location> data = GetData();
                 if (!(data.Count == 0)) {
-                  SendData(data);
+                  SendDataWithRabbitMQ(data);
               // }
             }
         }
@@ -80,6 +82,31 @@ namespace MapspeopleConsumer {
             return (locations);
         }
 
+        private static void SendDataWithRabbitMQ(List<Location> locations) {
+            var factory = new ConnectionFactory() { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel()) {
+                channel.QueueDeclare(queue: "Consumer_Azure_Queue",
+                                     durable: true,
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: null);
+
+                var message = JsonConvert.SerializeObject(locations);
+                var body = Encoding.UTF8.GetBytes(message);
+
+                var properties = channel.CreateBasicProperties();
+                properties.Persistent = true;
+
+                channel.BasicPublish(exchange: "",
+                                     routingKey: "Consumer_Azure_Queue",
+                                     basicProperties: properties,
+                                     body: body);
+                Console.WriteLine(message);
+                Console.WriteLine();
+                Console.WriteLine();
+            }
+        }
         //This method sends data to the Core Controller. 
         //Param: Is a list of locations. 
         private static void SendData(List<Location> locations) {

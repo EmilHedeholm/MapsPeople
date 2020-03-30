@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using ConsumerAzure.JsonModel;
 using DataModels;
 using Newtonsoft.Json;
-//using RabbitMQ.Client;
+using RabbitMQ.Client;
 using RestSharp;
 
 namespace ConsumerAzure {
