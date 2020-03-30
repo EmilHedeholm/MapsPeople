@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace DataModels {
     public class ExternalModel {
-        public string VenueId;
-        public string BuildingId;
-        public string FloorId;
+        public string LocationId;
+        public List<string> ParentIds;
         public Source Source;
     }
 }
