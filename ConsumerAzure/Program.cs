@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 using ConsumerAzure.JsonModel;
 using DataModels;
 using Newtonsoft.Json;
-using RabbitMQ.Client;
+//using RabbitMQ.Client;
 using RestSharp;
 
 namespace ConsumerAzure {
     class Program {
 
-        static List<RootObject> filteredData = new List<RootObject>();
+        static List<RootObject> oldData = new List<RootObject>();
 
         //TODO: make this better polling and not garbage as it is right now
         static void Main() {
@@ -25,7 +25,7 @@ namespace ConsumerAzure {
                 if (!(data.Count == 0)) {
                     SendData(data);
                 }
-            }
+           }
         }
 
         //This method gets data from the test data source provided by MapsPeople, and uses the method FilterData on that data. After that it returns a list of filtered data that has been converted to Internal Data Model by using the method ConvertFromJsonToInternalModel. 
@@ -38,34 +38,34 @@ namespace ConsumerAzure {
                 jsonstr = sr.ReadToEnd();
             }
             //The Data is in JSON, so it is deserialized so that it will be objects instead. 
-            List<RootObject> sources = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
+            List<RootObject> data = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
 
-            FilterData(sources);
+            List<RootObject> filteredData = FilterData(data);
             return ConvertToInternalModel(filteredData);
         }
 
         //This method Converts data from the deserialized JSON to the Internal Datamodel format. 
         //Param: a list of RootObject objects. 
         //Return: A list of locations (internal)   
-        private static List<Location> ConvertToInternalModel(List<RootObject> sources) {
+        private static List<Location> ConvertToInternalModel(List<RootObject> filteredData) {
             List<Location> locations = new List<Location>();
             //Goes through all Root objects - and makes a new Location object for each for them, and gives an ID.
-            foreach (RootObject r in sources) {
+            foreach (RootObject r in filteredData) {
                 Location location = new Location();
                 location.ExternalId = r.SpaceRefId;
                 location.ConsumerId = 1;
                 //Goes through the list LastReports in Root objects. - and makes a new Source object for each of them, and sets state, ID, Type and TimeStamp. 
                 foreach (LastReport lr in r.LastReports) {
                     Source source = new Source();
-                    string MotionDetected = lr.MotionDetected.ToString();
-                    string PersonCount = lr.PersonCount.ToString();
-                    string SignsOfLife = lr.SignsOfLife.ToString();
-                    source.State.Add("MotionDetected", MotionDetected);
-                    source.State.Add("PersonCount", PersonCount);
-                    source.State.Add("SignsOfLife", SignsOfLife);
                     source.Id = lr.Id;
                     source.Type = "Occupancy";
                     source.TimeStamp = lr.TimeStamp;
+                    State MotionDetected = new State() { Id = location.ExternalId + source.Id, Property = "MotionDetected", Value = lr.MotionDetected.ToString() };
+                    State PersonCount = new State() { Id = location.ExternalId + source.Id, Property = "PersonCount", Value = lr.PersonCount.ToString() };
+                    State SignsOfLife = new State() { Id = location.ExternalId + source.Id, Property = "SignsOfLife", Value = lr.SignsOfLife.ToString() };
+                    source.State.Add(MotionDetected);
+                    source.State.Add(PersonCount);
+                    source.State.Add(SignsOfLife);
                     //Adds source to the list of sources, in a location. 
                     location.Sources.Add(source);
                 }
@@ -77,17 +77,17 @@ namespace ConsumerAzure {
 
         //This method filters data so that it only keeps data that has been changed. 
         //Param: Json String. 
-        private static void FilterData(List<RootObject> rawData) {
+        private static List<RootObject> FilterData(List<RootObject> data) {
+            List<RootObject> filteredData = new List<RootObject>();
             //If the list filteredData is empty then add all the data from the list rawData. 
-            if(filteredData.Count == 0) {
-                filteredData.AddRange(rawData);
+            if (oldData.Count == 0) {
+                oldData.AddRange(data);
+                filteredData.AddRange(data);
             }
-            //A new list that can hold the changed data, before it is added to the list filteredData. 
-            List<RootObject> temp = new List<RootObject>();
             //Goes through the raw data list. 
-            foreach (RootObject r in rawData) {
+            foreach (RootObject r in data) {
                 //Goes through a list that has data that has changed. 
-                foreach (RootObject rO in filteredData) {
+                foreach (RootObject rO in oldData) {
                     //Checks that it is the same Root object. 
                     if (r.Id.Equals(rO.Id)) {
                         //Goes through the list of Last reports in the Root Object, but only those that are in raw data. 
@@ -99,18 +99,18 @@ namespace ConsumerAzure {
                                     //If the property MotionDetected has changed. 
                                     if (!(l.MotionDetected.Equals(lr.MotionDetected))) {
                                         //And if it doesn't already exists in the list temp - Then add it to the list. 
-                                        if (!temp.Contains(r)) {
-                                            temp.Add(r);
+                                        if (!filteredData.Contains(r)) {
+                                            filteredData.Add(r);
                                         }
                                     }
                                     if (!(l.PersonCount.Equals(lr.PersonCount))) {
-                                        if (!temp.Contains(r)) {
-                                            temp.Add(r);
+                                        if (!filteredData.Contains(r)) {
+                                            filteredData.Add(r);
                                         }
                                     }
                                     if (!(l.SignsOfLife.Equals(lr.SignsOfLife))) {
-                                        if (!temp.Contains(r)) {
-                                            temp.Add(r);
+                                        if (!filteredData.Contains(r)) {
+                                            filteredData.Add(r);
                                         }
                                     }
                                 }
@@ -120,11 +120,11 @@ namespace ConsumerAzure {
                 }
             }
             //If there is something in the temp list, then the list filteredData will be cleared first, before the list temp is added. 
-            if (!(temp.Count == 0)) {
-                filteredData.Clear();
-                filteredData.AddRange(temp);
+            List<RootObject> temp = new List<RootObject>();
+            if (!(filteredData.Count == 0)) {
+                oldData = data;
             }
-
+            return filteredData;
         }
 
         //This method sends data to the Core Controller. 
@@ -132,16 +132,16 @@ namespace ConsumerAzure {
         private static void SendData(List<Location> locations) {
             var client = new RestClient();
             //TODO: indtastes post adresse
-            client.BaseUrl = new Uri("");
+            client.BaseUrl = new Uri("https://localhost:44346/api/Receiving");
             string json = JsonConvert.SerializeObject(locations);
             var request = new RestRequest(Method.POST);
             request.AddParameter("application/json; charset=utf-8", json, ParameterType.RequestBody);
             request.RequestFormat = DataFormat.Json;
             var response = client.Execute(request);
-            Console.WriteLine(json);
+            Console.WriteLine(json + "\n");
         }
 
-        private static void SendDataWithRabbitMQ(List<Location> locations) {
+       /* private static void SendDataWithRabbitMQ(List<Location> locations) {
             var factory = new ConnectionFactory() { HostName = "localhost" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel()) {
@@ -165,6 +165,6 @@ namespace ConsumerAzure {
                 Console.WriteLine();
                 Console.WriteLine();
             }
-        }
+        }*/
     }
 }

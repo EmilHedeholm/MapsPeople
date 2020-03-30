@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapspeopleConsumer", "MapspeopleConsumer\MapspeopleConsumer.csproj", "{F5FBFF85-59D1-4D8E-AB71-E6D9536E0032}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseAccess", "DatabaseAccess\DatabaseAccess.csproj", "{F93B9729-7E94-45B7-9711-B3758DAE71F4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{F5FBFF85-59D1-4D8E-AB71-E6D9536E0032}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5FBFF85-59D1-4D8E-AB71-E6D9536E0032}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5FBFF85-59D1-4D8E-AB71-E6D9536E0032}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F93B9729-7E94-45B7-9711-B3758DAE71F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F93B9729-7E94-45B7-9711-B3758DAE71F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F93B9729-7E94-45B7-9711-B3758DAE71F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F93B9729-7E94-45B7-9711-B3758DAE71F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

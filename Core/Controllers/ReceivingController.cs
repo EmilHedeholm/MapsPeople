@@ -6,11 +6,12 @@ using System.Net.Http;
 using System.Web.Http;
 using Core.Models;
 using DataModels;
+using DatabaseAccess;
 
 namespace Core.Controllers
 {
     public class ReceivingController : ApiController {
-        //IDataBase dataBase = new DataBase();
+        IDataAccess dataAccess = new DataAccess();
         //This post method receives location data from consumers and maps them with data from other consumers before
         //savin the changes to database, converting to the external message format and sending it out of the system.
         public HttpResponseMessage Post([FromBody]IEnumerable<Location> locations) {
@@ -21,16 +22,16 @@ namespace Core.Controllers
                 Location existingLocation = GetLocationById(location.Id), 
                         completeLocation = null;
                 //Checking if the location was found in the DB, if not get it by ExternalId.
-                if (existingLocation == null) {
+                if (existingLocation == null || existingLocation.Id.Equals("0") ) {
                     //Getting the location data from the DB via externalID.
                     existingLocation = GetLocationByExternalId(location.ExternalId);
-                    if (existingLocation == null) {
+                    if (existingLocation == null || existingLocation.Id.Equals("0")) {
                         //Going through the mapping table to find the location.
                         existingLocation = FindLocationByMappingTable(location);
                         
                     }
                 }
-                if (existingLocation != null) {
+                if (existingLocation != null && !existingLocation.Id.Equals("0")) {
                     //Combine the data from both location and existingLocation
                     completeLocation = Map(location, existingLocation);
                     UpdateLocation(completeLocation);
@@ -38,7 +39,7 @@ namespace Core.Controllers
                     //var external = ConvertToExternal(location);
                     //SendMessage(external);
                     message = Request.CreateResponse(HttpStatusCode.OK);
-                } else {
+                } else if(location.Id != "0"){
                     //If the existingLocation is still null, insert it into the database as is.
                     InsertIntoDB(location);
                     message = Request.CreateResponse(HttpStatusCode.Created);
@@ -97,28 +98,28 @@ namespace Core.Controllers
         }
 
         private void UpdateLocation(Location completeLocation) {
-            throw new NotImplementedException();
+            dataAccess.UpdateLocation(completeLocation);
         }
 
         private Location GetLocationByExternalId(string externalId)
         {
-            throw new NotImplementedException();
+            return dataAccess.GetLocationByExternalId(externalId);
         }
         //This method maps data from a newly received location with data pertaining to that location from the database
         // then it merges them into a complete location, updates the sources and returns the complete location.
         private Location Map(Location location, Location existingLocation) {
             Location completeLocation = existingLocation;
             //Mapping locationId.
-            if (completeLocation.Id == null) {
+            if (completeLocation.Id == "0") {
                 completeLocation.Id = location.Id;
             }
             //Mapping ExternalId.
-            if (completeLocation.ExternalId == null && location.ExternalId != null) {
+            if (completeLocation.ExternalId == "0" && location.ExternalId != "0") {
                 completeLocation.ExternalId = location.ExternalId;
             }
             //Mapping Parent.
-            if (completeLocation.Parent == null && location.Parent != null) {
-                completeLocation.Parent = location.Parent;
+            if (completeLocation.ParentId == "0" && location.ParentId != "0") {
+                completeLocation.ParentId = location.ParentId;
             }
             //Inserting new sources.
             if(location.Sources.Count > completeLocation.Sources.Count) {
@@ -132,7 +133,7 @@ namespace Core.Controllers
             List<Source> completedSources = new List<Source>();
             foreach (var source in location.Sources) {
                 foreach (var completeSource in completeLocation.Sources) {
-                    if (source.Id == completeSource.Id && source.TimeStamp < completeSource.TimeStamp) {
+                    if (source.Id == completeSource.Id && source.TimeStamp > completeSource.TimeStamp) {
                         completedSources.Add(source);
                     } else {
                         completedSources.Add(completeSource);
@@ -144,15 +145,15 @@ namespace Core.Controllers
             return completeLocation;
         }
 
-        private bool InsertIntoDB(Location location){
+        private void InsertIntoDB(Location location){
             //return DataBase.insert(location);
             // TODO: Implement this when the db is up and running.
-            throw new NotImplementedException();
+            dataAccess.CreateLocation(location);
         }
         private Location GetLocationById(string id) {
             //return dataBase.GetLocation(id);
             //TODO: Implement this with the DB.
-            throw new NotImplementedException();
+            return dataAccess.GetLocationById(id);
         }
         /*
         private List<ExternalModel> ConvertToExternal(Location location) {
