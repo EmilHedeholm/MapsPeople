@@ -21,16 +21,20 @@ namespace Send {
                 foreach (var externalMessage in messages) {
                     string routingKey = "";
                     foreach (var parentId in externalMessage.ParentIds) {
-                       routingKey += parentId + ".";
+                        if (!externalMessage.ParentIds.Last().Equals(parentId)) {
+                            routingKey += parentId + ".";
+                        } else {
+                            routingKey += parentId;
+                        }
                     }
-                    var message = externalMessage.source;
                     string json = JsonConvert.SerializeObject(externalMessage);
                     var body = Encoding.UTF8.GetBytes(json);
+                    
                     channel.BasicPublish(exchange: "Venue1",
                                             routingKey: routingKey,
                                             basicProperties: null,
                                             body: body);
-                    Console.WriteLine(" [x] Sent '{0}':'{1}'", routingKey, message);
+                    Console.WriteLine(" [x] Sent '{0}':'{1}'", routingKey, json + "\n");
                 }
                 
             }
