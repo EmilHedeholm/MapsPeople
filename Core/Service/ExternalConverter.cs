@@ -15,20 +15,13 @@ namespace Core.Service {
             List<ExternalModel> externalModels = new List<ExternalModel>();
             ExternalModel externalModel = new ExternalModel();
             if (location != null) {
-                externalModel.LocationId = location.Id;
-                
-                if (location.Sources != null && location.Sources.Count() > 0) {
-                    if (!location.ParentId.Equals("0")) {
-                        externalModel.ParentIds = FindParentIds(location);
-                    }
+                externalModel.ParentIds = FindParentIds(location);
+                if (location.Sources != null && location.Sources.Count() > 0) {                                               
                     for (int i = 0; i < location.Sources.Count(); i++) {                   
                         externalModel.Source = location.Sources[i];
                         externalModels.Add(externalModel);
                     }
-                } else {
-                    if (!location.ParentId.Equals("0")) {
-                        externalModel.ParentIds = FindParentIds(location);
-                    }
+                } else {                          
                     externalModels.Add(externalModel);
                 }
             }
@@ -37,18 +30,15 @@ namespace Core.Service {
 
         //This method find all the parent IDs of a clocation
         //Param: a Location object.
-        //Return: A string list of the parent IDs.
-        private List<string> FindParentIds(Location location) {
+        //Return: A string stack of the parent IDs.
+        private Stack<string> FindParentIds(Location location) {
             IDataAccess dataAccess = new DataAccess();
-            List<string> parentIds = new List<string>();
-            parentIds.Add(location.ParentId);
-            Location l1 = dataAccess.GetLocationById(location.ParentId);
-            if (!l1.ParentId.Equals("0")) {
-                parentIds.Add(l1.ParentId);
-                Location l2 = dataAccess.GetLocationById(l1.ParentId);
-                if (!l2.ParentId.Equals("0")) {
-                    parentIds.Add(l2.ParentId);
-                }
+            Stack<string> parentIds = new Stack<string>();
+            parentIds.Push(location.Id);
+            
+            while (!location.ParentId.Equals("0")) {           
+                location= dataAccess.GetLocationById(location.ParentId);
+                parentIds.Push(location.Id);
             }
             return parentIds;
         }
