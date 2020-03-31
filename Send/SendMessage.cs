@@ -27,6 +27,11 @@ namespace Send {
                             routingKey += parentId;
                         }
                     }
+                    channel.QueueDeclare("test", durable: true,
+                     exclusive: false,
+                     autoDelete: false,
+                     arguments: null);
+                    channel.QueueBind(queue: "test", exchange: "Venue1", routingKey:routingKey);
                     string json = JsonConvert.SerializeObject(externalMessage);
                     var body = Encoding.UTF8.GetBytes(json);
                     

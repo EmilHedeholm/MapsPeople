@@ -27,6 +27,7 @@ namespace Send {
             };
             var connection = connectionFactory.CreateConnection();
             var channel = connection.CreateModel();
+
             // accept only one unack-ed message at a time
 
             // uint prefetchSize, ushort prefetchCount, bool global
@@ -35,7 +36,7 @@ namespace Send {
 
             MessageReceiver messageReceiver = new MessageReceiver(channel);
 
-            channel.BasicConsume("Benny.Jhonny.Birger", false, messageReceiver);
+            channel.BasicConsume("test", false, messageReceiver);
 
             Console.ReadLine();
         }
