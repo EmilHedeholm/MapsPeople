@@ -60,7 +60,7 @@ namespace Send {
                     string json = JsonConvert.SerializeObject(externalMessage);
                     var body = Encoding.UTF8.GetBytes(json);
 
-                    channel.BasicPublish(exchange: "Venue1",
+                    channel.BasicPublish(exchange: "Customer1",
                                             routingKey: routingKey,
                                             basicProperties: null,
                                             body: body);

@@ -15,7 +15,6 @@ namespace Send {
                 string parent = "" + i;
                 parentIds.Push(parent);
             }
-            
             Source source = new Source();
 
             ExternalModel externalMessage = new ExternalModel() { Source = source, ParentIds = parentIds };
