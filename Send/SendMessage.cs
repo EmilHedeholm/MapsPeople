@@ -10,12 +10,12 @@ using DataModels;
 namespace Send {
     public class SendMessage {
 
-        public static void SendUpdate(List<ExternalHans> messages) { 
+        public static void SendUpdate(List<ExternalModel> messages) { 
             
             var factory = new ConnectionFactory() { HostName = "localhost" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel()) {
-                channel.ExchangeDeclare(exchange: "Venue1",
+                channel.ExchangeDeclare(exchange: "Customer1",
                                         type: "topic");
                 
                 foreach (var externalMessage in messages) {

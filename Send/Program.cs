@@ -9,16 +9,7 @@ using RabbitMQ.Client;
 namespace Send {
     class Program {
         static void Main(string[] args) {
-            List<State> states = new List<State>() { new State() { Id = "Raynolds", Property = "Uppercut", Value = "Over 9000" } };
-            Source sovs = new Source() { Id = "1234567", State = states, TimeStamp = DateTime.Now, Type = "Scouter" };
-            List<string> parentIds = new List<string>{ "Benny", "Jhonny", "Birger" };
-            List<string> parentIdsIs = new List<string> { "Benny", "Jhonny", "Palle"};
-            ExternalHans hans = new ExternalHans() { ParentIds = parentIds, source = sovs };
-            ExternalHans hansi = new ExternalHans() { ParentIds = parentIdsIs, source = sovs };
-            List<ExternalHans> hanser = new List<ExternalHans>();
-            hanser.Add(hans);
-            hanser.Add(hansi);
-            string[] routing = {"Benny.Jhonny.Birger"};
+            
             SendMessage.SendUpdate(hanser);
 
 
