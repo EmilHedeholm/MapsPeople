@@ -88,7 +88,7 @@ namespace MapspeopleConsumer {
             var factory = new ConnectionFactory() { HostName = "localhost" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel()) {
-                channel.QueueDeclare(queue: "Consumer_Azure_Queue",
+                channel.QueueDeclare(queue: "Consumer_Queue",
                                      durable: true,
                                      exclusive: false,
                                      autoDelete: false,
@@ -101,7 +101,7 @@ namespace MapspeopleConsumer {
                 properties.Persistent = true;
 
                 channel.BasicPublish(exchange: "",
-                                     routingKey: "Consumer_Azure_Queue",
+                                     routingKey: "Consumer_Queue",
                                      basicProperties: properties,
                                      body: body);
                 Console.WriteLine(message);
