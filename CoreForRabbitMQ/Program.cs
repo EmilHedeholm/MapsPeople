@@ -39,7 +39,7 @@ namespace CoreForRabbitMQ {
                         //Combine the data from both location and existingLocation
                         completeLocation = Map(location, existingLocation);
                         UpdateLocation(completeLocation);
-                        var external = ConvertToExternal(location);
+                        var external = ConvertToExternal(completeLocation);
                         SendMessage(external);
                     } else if (location.Id != "0") {
                         //If the existingLocation is still null, insert it into the database as is.
