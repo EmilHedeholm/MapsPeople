@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using ConsumerAzure.JsonModel;
 using DataModels;
 using Newtonsoft.Json;
-//using RabbitMQ.Client;
+using RabbitMQ.Client;
 using RestSharp;
 
 namespace ConsumerAzure {
@@ -23,7 +23,7 @@ namespace ConsumerAzure {
                 Thread.Sleep(3000);
                 List<Location> data = GetData();
                 if (!(data.Count == 0)) {
-                    SendData(data);
+                    SendDataWithRabbitMQ(data);
                 }
            }
         }
@@ -141,7 +141,7 @@ namespace ConsumerAzure {
             Console.WriteLine(json + "\n");
         }
 
-       /* private static void SendDataWithRabbitMQ(List<Location> locations) {
+        private static void SendDataWithRabbitMQ(List<Location> locations) {
             var factory = new ConnectionFactory() { HostName = "localhost" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel()) {
@@ -165,6 +165,6 @@ namespace ConsumerAzure {
                 Console.WriteLine();
                 Console.WriteLine();
             }
-        }*/
+        }
     }
 }
