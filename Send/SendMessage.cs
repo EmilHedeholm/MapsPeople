@@ -17,14 +17,27 @@ namespace Send {
             using (var channel = connection.CreateModel()) {
                 channel.ExchangeDeclare(exchange: "Customer1",
                                         type: "topic");
-
+                
                 foreach (var externalMessage in messages) {
-                    string routingKey = "";
-                    foreach (var parentId in externalMessage.ParentIds) {
-                        channel.QueueDeclare(parentId, durable: true,
+                    string routingKey = "", bindingKey = "", queueId = "";
+                    int repeatTimes = externalMessage.ParentIds.Count;
+                    //foreach (var parentId in externalMessage.ParentIds) {
+                    for (int i = 0; i < repeatTimes; i++) {
+                        if (externalMessage.ParentIds.Count > 1) {
+                            queueId = externalMessage.ParentIds.Pop();
+                            routingKey += queueId + ".";
+                            bindingKey = routingKey + "#";
+                        } else {
+                            queueId = externalMessage.ParentIds.Pop();
+                            routingKey += queueId;
+                            bindingKey = routingKey;
+                        }
+                        channel.QueueDeclare(queueId, durable: true,
                                exclusive: false,
                                autoDelete: false,
                                arguments: null);
+                        channel.QueueBind(queue: queueId, exchange: "Customer1", routingKey: $"{bindingKey}");
+
                         //if(externalMessage.ParentIds.Count == 1) {
                         //    channel.QueueBind(queue: parentId, exchange: "Customer1", routingKey: $"{parentId}.#");
                         //}
@@ -38,11 +51,11 @@ namespace Send {
                         //    channel.QueueBind(queue: parentId, exchange: "Customer1", routingKey: $"#.{parentId}");
                         //}
 
-                        if (!externalMessage.ParentIds.Pop().Equals(parentId)) {
-                            routingKey += parentId + ".";
-                        } else {
-                            routingKey += parentId;
-                        }
+                        //if (externalMessage.ParentIds.Peek() != null) {
+                        //    routingKey += parentId + ".";
+                        //} else {
+                        //    routingKey += parentId;
+                        //}
                     }
                     string json = JsonConvert.SerializeObject(externalMessage);
                     var body = Encoding.UTF8.GetBytes(json);

@@ -9,9 +9,37 @@ using RabbitMQ.Client;
 namespace Send {
     class Program {
         static void Main(string[] args) {
-            
-            SendMessage.SendUpdate(hanser);
 
+            Stack<string> parentIds = new Stack<string>();
+            for (int i = 1; i <= 4; i++) {
+                string parent = "" + i;
+                parentIds.Push(parent);
+            }
+            
+            Source source = new Source();
+
+            ExternalModel externalMessage = new ExternalModel() { Source = source, ParentIds = parentIds };
+            List<ExternalModel> externals = new List<ExternalModel>();
+            externals.Add(externalMessage);
+
+            //string routingKey = "", bindingKey = "", queueId = "";
+            //int repeatTimes = externalMessage.ParentIds.Count;
+            //for (int i = 0; i < repeatTimes; i++) {
+            //    if (externalMessage.ParentIds.Count > 1) {
+            //        queueId = externalMessage.ParentIds.Pop();
+            //        routingKey += queueId + ".";
+            //        bindingKey = routingKey + "#";
+            //    } else {
+            //        queueId = externalMessage.ParentIds.Pop();
+            //        routingKey += queueId;
+            //        bindingKey = routingKey;
+            //    }
+            //    Console.WriteLine("QueueId: " + queueId + ", " + "bindingKey: " + bindingKey);
+            //}
+            //Console.WriteLine("routingKey: " + routingKey);
+            
+            
+            SendMessage.SendUpdate(externals);
 
             ConnectionFactory connectionFactory = new ConnectionFactory {
                 HostName = "localhost"
@@ -31,9 +59,5 @@ namespace Send {
 
             Console.ReadLine();
         }
-    }
-    public class ExternalHans {
-        public List<string> ParentIds { get; set; }
-        public Source source { get; set; }
     }
 }
