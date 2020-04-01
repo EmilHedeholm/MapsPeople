@@ -82,6 +82,8 @@ namespace MapspeopleConsumer {
             return (locations);
         }
 
+        //This method sends data to the Core Controller for RabbitMQ. 
+        //Param: Is a list of locations. 
         private static void SendDataWithRabbitMQ(List<Location> locations) {
             var factory = new ConnectionFactory() { HostName = "localhost" };
             using (var connection = factory.CreateConnection())

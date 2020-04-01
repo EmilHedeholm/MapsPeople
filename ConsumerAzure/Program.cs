@@ -76,7 +76,7 @@ namespace ConsumerAzure {
         }
 
         //This method filters data so that it only keeps data that has been changed. 
-        //Param: Json String. 
+        //Param: a list of RootObject objects 
         private static List<RootObject> FilterData(List<RootObject> data) {
             List<RootObject> filteredData = new List<RootObject>();
             //If the list filteredData is empty then add all the data from the list rawData. 
@@ -141,6 +141,8 @@ namespace ConsumerAzure {
             Console.WriteLine(json + "\n");
         }
 
+        //This method sends data to the Core Controller for RabbitMQ. 
+        //Param: Is a list of locations. 
         private static void SendDataWithRabbitMQ(List<Location> locations) {
             var factory = new ConnectionFactory() { HostName = "localhost" };
             using (var connection = factory.CreateConnection())
