@@ -10,7 +10,7 @@ using DataModels;
 namespace Send {
     public class SendMessage {
 
-        public static void SendUpdate(List<ExternalModel> messages) {
+        public void SendUpdate(List<ExternalModel> messages) {
 
             var factory = new ConnectionFactory() { HostName = "localhost" };
             using (var connection = factory.CreateConnection())

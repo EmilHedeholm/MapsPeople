@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExternalConverter.cs" />
     <Compile Include="MappingEntry.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -68,6 +69,10 @@
     <ProjectReference Include="..\DataModels\DataModels.csproj">
       <Project>{1372fd92-3251-46bc-8109-fc2f9222246c}</Project>
       <Name>DataModels</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Send\Send.csproj">
+      <Project>{beed99b4-3757-499a-926b-b284117c5e52}</Project>
+      <Name>Send</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

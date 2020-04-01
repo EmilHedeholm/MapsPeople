@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Newtonsoft.Json;
+using Send;
 
 namespace CoreForRabbitMQ {
     class Program {
@@ -19,7 +20,7 @@ namespace CoreForRabbitMQ {
            static  IDataAccess dataAccess = new DataAccess();
             //This post method receives location data from consumers and maps them with data from other consumers before
             //savin the changes to database, converting to the external message format and sending it out of the system.
-            public static void  Post(IEnumerable<Location> locations) {
+            public static void Receive(IEnumerable<Location> locations) {
                 foreach (var location in locations) {
                     //Getting the location data from the DB via ID.
                     Location existingLocation = GetLocationById(location.Id),
@@ -38,9 +39,8 @@ namespace CoreForRabbitMQ {
                         //Combine the data from both location and existingLocation
                         completeLocation = Map(location, existingLocation);
                         UpdateLocation(completeLocation);
-                        //TODO: Create converting and sending functionality
-                        //var external = ConvertToExternal(location);
-                        //SendMessage(external);
+                        var external = ConvertToExternal(location);
+                        SendMessage(external);
                     } else if (location.Id != "0") {
                         //If the existingLocation is still null, insert it into the database as is.
                         InsertIntoDB(location);
@@ -48,8 +48,14 @@ namespace CoreForRabbitMQ {
 
                 }
             }
-            //This method maps a locations ConsumerId and Id with data from a list and adds an ExternalId if a match is found.
-            private static Location FindLocationByMappingTable(Location location) {
+
+        private static void SendMessage(List<ExternalModel> external) {
+            SendMessage sender = new SendMessage();
+            sender.SendUpdate(external);
+        }
+
+        //This method maps a locations ConsumerId and Id with data from a list and adds an ExternalId if a match is found.
+        private static Location FindLocationByMappingTable(Location location) {
                 List<MappingEntry> entries = new List<MappingEntry>();
                 entries = FillEntries(entries);
                 foreach (var entry in entries) {
@@ -154,47 +160,45 @@ namespace CoreForRabbitMQ {
                 return dataAccess.GetLocationById(id);
             }
 
-            public static void ReceiveDataFromRabbitMQ() {
-                var factory = new ConnectionFactory() { HostName = "localhost" };
-                using (var connection = factory.CreateConnection())
-                using (var channel = connection.CreateModel()) {
-                    channel.QueueDeclare(queue: "Consumer_Azure_Queue",
-                                         durable: true,
-                                         exclusive: false,
-                                         autoDelete: false,
-                                         arguments: null);
+        public static void ReceiveDataFromRabbitMQ() {
+            var factory = new ConnectionFactory() { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel()) {
+                channel.QueueDeclare(queue: "Consumer_Azure_Queue",
+                                     durable: true,
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: null);
 
-                    channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+                channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
-                    Console.WriteLine(" [*] Waiting for messages.");
+                Console.WriteLine(" [*] Waiting for messages.");
 
-                    var consumer = new EventingBasicConsumer(channel);
-                    consumer.Received += (sender, ea) => {
-                        var body = ea.Body;
-                        var message = Encoding.UTF8.GetString(body);
-                        if (message != null) { 
-                            var deserializedMessage = JsonConvert.DeserializeObject<IEnumerable<Location>>(message);
-                            Post(deserializedMessage);
-                        }
-                        // Note: it is possible to access the channel via
-                        //       ((EventingBasicConsumer)sender).Model here
-                        channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
-                    };
-                    channel.BasicConsume(queue: "Consumer_Azure_Queue",
-                                         autoAck: false,
-                                         consumer: consumer);
+                var consumer = new EventingBasicConsumer(channel);
+                consumer.Received += (sender, ea) => {
+                    var body = ea.Body;
+                    var message = Encoding.UTF8.GetString(body);
+                    if (message != null) {
+                        var deserializedMessage = JsonConvert.DeserializeObject<IEnumerable<Location>>(message);
+                        Receive(deserializedMessage);
+                    }
+                    // Note: it is possible to access the channel via
+                    //       ((EventingBasicConsumer)sender).Model here
+                    channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+                };
+                channel.BasicConsume(queue: "Consumer_Azure_Queue",
+                                     autoAck: false,
+                                     consumer: consumer);
 
-                    Console.ReadLine();
-                }
-                /*
-                private List<ExternalModel> ConvertToExternal(Location location) {
-                    //TODO: Implement this when the external converter class is finished.
-                    //ExternalConverter externalConverter = new ExternalConverter();
-                    //List<ExternalModel> externalModels = externalConverter.Convert(location);
-                    throw new NotImplementedException();
-                }*/
-
+                Console.ReadLine();
             }
+        }
+                
+        private static List<ExternalModel> ConvertToExternal(Location location) {
+            ExternalConverter externalConverter = new ExternalConverter();
+            return externalConverter.Convert(location);
         }
 
     }
+}
+

@@ -36,9 +36,9 @@ namespace Send {
             //    Console.WriteLine("QueueId: " + queueId + ", " + "bindingKey: " + bindingKey);
             //}
             //Console.WriteLine("routingKey: " + routingKey);
-            
-            
-            SendMessage.SendUpdate(externals);
+
+            SendMessage sender = new SendMessage();
+            sender.SendUpdate(externals);
 
             ConnectionFactory connectionFactory = new ConnectionFactory {
                 HostName = "localhost"
