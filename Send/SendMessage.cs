@@ -10,38 +10,50 @@ using DataModels;
 namespace Send {
     public class SendMessage {
 
-        public static void SendUpdate(List<ExternalModel> messages) { 
-            
+        public static void SendUpdate(List<ExternalModel> messages) {
+
             var factory = new ConnectionFactory() { HostName = "localhost" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel()) {
                 channel.ExchangeDeclare(exchange: "Customer1",
                                         type: "topic");
-                
+
                 foreach (var externalMessage in messages) {
                     string routingKey = "";
                     foreach (var parentId in externalMessage.ParentIds) {
-                        if (!externalMessage.ParentIds.Last().Equals(parentId)) {
+                        channel.QueueDeclare(parentId, durable: true,
+                               exclusive: false,
+                               autoDelete: false,
+                               arguments: null);
+                        //if(externalMessage.ParentIds.Count == 1) {
+                        //    channel.QueueBind(queue: parentId, exchange: "Customer1", routingKey: $"{parentId}.#");
+                        //}
+                        //if (externalMessage.ParentIds.Count == 2) {
+                        //    channel.QueueBind(queue: parentId, exchange: "Customer1", routingKey: $"*.{parentId}.#");
+                        //}
+                        //if (externalMessage.ParentIds.Count == 3) {
+                        //    channel.QueueBind(queue: parentId, exchange: "Customer1", routingKey: $"#.{parentId}.#");
+                        //}
+                        //if (externalMessage.ParentIds.Count == 4) {
+                        //    channel.QueueBind(queue: parentId, exchange: "Customer1", routingKey: $"#.{parentId}");
+                        //}
+
+                        if (!externalMessage.ParentIds.Pop().Equals(parentId)) {
                             routingKey += parentId + ".";
                         } else {
                             routingKey += parentId;
                         }
                     }
-                    channel.QueueDeclare("test", durable: true,
-                     exclusive: false,
-                     autoDelete: false,
-                     arguments: null);
-                    channel.QueueBind(queue: "test", exchange: "Venue1", routingKey:routingKey);
                     string json = JsonConvert.SerializeObject(externalMessage);
                     var body = Encoding.UTF8.GetBytes(json);
-                    
+
                     channel.BasicPublish(exchange: "Venue1",
                                             routingKey: routingKey,
                                             basicProperties: null,
                                             body: body);
                     Console.WriteLine(" [x] Sent '{0}':'{1}'", routingKey, json + "\n");
                 }
-                
+
             }
         }
     }
