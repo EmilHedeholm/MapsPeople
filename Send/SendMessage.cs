@@ -17,7 +17,8 @@ namespace Send {
             using (var channel = connection.CreateModel()) {
                 channel.ExchangeDeclare(exchange: "Customer1",
                                         type: "topic");
-                
+                var args = new Dictionary<string, object>();
+                args.Add("x-message-ttl", 30000);
                 foreach (var externalMessage in messages) {
                     string routingKey = "", bindingKey = "", queueId = "";
                     int repeatTimes = externalMessage.ParentIds.Count;
@@ -35,7 +36,7 @@ namespace Send {
                         channel.QueueDeclare(queueId, durable: true,
                                exclusive: false,
                                autoDelete: false,
-                               arguments: null);
+                               arguments: args);
                         channel.QueueBind(queue: queueId, exchange: "Customer1", routingKey: $"{bindingKey}");
 
                         //if(externalMessage.ParentIds.Count == 1) {

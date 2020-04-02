@@ -36,7 +36,7 @@ namespace CoreForRabbitMQ {
             Stack<string> parentIds = new Stack<string>();
             parentIds.Push(location.Id);
             
-            while (!location.ParentId.Equals("0")) {           
+            while (location.ParentId != null && !location.ParentId.Equals("0")) {           
                 location= dataAccess.GetLocationById(location.ParentId);
                 parentIds.Push(location.Id);
             }
