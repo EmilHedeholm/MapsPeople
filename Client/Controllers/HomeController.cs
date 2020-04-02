@@ -9,9 +9,10 @@ using Client.Models;
 
 namespace Client.Controllers {
     public class HomeController : Controller {
-        public ActionResult Index() {
+        [HttpPost]
+        public ActionResult Index(string queueName) {
             RabbitMQAccess dataAccess = new RabbitMQAccess();
-            string jsonData = dataAccess.GetData();
+            string jsonData = dataAccess.GetData(queueName);
             var data = JsonConvert.DeserializeObject<List<Message>>(jsonData);
             return View(data);
         }

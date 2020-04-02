@@ -8,7 +8,7 @@ using System.Web;
 
 namespace Client.DataAccess {
     public class RabbitMQAccess {
-        public void GetData(string queueName) {
+        public string GetData(string queueName) {
             ConnectionFactory connectionFactory = new ConnectionFactory {
                 HostName = "localhost"
             };
@@ -17,14 +17,16 @@ namespace Client.DataAccess {
 
             channel.BasicQos(0, 1, false);
 
-            //var consumer = new EventingBasicConsumer(channel);
-            //consumer.Received += (sender, ea) => {
-            //    var body = ea.Body;
-            //    var message = Encoding.UTF8.GetString(body);
-            //    channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
-            //};
+            var consumer = new EventingBasicConsumer(channel);
+            string message = null;
+            consumer.Received += (sender, ea) => {
+                var body = ea.Body;
+                message = Encoding.UTF8.GetString(body);
+                channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+            };
 
             channel.BasicConsume(queueName, false, consumer);
+            return message;
         }
     }
 }

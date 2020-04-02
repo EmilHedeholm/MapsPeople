@@ -1,26 +1,32 @@
-﻿@model List<Client.Models.Message>
+﻿@model Client.Models.Message
 @{
     ViewBag.Title = "Home Page";
 }
 
-    <h2>States</h2>
-    <table>
-        <tr>
-           @foreach(Client.Models.Message message in Model) {
-               foreach(Client.Models.State state in message.source.State) {
-                   <th>
-                       @state.Property
-                   </th>
-               }
-           }
-        </tr>
-        <tr>
-            @foreach (Client.Models.Message message in Model) {
-                foreach (Client.Models.State state in message.source.State) {
-                    <th>
-                        @state.Value
-                    </th>
-                }
-            }
-        </tr>
-    </table>
+<h2>choose a queue</h2>
+<form action="/Home/Index" method="post">
+    <input id="InputQueueName" name="InputQueueName" type="text" />
+    <input type="submit" value="Choose" class="button" />
+    <br>
+    <br>
+</form>
+
+<h2>States</h2>
+<table>
+    <tr>
+        @foreach (Client.Models.State state in Model.source.State) {
+            <th>
+                ID
+                @state.Property
+            </th>
+        }
+    </tr>
+    <tr>
+        @foreach (Client.Models.State state in Model.source.State) {
+            <th>
+                @state.Id
+                @state.Value
+            </th>
+        }
+    </tr>
+</table>
