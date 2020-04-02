@@ -4,13 +4,18 @@
 }
 
 <h2>choose a queue</h2>
-<form action="/Home/Index" method="post">
-    <input id="InputQueueName" name="InputQueueName" type="text" />
-    <input type="submit" value="Choose" class="button" />
-    <br>
-    <br>
+<form name="chooseQueue" method="post" action='@Url.Action("Index","Home")'>
+   <div>
+       queue
+       <input id="queueName" name="queueName" type="text"/>
+       <br>
+       <br>
+   </div>
+    <div>
+        <input type="submit" value="choose" class="button"/>
+    </div>
 </form>
-
+@if (Model != null) {
 <h2>States</h2>
 <table>
     <tr>
@@ -30,3 +35,4 @@
         }
     </tr>
 </table>
+}

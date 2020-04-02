@@ -161,44 +161,41 @@ namespace CoreForRabbitMQ {
                 return dataAccess.GetLocationById(id);
             }
 
-            //This method uses RabbitMQ to get data from the the customer consumers. 
-            public static void ReceiveDataFromRabbitMQ() {
-                var factory = new ConnectionFactory() { HostName = "localhost" };
-                using (var connection = factory.CreateConnection())
-                using (var channel = connection.CreateModel()) {
-                    channel.QueueDeclare(queue: "Consumer_Queue",
-                                         durable: true,
-                                         exclusive: false,
-                                         autoDelete: false,
-                                         arguments: null);
+        //This method uses RabbitMQ to get data from the the customer consumers. 
+        public static void ReceiveDataFromRabbitMQ() {
+            var factory = new ConnectionFactory() { HostName = "localhost" };
+            using (var connection = factory.CreateConnection())
+            using (var channel = connection.CreateModel()) {
+                channel.QueueDeclare(queue: "Consumer_Queue",
+                                     durable: true,
+                                     exclusive: false,
+                                     autoDelete: false,
+                                     arguments: null);
 
                 channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
                 Console.WriteLine(" [*] Waiting for messages.");
 
-                    var consumer = new EventingBasicConsumer(channel);
-                    consumer.Received += (sender, ea) => {
-                        var body = ea.Body;
-                        var message = Encoding.UTF8.GetString(body);
-                        if (message != null) { 
-                            //The message is converted from JSON to IEnumerable<Location>.
-                            var deserializedMessage = JsonConvert.DeserializeObject<IEnumerable<Location>>(message);
-                            Post(deserializedMessage);
-                        }
-                        channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
-                    };
-                    channel.BasicConsume(queue: "Consumer_Queue",
-                                         autoAck: false,
-                                         consumer: consumer);
-                    Console.ReadLine();
-                }
-                /*
-                private List<ExternalModel> ConvertToExternal(Location location) {
-                    //TODO: Implement this when the external converter class is finished.
-                    //ExternalConverter externalConverter = new ExternalConverter();
-                    //List<ExternalModel> externalModels = externalConverter.Convert(location);
-                    throw new NotImplementedException();
-                }*/
+                var consumer = new EventingBasicConsumer(channel);
+                consumer.Received += (sender, ea) => {
+                    var body = ea.Body;
+                    var message = Encoding.UTF8.GetString(body);
+                    if (message != null) {
+                        //The message is converted from JSON to IEnumerable<Location>.
+                        var deserializedMessage = JsonConvert.DeserializeObject<IEnumerable<Location>>(message);
+                        Receive(deserializedMessage);
+                    }
+                    channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+                };
+                channel.BasicConsume(queue: "Consumer_Queue",
+                                     autoAck: false,
+                                     consumer: consumer);
+                Console.ReadLine();
             }
         }
-    }
+                private static List<ExternalModel> ConvertToExternal(Location location) {
+                    ExternalConverter externalConverter = new ExternalConverter();
+                    return externalConverter.Convert(location);
+                }
+            }
+        }
