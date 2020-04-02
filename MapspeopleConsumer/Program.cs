@@ -15,8 +15,8 @@ using System.Threading.Tasks;
 
 
 namespace MapspeopleConsumer {
-    class Program {
-        static void Main(string[] args) {
+    public class Program {
+       public static void Main(string[] args) {
           // while (true) {
                 Thread.Sleep(3000);           
                 List<Location> data = GetData();
@@ -29,7 +29,7 @@ namespace MapspeopleConsumer {
         //This method request a token using a post Request using your credentials from Mapspeoples CMS, which gives you a token that you
         //pass along when interacting with Mapspeoples systems
         //Return Security Token
-        public static Token GetToken(RestClient client)
+        private static Token GetToken(RestClient client)
         {
             client.BaseUrl = new Uri("https://auth.mapsindoors.com/connect/token");
             var request = new RestRequest(Method.POST);
