@@ -4,7 +4,7 @@
 }
     <head>
         <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=geometry&key=AIzaSyCzODjQBop68PKetHYZ8KLLX8IerHyoHSo"></script>
-        <script type="text/javascript" src="https://app.mapsindoors.com/mapsindoors/js/sdk/3.8.1/mapsindoors-3.8.1.js.gz?apikey=6fbb3035c7e2436ba335edac"></script>
+        <script type="text/javascript" src="https://app.mapsindoors.com/mapsindoors/js/sdk/3.8.1/mapsindoors-3.8.1.js.gz?apikey=6fbb3035c7e2436ba335edac" + config.Mapspeople_Api_Key></script>
 
         <link href="https://app.mapsindoors.com/mapsindoors/js/sdk/ui/FloorSelector.css" type="text/css" rel="stylesheet" />
     </head>
@@ -23,11 +23,11 @@
         var div = document.createElement('div');
         var floorSelector = new mapsindoors.FloorSelector(div, myMapsIndoors);
         myGoogleMap.controls[google.maps.ControlPosition.RIGHT_TOP].push(div);
-
     };
 
     google.maps.event.addDomListener(window, 'load', init);
 </script>
+
 
 
 <div id="map" style="width:600px;height:600px"></div>
