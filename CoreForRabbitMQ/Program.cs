@@ -193,7 +193,6 @@ namespace CoreForRabbitMQ {
                 Console.ReadLine();
             }
         }
-                
         private static List<ExternalModel> ConvertToExternal(Location location) {
             ExternalConverter externalConverter = new ExternalConverter();
             return externalConverter.Convert(location);
