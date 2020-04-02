@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Newtonsoft.Json;
+using Send;
 
 namespace CoreForRabbitMQ {
     public class Program {
@@ -19,7 +20,7 @@ namespace CoreForRabbitMQ {
            static  IDataAccess dataAccess = new DataAccess();
             //This post method receives location data from consumers and maps them with data from other consumers before
             //savin the changes to database, converting to the external message format and sending it out of the system.
-            public static void Post(IEnumerable<Location> locations) {
+            public static void Receive(IEnumerable<Location> locations) {
                 foreach (var location in locations) {
                     //Getting the location data from the DB via ID.
                     Location existingLocation = GetLocationById(location.Id),
@@ -38,9 +39,8 @@ namespace CoreForRabbitMQ {
                         //If found then combine the data from both location and existingLocation
                         completeLocation = Map(location, existingLocation);
                         UpdateLocation(completeLocation);
-                        //TODO: Create converting and sending functionality
-                        //var external = ConvertToExternal(location);
-                        //SendMessage(external);
+                        var external = ConvertToExternal(completeLocation);
+                        SendMessage(external);
                     } else if (location.Id != "0") {
                         //If the existingLocation is still null, insert it into the database as is.
                         InsertIntoDB(location);
@@ -48,8 +48,14 @@ namespace CoreForRabbitMQ {
 
                 }
             }
-            //This method maps a locations ConsumerId and Id with data from a list and adds an ExternalId if a match is found.
-            private static Location FindLocationByMappingTable(Location location) {
+
+        private static void SendMessage(List<ExternalModel> external) {
+            SendMessage sender = new SendMessage();
+            sender.SendUpdate(external);
+        }
+
+        //This method maps a locations ConsumerId and Id with data from a list and adds an ExternalId if a match is found.
+        private static Location FindLocationByMappingTable(Location location) {
                 List<MappingEntry> entries = new List<MappingEntry>();
                 entries = FillEntries(entries);
                 foreach (var entry in entries) {
@@ -166,9 +172,9 @@ namespace CoreForRabbitMQ {
                                          autoDelete: false,
                                          arguments: null);
 
-                    channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+                channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
-                    Console.WriteLine(" [*] Waiting for messages.");
+                Console.WriteLine(" [*] Waiting for messages.");
 
                     var consumer = new EventingBasicConsumer(channel);
                     consumer.Received += (sender, ea) => {
