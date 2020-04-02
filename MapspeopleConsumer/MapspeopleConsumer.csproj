@@ -62,7 +62,6 @@
     <Compile Include="JsonModel\DisplaySetting.cs" />
     <Compile Include="JsonModel\Geometry.cs" />
     <Compile Include="JsonModel\IconSize.cs" />
-    <Compile Include="JsonModel\LastReport.cs" />
     <Compile Include="JsonModel\Properties.cs" />
     <Compile Include="JsonModel\RootObject.cs" />
     <Compile Include="JsonModel\State.cs" />
