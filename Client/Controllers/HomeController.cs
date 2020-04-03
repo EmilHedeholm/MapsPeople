@@ -13,7 +13,8 @@ namespace Client.Controllers {
         public ActionResult Index(string queueName) {
             RabbitMQAccess dataAccess = new RabbitMQAccess();
             dataAccess.ReceiveDataFromRabbitMQ(queueName);
-            return View(dataAccess.data);
+            //ViewBag.Situation = 2;
+            return View(dataAccess.Data);
         }
 
         public ActionResult Index() {
