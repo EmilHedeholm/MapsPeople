@@ -222,5 +222,21 @@ namespace DatabaseAccess
             }
             client.Dispose();
         }
+
+        public List<Location> GetLocations() {
+            client.Connect();
+
+            var locations = client.Cypher
+                .Match("(location:Location)")
+                .Return<Location>("location")
+                .Results;
+
+            List<Location> completeLocations = new List<Location>(); 
+            foreach(var location in locations) {
+                var foundLocation = GetLocationById(location.Id);
+                completeLocations.Add(foundLocation);
+            }
+            return completeLocations;
+        }
     }
 }
