@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web;
 using System.Web.Http;
 using Core.Service;
 using DatabaseAccess;
@@ -13,11 +14,16 @@ namespace Core.Controllers
     public class SendController : ApiController {
         IDataAccess dataAccess = new DataAccess();
 
-        public IEnumerable<ExternalModel> Get() {
-            IEnumerable<Location> allLocations = GetAllLocations();
+        public IEnumerable<ExternalModel> Get(string id) {
+            List<Location> locations = GetLocation(id);
             List<ExternalModel> messages = new List<ExternalModel>();
-            foreach(var location in allLocations) {
+            foreach (var location in locations) {
                 messages.AddRange(Convert(location));
+            }
+            foreach (var item in messages) {
+                if (item.Source != null) {
+                    Console.WriteLine(item.Source.Id);
+                }
             }
             return messages;
         }
@@ -27,8 +33,8 @@ namespace Core.Controllers
             return externalConverter.Convert(location);
         }
 
-        private List<Location> GetAllLocations() {
-            return dataAccess.GetLocations();
+        private List<Location> GetLocation(string id) {
+            return dataAccess.GetAllConnectedLocations(id);
         }
 
     }

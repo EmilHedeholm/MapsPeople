@@ -164,6 +164,29 @@ namespace DatabaseAccess
             return foundLocation;
         }
 
+        public List<Location> GetAllConnectedLocations(string id) {
+            client.Connect();
+            List<Location> foundlocations = new List<Location>();
+            var locations = client.Cypher
+                .Match("(l1: Location)")
+                .Where("l1.ParentId = {locationId} OR l1.Id = {locationId}")
+                .WithParams(new { locationId = id })
+                .Return<Location>("(l1)")
+                .Results;
+
+            foreach(var location in locations) {
+                if(location.Id == id) {
+                    location.Sources = GetSourcesByLocation(location);
+                    foundlocations.Add(location);
+                } else {
+                    location.Sources = GetSourcesByLocation(location);
+                    foundlocations.Add(location);
+                    GetAllConnectedLocations(location.Id);
+                }
+            }
+            return foundlocations;
+        }
+
         //this method gets all the sources for a location
         //parameter: the location that the sources belog to
         //return: a list of found sources

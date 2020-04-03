@@ -9,6 +9,7 @@ namespace DatabaseAccess {
     public interface IDataAccess {
         Location GetLocationById(string id);
         Location GetLocationByExternalId(string externalId);
+        List<Location> GetAllConnectedLocations(string id);
         List<Location> GetLocations();
         void CreateLocation(Location location);
         void UpdateLocation(Location location);
