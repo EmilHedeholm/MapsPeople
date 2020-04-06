@@ -1,38 +1,7 @@
-﻿@model Client.Models.Message
+﻿
 @{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "Index";
 }
 
-<h2>choose a queue</h2>
-<form name="chooseQueue" method="post" action='@Url.Action("Index","Home")'>
-   <div>
-       queue
-       <input id="queueName" name="queueName" type="text"/>
-       <br>
-       <br>
-   </div>
-    <div>
-        <input type="submit" value="choose" class="button"/>
-    </div>
-</form>
-@if (Model != null) {
-<h2>States</h2>
-<table>
-    <tr>
-        @foreach (Client.Models.State state in Model.source.State) {
-            <th>
-                ID
-                @state.Property
-            </th>
-        }
-    </tr>
-    <tr>
-        @foreach (Client.Models.State state in Model.source.State) {
-            <th>
-                @state.Id
-                @state.Value
-            </th>
-        }
-    </tr>
-</table>
-}
+<h2>Index</h2>
+

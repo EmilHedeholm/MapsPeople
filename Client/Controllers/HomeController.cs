@@ -9,13 +9,6 @@ using Client.Models;
 
 namespace Client.Controllers {
     public class HomeController : Controller {
-       [HttpPost]
-        public ActionResult Index(string queueName) {
-            RabbitMQAccess dataAccess = new RabbitMQAccess();
-            dataAccess.ReceiveDataFromRabbitMQ(queueName);
-            //ViewBag.Situation = 2;
-            return View(dataAccess.Data);
-        }
 
         public ActionResult Index() {
             return View();

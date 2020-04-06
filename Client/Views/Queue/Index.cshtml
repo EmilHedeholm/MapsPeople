@@ -1,0 +1,40 @@
+﻿
+@model Client.Models.Message
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>choose a queue</h2>
+<form name="chooseQueue" method="post" action='@Url.Action("Index","Queue")'>
+    <div>
+        queue
+        <input id="queueName" name="queueName" type="text" maxlength="100" />
+        <br>
+        <br>
+    </div>
+    <div>
+        <input type="submit" value="choose" class="button" onclick="if ( ! validate()) return false;" language="javascript" />
+        <input type="reset" value="Cancel" />
+    </div>
+</form>
+@if (Model != null) {
+    <h2>States</h2>
+    <table>
+        <tr>
+            @foreach (Client.Models.State state in Model.source.State) {
+                <th>
+                    ID
+                    @state.Property
+                </th>
+            }
+        </tr>
+        <tr>
+            @foreach (Client.Models.State state in Model.source.State) {
+                <th>
+                    @state.Id
+                    @state.Value
+                </th>
+            }
+        </tr>
+    </table>
+}
