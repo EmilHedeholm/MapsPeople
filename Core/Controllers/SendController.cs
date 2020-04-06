@@ -20,11 +20,6 @@ namespace Core.Controllers
             foreach (var location in locations) {
                 messages.AddRange(Convert(location));
             }
-            foreach (var item in messages) {
-                if (item.Source != null) {
-                    Console.WriteLine(item.Source.Id);
-                }
-            }
             return messages;
         }
 
@@ -34,7 +29,9 @@ namespace Core.Controllers
         }
 
         private List<Location> GetLocation(string id) {
-            return dataAccess.GetAllConnectedLocations(id);
+            List<Location> foundLocations = new List<Location>();
+            foundLocations = dataAccess.GetAllConnectedLocations(id, foundLocations);
+            return foundLocations;
         }
 
     }

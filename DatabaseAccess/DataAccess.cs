@@ -164,9 +164,8 @@ namespace DatabaseAccess
             return foundLocation;
         }
 
-        public List<Location> GetAllConnectedLocations(string id) {
+        public List<Location> GetAllConnectedLocations(string id, List<Location> foundLocations) {
             client.Connect();
-            List<Location> foundlocations = new List<Location>();
             var locations = client.Cypher
                 .Match("(l1: Location)")
                 .Where("l1.ParentId = {locationId} OR l1.Id = {locationId}")
@@ -177,14 +176,14 @@ namespace DatabaseAccess
             foreach(var location in locations) {
                 if(location.Id == id) {
                     location.Sources = GetSourcesByLocation(location);
-                    foundlocations.Add(location);
+                    foundLocations.Add(location);
                 } else {
                     location.Sources = GetSourcesByLocation(location);
-                    foundlocations.Add(location);
-                    GetAllConnectedLocations(location.Id);
+                    foundLocations.Add(location);
+                    GetAllConnectedLocations(location.Id, foundLocations);
                 }
             }
-            return foundlocations;
+            return foundLocations;
         }
 
         //this method gets all the sources for a location
