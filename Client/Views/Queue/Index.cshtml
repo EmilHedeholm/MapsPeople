@@ -3,18 +3,19 @@
 @{
     ViewBag.Title = "Index";
 }
+@Styles.Render("~/Content/Button.css")
 
-<h2>choose a queue</h2>
+<h2>Choose a queue</h2>
 <form name="chooseQueue" method="post" action='@Url.Action("Index","Queue")'>
     <div>
-        queue
+        Queue ID
         <input id="queueName" name="queueName" type="text" maxlength="100" />
         <br>
         <br>
     </div>
     <div>
-        <input type="submit" value="choose" class="button" onclick="if ( ! validate()) return false;" language="javascript" />
-        <input type="reset" value="Cancel" />
+        <input type="submit" value="Choose" class="button" onclick="if ( ! validate()) return false;" language="javascript" />
+        <input type="reset" class="button2" value="Cancel" />
     </div>
 </form>
 @if (Model != null) {
