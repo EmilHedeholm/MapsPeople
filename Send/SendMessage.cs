@@ -17,12 +17,16 @@ namespace Send {
             using (var channel = connection.CreateModel()) {
                 channel.ExchangeDeclare(exchange: "Customer1",
                                         type: "topic");
+                //Setting Time to live of the message
                 var args = new Dictionary<string, object>();
                 args.Add("x-message-ttl", 30000);
+                
                 foreach (var externalMessage in messages) {
                     string routingKey = "", bindingKey = "", queueId = "";
                     int repeatTimes = externalMessage.ParentIds.Count;
-                    //foreach (var parentId in externalMessage.ParentIds) {
+                    Stack<string> parentsForDelivery = new Stack<string>(externalMessage.ParentIds);
+
+                    //Iterating through the parent id's to create queues, routingkeys and bindings.
                     for (int i = 0; i < repeatTimes; i++) {
                         if (externalMessage.ParentIds.Count > 1) {
                             queueId = externalMessage.ParentIds.Pop();
@@ -39,25 +43,8 @@ namespace Send {
                                arguments: args);
                         channel.QueueBind(queue: queueId, exchange: "Customer1", routingKey: $"{bindingKey}");
 
-                        //if(externalMessage.ParentIds.Count == 1) {
-                        //    channel.QueueBind(queue: parentId, exchange: "Customer1", routingKey: $"{parentId}.#");
-                        //}
-                        //if (externalMessage.ParentIds.Count == 2) {
-                        //    channel.QueueBind(queue: parentId, exchange: "Customer1", routingKey: $"*.{parentId}.#");
-                        //}
-                        //if (externalMessage.ParentIds.Count == 3) {
-                        //    channel.QueueBind(queue: parentId, exchange: "Customer1", routingKey: $"#.{parentId}.#");
-                        //}
-                        //if (externalMessage.ParentIds.Count == 4) {
-                        //    channel.QueueBind(queue: parentId, exchange: "Customer1", routingKey: $"#.{parentId}");
-                        //}
-
-                        //if (externalMessage.ParentIds.Peek() != null) {
-                        //    routingKey += parentId + ".";
-                        //} else {
-                        //    routingKey += parentId;
-                        //}
                     }
+                    externalMessage.ParentIds = parentsForDelivery;
                     string json = JsonConvert.SerializeObject(externalMessage);
                     var body = Encoding.UTF8.GetBytes(json);
 
