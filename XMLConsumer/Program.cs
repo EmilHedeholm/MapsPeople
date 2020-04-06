@@ -32,7 +32,7 @@ namespace XMLConsumer {
             HttpWebRequest req = null;
             HttpWebResponse res = null;
 
-            string url = "http://localhost:52080/Service1.svc/GetXMLData";
+            string url = "http://localhost:52080/XMLSource.svc/GetXMLData";
 
             req = (HttpWebRequest)WebRequest.Create(url);
             req.Method = "GET";
