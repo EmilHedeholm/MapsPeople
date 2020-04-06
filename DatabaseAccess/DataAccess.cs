@@ -164,6 +164,28 @@ namespace DatabaseAccess
             return foundLocation;
         }
 
+        public List<Location> GetAllConnectedLocations(string id, List<Location> foundLocations) {
+            client.Connect();
+            var locations = client.Cypher
+                .Match("(l1: Location)")
+                .Where("l1.ParentId = {locationId} OR l1.Id = {locationId}")
+                .WithParams(new { locationId = id })
+                .Return<Location>("(l1)")
+                .Results;
+
+            foreach(var location in locations) {
+                if(location.Id == id) {
+                    location.Sources = GetSourcesByLocation(location);
+                    foundLocations.Add(location);
+                } else {
+                    location.Sources = GetSourcesByLocation(location);
+                    foundLocations.Add(location);
+                    GetAllConnectedLocations(location.Id, foundLocations);
+                }
+            }
+            return foundLocations;
+        }
+
         //this method gets all the sources for a location
         //parameter: the location that the sources belog to
         //return: a list of found sources
@@ -221,6 +243,22 @@ namespace DatabaseAccess
                 CreateSources(location);
             }
             client.Dispose();
+        }
+
+        public List<Location> GetLocations() {
+            client.Connect();
+
+            var locations = client.Cypher
+                .Match("(location:Location)")
+                .Return<Location>("location")
+                .Results;
+
+            List<Location> completeLocations = new List<Location>(); 
+            foreach(var location in locations) {
+                var foundLocation = GetLocationById(location.Id);
+                completeLocations.Add(foundLocation);
+            }
+            return completeLocations;
         }
     }
 }
