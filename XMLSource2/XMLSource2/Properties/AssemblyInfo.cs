@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("XMLDataSource")]
+[assembly: AssemblyTitle("XMLSource2")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("HP Inc.")]
-[assembly: AssemblyProduct("XMLDataSource")]
+[assembly: AssemblyProduct("XMLSource2")]
 [assembly: AssemblyCopyright("Copyright © HP Inc. 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("cef63082-c797-4c60-9ce1-b24a74a38369")]
+[assembly: Guid("b8dbba1d-a66f-4ba6-ad40-e5628a3c3a2a")]
 
 // Version information for an assembly consists of the following four values:
 //

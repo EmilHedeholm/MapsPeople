@@ -19,7 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Send", "Send\Send.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLConsumer", "XMLConsumer\XMLConsumer.csproj", "{96726D51-BA2E-492D-A24C-7C848DA5F0A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLSource2", "..\..\XMLSource2\XMLSource2\XMLSource2.csproj", "{B8DBBA1D-A66F-4BA6-AD40-E5628A3C3A2A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLSource2", "XMLSource2\XMLSource2\XMLSource2.csproj", "{B8DBBA1D-A66F-4BA6-AD40-E5628A3C3A2A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
