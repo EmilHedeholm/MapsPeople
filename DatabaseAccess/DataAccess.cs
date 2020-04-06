@@ -10,12 +10,16 @@ namespace DatabaseAccess
 {
     public class DataAccess : IDataAccess {
 
+        //makes a graph client with the vuri and the credentials for the database
         GraphClient client = new GraphClient(new Uri("http://localhost:7474/db/data"), "neo4j", "1234");
+
+        //this method creates a location node and a relation to its parent and calls CreateSource to create the sources for the location
+        //parameter: the location to be inserted into the database
         public void CreateLocation(Location location) {
             //connects to the neo4j database
             client.Connect();
 
-            //creates a location node if one does not exist otherwise nothing happens
+            //creates a location node and a reltion to its parent if it does not already exists
             client.Cypher
             .Merge("(location:Location { Id: {id} })")
             .OnCreate()
@@ -33,11 +37,13 @@ namespace DatabaseAccess
             CreateSources(location);
             client.Dispose();
         }
-
+        //this method creates sources relations to the location they belong and calls CreateStates to creates states for ech source
+        //parameter: the location where the sources to be inserted into the database belongs to
         private void CreateSources(Location location) {
             client.Connect();
+            //iterates through the list of sources on location
             foreach (Source source in location.Sources) {
-                //checks if the source exists 
+                //checks if the source exists in the database and sets its properties if it does
                 var foundSources = client.Cypher
                   .Match("(source: Source { Id: {id}})")
                   .Where("(source)-[:Located_In]->(:Location { Id: {locationId}})")
@@ -61,17 +67,20 @@ namespace DatabaseAccess
                     .ExecuteWithoutResults();
 
                 }
+                // the id for the states to be inserted into the database
                 string stateId = location.Id + source.Id;
                 CreateStates(source, stateId);
             }
             client.Dispose();
         }
 
+        //this method creates states and relations to the source they belong to 
+        //parameter: the source where the states to be inserted into the database belongs to and the id for all the states
         private void CreateStates(Source source, string stateId) {
             client.Connect();
             //runs through all the states for a source
             foreach (var state in source.State) {
-                //checks if the state exists
+                //checks if the state exists and sets its properties if it does
                 var foundStates = client.Cypher
                   .Match("(state: State { Property: {property}})")
                   .Where("(state)-[:State_For]->(:Source { Id: {sourceId}})")
@@ -81,6 +90,7 @@ namespace DatabaseAccess
                   .Return<State>("state")
                   .Results;
 
+                //if the state deos not exists it is created
                 if (foundStates.Count() == 0) {
                     client.Cypher
                     .Create("(state:State {Id: {id}})")
@@ -105,37 +115,48 @@ namespace DatabaseAccess
             throw new NotImplementedException();
         }
 
+        //this method gets a location from the database based on its externalId
+        //parameter: the externalId of the location
+        //return the found location
         public Location GetLocationByExternalId(string externalId) {
             client.Connect();
             Location foundLocation = null;
+            //checks if the location exists int eh database and returns it if it does
             var locations = client.Cypher
             .Match("(location:Location {ExternalId:{ExternalId}})")
             .WithParams(new { ExternalId = externalId })
             .Return<Location>("location")
             .Results;
 
+            //iterates through returned IEnumrable from the cypher statement and sets the location to foundLocation 
             foreach (var location in locations) {
                 foundLocation = location;
             }
+            //if a location was found GetSourceByLocation is called to get the sources for the loaction
             if (foundLocation != null) {
                 foundLocation.Sources = GetSourcesByLocation(foundLocation);
             }
             client.Dispose();
             return foundLocation;
         }
-
+        //this method gets a location from the database based on its Id
+        //parameter: the Id of the location
+        //return the found location
         public Location GetLocationById(string id) {
             client.Connect();
             Location foundLocation = null;
+            //checks if the location exists int eh database and returns it if it does
             var locations = client.Cypher
             .Match("(location:Location {Id:{Id}})")
             .WithParams(new { Id = id })
             .Return<Location>("location")
             .Results;
 
+            //iterates through returned IEnumrable from the cypher statement and sets the location to foundLocation
             foreach (var location in locations) {
                 foundLocation = location;
             }
+            //if a location was found GetSourceByLocation is called to get the sources for the loaction
             if (foundLocation != null) { 
             foundLocation.Sources = GetSourcesByLocation(foundLocation);
             }   
@@ -143,8 +164,12 @@ namespace DatabaseAccess
             return foundLocation;
         }
 
+        //this method gets all the sources for a location
+        //parameter: the location that the sources belog to
+        //return: a list of found sources
         private List<Source> GetSourcesByLocation(Location location) {
             client.Connect();
+            //checks if the sources exist and if they do they are returned
             var sources = client.Cypher
             .Match("(source:Source)")
             .Where("(source)-[:Located_In]->(:Location {Id: {locationId}})")
@@ -152,6 +177,7 @@ namespace DatabaseAccess
             .Return<Source>("(source)")
             .Results;
 
+            //iterates through the found sources and calls GetStatesBySource to get alle the states for ech source
             foreach (var source in sources) {
                 source.State = GetStatesBySource(source);
             }
@@ -159,8 +185,12 @@ namespace DatabaseAccess
             return (List<Source>)sources;
         }
 
+        //this method gets all the states for a source in the database
+        //parameter: the source that the sta¨tes belog to
+        //return: a list of found states
         private  List<State> GetStatesBySource(Source source) {
             client.Connect();
+            //checks if the states exists in the database and returns them if they do
             var states = client.Cypher
             .Match("(state:State)")
             .Where("(state)-[:State_For]->(:Source {Id: {sourceId}})")
@@ -171,8 +201,12 @@ namespace DatabaseAccess
             client.Dispose();
             return (List<State>)states;
         }
+
+        //this method updates a location and all the sources and states related to it
+        //parameter: the location to be updated
         public void UpdateLocation(Location location) {
             client.Connect();
+            //checks if a location exists in the database and sets its properties and returns it
             var foundlocation = client.Cypher
              .Match("(location:Location {Id:{id}})")
              .Set("location.ParentId = {parentId}")
@@ -182,6 +216,7 @@ namespace DatabaseAccess
              .Return<Location>("(location)")
              .Results;
 
+            //if the location exists in the database CreateSources is called
             if (foundlocation.Count() != 0) {
                 CreateSources(location);
             }

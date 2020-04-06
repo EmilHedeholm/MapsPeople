@@ -9,12 +9,16 @@ using Client.Models;
 
 namespace Client.Controllers {
     public class HomeController : Controller {
-        [HttpPost]
+       [HttpPost]
         public ActionResult Index(string queueName) {
             RabbitMQAccess dataAccess = new RabbitMQAccess();
-            string jsonData = dataAccess.GetData(queueName);
-            var data = JsonConvert.DeserializeObject<List<Message>>(jsonData);
-            return View(data);
+            dataAccess.ReceiveDataFromRabbitMQ(queueName);
+            //ViewBag.Situation = 2;
+            return View(dataAccess.Data);
+        }
+
+        public ActionResult Index() {
+            return View();
         }
 
         public ActionResult About() {
