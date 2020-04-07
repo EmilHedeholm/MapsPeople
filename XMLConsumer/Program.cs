@@ -96,7 +96,7 @@ namespace XMLConsumer {
                 source.Id = location.Availability.Id;
                 source.Type = "Room Availablility";
                 source.TimeStamp = DateTime.Parse(location.Availability.TimeStamp);
-                State Available = new State() { Id = "0" + source.Id, Property = "Available", Value = location.Availability.Available };
+                State Available = new State() { Id = convertedLocation.ExternalId + source.Id, Property = "Available", Value = location.Availability.Available };
                 source.State.Add(Available);
                 convertedLocation.Sources.Add(source);
                 convertedLocations.Add(convertedLocation);

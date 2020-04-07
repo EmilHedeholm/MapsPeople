@@ -149,7 +149,15 @@ namespace CoreForRabbitMQ {
         //This method maps data from a newly received location with data pertaining to that location from the database
         // then it merges them into a complete location, updates the sources and returns the complete location.
         private static Location Map(Location location, Location existingLocation) {
-            Location completeLocation = existingLocation;
+            Location completeLocation = new Location() { ConsumerId = existingLocation.ConsumerId, 
+                                                         ExternalId = existingLocation.ExternalId, 
+                                                         Id = existingLocation.Id, 
+                                                         ParentId = existingLocation.ParentId};
+            List<Source> existingSources = new List<Source>();
+            foreach(var source in existingLocation.Sources) {
+                existingSources.Add(source);
+            }
+            completeLocation.Sources = existingSources;
             //Mapping locationId.
             if (completeLocation.Id == "0" && location.Id != "0") {
                 completeLocation.Id = location.Id;

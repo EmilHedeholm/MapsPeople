@@ -11,7 +11,7 @@ namespace DataModels {
         public string Value { get; set; }
 
         public bool Equals(State other) {
-            if (this.Property.Equals(other.Property) && this.Id.Equals(other.Id)) {
+            if (this.Property.Equals(other.Property)) {
                 return true;
             } else {
                 return false;
