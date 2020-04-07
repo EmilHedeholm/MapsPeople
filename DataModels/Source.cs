@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace DataModels {
-    public class Source {
+    public class Source : IEquatable<Source> {
         public string Id { get; set; }
         public string Type { get; set; }
         public List<State> State { get; set; }
@@ -16,6 +16,14 @@ namespace DataModels {
             Id = "0";
             Type = "0";
             TimeStamp = DateTime.Now;
+        }
+
+        public bool Equals(Source other) {
+            if (this.Id.Equals(other.Id)) {
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 }

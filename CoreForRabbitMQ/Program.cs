@@ -29,7 +29,7 @@ namespace CoreForRabbitMQ {
                 if (existingLocation == null || existingLocation.Id.Equals("0")) {
                     //Getting the location data from the DB via externalID.
                     existingLocation = GetLocationByExternalId(location.ExternalId);
-                    if (existingLocation == null) {
+                    if (existingLocation == null || existingLocation.Id.Equals("0")) {
                         //Going through the mapping table to find the location.
                         existingLocation = FindLocationByMappingTable(location);
                     }
@@ -39,14 +39,41 @@ namespace CoreForRabbitMQ {
                     //If found then combine the data from both location and existingLocation
                     completeLocation = Map(location, existingLocation);
                     UpdateLocation(completeLocation);
-                    var external = ConvertToExternal(completeLocation);
-                    SendMessage(external);
+                    Location update = PrepareUpdate(completeLocation, existingLocation);
+                    if (update.Sources.Count > 0) {
+                        var external = ConvertToExternal(update);
+                        SendMessage(external);
+                    }
+                    
                 } else if (location.Id != "0") {
                     //If the existingLocation is still null, insert it into the database as is.
                     InsertIntoDB(location);
                 }
 
             }
+        }
+
+        private static Location PrepareUpdate(Location completeLocation, Location existingLocation) {
+            Location update = new Location() {
+                ConsumerId = completeLocation.ConsumerId,
+                ExternalId = completeLocation.ExternalId, 
+                Id = completeLocation.Id, 
+                ParentId = completeLocation.ParentId
+            };
+            foreach (var completeSource in completeLocation.Sources) {
+                foreach (var existingSource in existingLocation.Sources) {
+                        foreach (var completeState in completeSource.State) {
+                            foreach (var existingState in existingSource.State) {
+                                if (completeState.Equals(existingState)) {
+                                    if (!completeState.Value.Equals(existingState.Value)) {
+                                        update.Sources.Add(completeSource);
+                                    }
+                                }
+                            }
+                        }
+                }
+            }
+            return update;
         }
 
         private static void SendMessage(List<ExternalModel> external) {
@@ -60,11 +87,19 @@ namespace CoreForRabbitMQ {
             entries = FillEntries(entries);
             foreach (var entry in entries) {
                 //If the location.id and location.ConsumerId matches the entry we set the location.ExternalId to the entry.ExternalId.
-                if (location.ConsumerId == entry.ConsumerId && location.Id.Equals(entry.Id)) {
+                if (location.ConsumerId == entry.ConsumerId && location.ExternalId.Equals(entry.Id)) {
                     location.ExternalId = entry.ExternalId;
                 }
             }
-            return GetLocationByExternalId(location.ExternalId);
+            Location result = GetLocationByExternalId(location.ExternalId);
+            if (result != null) {
+                foreach (var source in location.Sources) {
+                    if (!result.Sources.Contains(source)) {
+                        result.Sources.Add(source);
+                    }
+                } 
+            }
+            return result;
         }
 
         //In this method a list of entries, is being filled. In each entry an ID is manually paired with an externalID. 
@@ -116,7 +151,7 @@ namespace CoreForRabbitMQ {
         private static Location Map(Location location, Location existingLocation) {
             Location completeLocation = existingLocation;
             //Mapping locationId.
-            if (completeLocation.Id == "0") {
+            if (completeLocation.Id == "0" && location.Id != "0") {
                 completeLocation.Id = location.Id;
             }
             //Mapping ExternalId.
@@ -128,11 +163,9 @@ namespace CoreForRabbitMQ {
                 completeLocation.ParentId = location.ParentId;
             }
             //Inserting new sources.
-            if (location.Sources.Count > completeLocation.Sources.Count) {
-                foreach (var source in location.Sources) {
-                    if (!completeLocation.Sources.Contains(source)) {
-                        completeLocation.Sources.Add(source);
-                    }
+            foreach (var source in location.Sources) {
+                if (!completeLocation.Sources.Contains(source)) {
+                    completeLocation.Sources.Add(source);
                 }
             }
             //Updating states
