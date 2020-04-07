@@ -12,7 +12,7 @@ namespace XMLSource2 {
     public class Service1 : IXMLSource {
         public List<Location> GetXMLData() {
             List<Location> data = new List<Location>();
-            for (int i = 0; i < 500; i++) {
+            for (int i = 1; i < 31; i++) {
                 Location location = new Location();
                 location.Id = "" + i;
                 Source source = new Source();

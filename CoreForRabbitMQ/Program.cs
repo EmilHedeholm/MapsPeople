@@ -29,7 +29,7 @@ namespace CoreForRabbitMQ {
                 if (existingLocation == null || existingLocation.Id.Equals("0")) {
                     //Getting the location data from the DB via externalID.
                     existingLocation = GetLocationByExternalId(location.ExternalId);
-                    if (existingLocation == null || existingLocation.Id.Equals("0")) {
+                    if (existingLocation == null) {
                         //Going through the mapping table to find the location.
                         existingLocation = FindLocationByMappingTable(location);
                     }

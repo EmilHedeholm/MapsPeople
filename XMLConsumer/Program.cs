@@ -90,6 +90,7 @@ namespace XMLConsumer {
 
             foreach (var location in filteredData.Location) {
                 DataModels.Location convertedLocation = new DataModels.Location();
+                convertedLocation.Id = location.Id;
                 convertedLocation.ConsumerId = 3;
                 Source source = new Source();
                 source.Id = location.Availability.Id;
