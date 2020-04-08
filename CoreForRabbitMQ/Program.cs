@@ -20,7 +20,7 @@ namespace CoreForRabbitMQ {
         static IDataAccess dataAccess = new DataAccess();
         //This post method receives location data from consumers and maps them with data from other consumers before
         //savin the changes to database, converting to the external message format and sending it out of the system.
-        public static void Receive(IEnumerable<Location> locations) {
+        public static async Task ReceiveAsync(IEnumerable<Location> locations) {
             foreach (var location in locations) {
                 //Getting the location data from the DB via ID.
                 Location existingLocation = GetLocationById(location.Id),
@@ -185,7 +185,7 @@ namespace CoreForRabbitMQ {
                     if (message != null) {
                         //The message is converted from JSON to IEnumerable<Location>.
                         var deserializedMessage = JsonConvert.DeserializeObject<IEnumerable<Location>>(message);
-                        Receive(deserializedMessage);
+                        ReceiveAsync(deserializedMessage);
                     }
                     channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                 };
