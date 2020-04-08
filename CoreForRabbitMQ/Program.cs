@@ -24,7 +24,7 @@ namespace CoreForRabbitMQ {
             foreach (var location in locations) {
                 //Getting the location data from the DB via ID.
                 Location existingLocation = GetLocationById(location.Id),
-                        completeLocation = null;
+                        update = null;
                 //Checking if the location was found in the DB, if not get it by ExternalId.
                 if (existingLocation == null || existingLocation.Id.Equals("0")) {
                     //Getting the location data from the DB via externalID.
@@ -37,9 +37,9 @@ namespace CoreForRabbitMQ {
                 //Checks if the location was found. 
                 if (existingLocation != null && !existingLocation.Id.Equals("0")) {
                     //If found then combine the data from both location and existingLocation
-                    completeLocation = Map(location, existingLocation);
-                    UpdateLocation(completeLocation);
-                    Location update = PrepareUpdate(completeLocation, existingLocation);
+                    update = Map(location, existingLocation);
+                    UpdateLocation(update);
+                    //Location update = PrepareUpdate(completeLocation, existingLocation);
                     if (update.Sources.Count > 0) {
                         var external = ConvertToExternal(update);
                         SendMessage(external);
@@ -53,28 +53,28 @@ namespace CoreForRabbitMQ {
             }
         }
 
-        private static Location PrepareUpdate(Location completeLocation, Location existingLocation) {
-            Location update = new Location() {
-                ConsumerId = completeLocation.ConsumerId,
-                ExternalId = completeLocation.ExternalId, 
-                Id = completeLocation.Id, 
-                ParentId = completeLocation.ParentId
-            };
-            foreach (var completeSource in completeLocation.Sources) {
-                foreach (var existingSource in existingLocation.Sources) {
-                        foreach (var completeState in completeSource.State) {
-                            foreach (var existingState in existingSource.State) {
-                                if (completeState.Equals(existingState)) {
-                                    if (!completeState.Value.Equals(existingState.Value)) {
-                                        update.Sources.Add(completeSource);
-                                    }
-                                }
-                            }
-                        }
-                }
-            }
-            return update;
-        }
+        //private static Location PrepareUpdate(Location completeLocation, Location existingLocation) {
+        //    Location update = new Location() {
+        //        ConsumerId = completeLocation.ConsumerId,
+        //        ExternalId = completeLocation.ExternalId, 
+        //        Id = completeLocation.Id, 
+        //        ParentId = completeLocation.ParentId
+        //    };
+        //    foreach (var completeSource in completeLocation.Sources) {
+        //        foreach (var existingSource in existingLocation.Sources) {
+        //                foreach (var completeState in completeSource.State) {
+        //                    foreach (var existingState in existingSource.State) {
+        //                        if (completeState.Equals(existingState)) {
+        //                            if (!completeState.Value.Equals(existingState.Value)) {
+        //                                update.Sources.Add(completeSource);
+        //                            }
+        //                        }
+        //                    }
+        //                }
+        //        }
+        //    }
+        //    return update;
+        //}
 
         private static void SendMessage(List<ExternalModel> external) {
             SendMessage sender = new SendMessage();
@@ -149,48 +149,40 @@ namespace CoreForRabbitMQ {
         //This method maps data from a newly received location with data pertaining to that location from the database
         // then it merges them into a complete location, updates the sources and returns the complete location.
         private static Location Map(Location location, Location existingLocation) {
-            Location completeLocation = new Location() { ConsumerId = existingLocation.ConsumerId, 
+            Location update = new Location() { ConsumerId = existingLocation.ConsumerId, 
                                                          ExternalId = existingLocation.ExternalId, 
                                                          Id = existingLocation.Id, 
-                                                         ParentId = existingLocation.ParentId};
-            List<Source> existingSources = new List<Source>();
-            foreach(var source in existingLocation.Sources) {
-                existingSources.Add(source);
-            }
-            completeLocation.Sources = existingSources;
+                                                         ParentId = existingLocation.ParentId,
+                                                         Sources = new List<Source>(location.Sources)};
             //Mapping locationId.
-            if (completeLocation.Id == "0" && location.Id != "0") {
-                completeLocation.Id = location.Id;
+            if (update.Id == "0" && location.Id != "0") {
+                update.Id = location.Id;
             }
             //Mapping ExternalId.
-            if (completeLocation.ExternalId == "0" && location.ExternalId != "0") {
-                completeLocation.ExternalId = location.ExternalId;
+            if (update.ExternalId == "0" && location.ExternalId != "0") {
+                update.ExternalId = location.ExternalId;
             }
             //Mapping Parent.
-            if (completeLocation.ParentId == "0" && location.ParentId != "0") {
-                completeLocation.ParentId = location.ParentId;
+            if (update.ParentId == "0" && location.ParentId != "0") {
+                update.ParentId = location.ParentId;
             }
-            //Inserting new sources.
-            foreach (var source in location.Sources) {
-                if (!completeLocation.Sources.Contains(source)) {
-                    completeLocation.Sources.Add(source);
-                }
-            }
-            //Updating states
-            List<Source> completedSources = new List<Source>();
-            foreach (var source in location.Sources) {
-                foreach (var completeSource in completeLocation.Sources) {
-                    //If it is the same source and the source from location is newer than the completed source, then the source is added to the list of completed sources. 
-                    if (source.Id == completeSource.Id && source.TimeStamp > completeSource.TimeStamp) {
-                        completedSources.Add(source);
-                    } else {
-                        completedSources.Add(completeSource);
+            //Mapping sources.
+            //if (existingLocation.Sources.Count > 0){
+            //    foreach (var source in existingLocation.Sources){
+            //        if (!completeLocation.Sources.Contains(source)){
+            //            completeLocation.Sources.Add(source);
+            //        }
+            //    }
+            //}
+            //Setting state id's
+            if (update.Sources.Count > 0){
+                foreach (var completeSource in update.Sources){
+                    foreach (var state in completeSource.State){
+                        state.Id = update.Id + completeSource.Id;
                     }
                 }
             }
-            completeLocation.Sources = completedSources;
-
-            return completeLocation;
+            return update;
         }
 
         //This method creates a location node in the database. 
