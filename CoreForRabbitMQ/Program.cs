@@ -53,29 +53,6 @@ namespace CoreForRabbitMQ {
             }
         }
 
-        //private static Location PrepareUpdate(Location completeLocation, Location existingLocation) {
-        //    Location update = new Location() {
-        //        ConsumerId = completeLocation.ConsumerId,
-        //        ExternalId = completeLocation.ExternalId, 
-        //        Id = completeLocation.Id, 
-        //        ParentId = completeLocation.ParentId
-        //    };
-        //    foreach (var completeSource in completeLocation.Sources) {
-        //        foreach (var existingSource in existingLocation.Sources) {
-        //                foreach (var completeState in completeSource.State) {
-        //                    foreach (var existingState in existingSource.State) {
-        //                        if (completeState.Equals(existingState)) {
-        //                            if (!completeState.Value.Equals(existingState.Value)) {
-        //                                update.Sources.Add(completeSource);
-        //                            }
-        //                        }
-        //                    }
-        //                }
-        //        }
-        //    }
-        //    return update;
-        //}
-
         private static void SendMessage(List<ExternalModel> external) {
             SendMessage sender = new SendMessage();
             sender.SendUpdate(external);
@@ -166,14 +143,6 @@ namespace CoreForRabbitMQ {
             if (update.ParentId == "0" && location.ParentId != "0") {
                 update.ParentId = location.ParentId;
             }
-            //Mapping sources.
-            //if (existingLocation.Sources.Count > 0){
-            //    foreach (var source in existingLocation.Sources){
-            //        if (!completeLocation.Sources.Contains(source)){
-            //            completeLocation.Sources.Add(source);
-            //        }
-            //    }
-            //}
             //Setting state id's
             if (update.Sources.Count > 0){
                 foreach (var completeSource in update.Sources){
