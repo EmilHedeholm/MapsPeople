@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLConsumer", "XMLConsumer\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLSource2", "XMLSource2\XMLSource2\XMLSource2.csproj", "{B8DBBA1D-A66F-4BA6-AD40-E5628A3C3A2A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsumerTest", "ConsumerTest\ConsumerTest\ConsumerTest.csproj", "{F8EF49ED-420B-4D0D-8A28-0A6753A968E6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{B8DBBA1D-A66F-4BA6-AD40-E5628A3C3A2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B8DBBA1D-A66F-4BA6-AD40-E5628A3C3A2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B8DBBA1D-A66F-4BA6-AD40-E5628A3C3A2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8EF49ED-420B-4D0D-8A28-0A6753A968E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8EF49ED-420B-4D0D-8A28-0A6753A968E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8EF49ED-420B-4D0D-8A28-0A6753A968E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8EF49ED-420B-4D0D-8A28-0A6753A968E6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
