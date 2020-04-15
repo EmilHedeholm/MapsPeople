@@ -17,10 +17,13 @@ namespace ConsumerTest
             factory.HostName = "localhost";
             IConnection conn = factory.CreateConnection();
             IModel channel = conn.CreateModel();
+            channel.ExchangeDeclare(exchange: "Customer1",
+                                        type: "topic");
             while (true){
 
                 Console.WriteLine("Enter a queue ID");
                 string queueID = Console.ReadLine();
+
                 var response = channel.QueueDeclarePassive(queueID);
 
                 var consumer = new EventingBasicConsumer(channel);
