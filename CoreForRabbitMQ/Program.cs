@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Collections.Generic;
 using DataModels;
 using DatabaseAccess;
-using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Newtonsoft.Json;
@@ -143,14 +140,7 @@ namespace CoreForRabbitMQ {
             if (update.ParentId == "0" && location.ParentId != "0") {
                 update.ParentId = location.ParentId;
             }
-            //Setting state id's
-            if (update.Sources.Count > 0){
-                foreach (var completeSource in update.Sources){
-                    foreach (var state in completeSource.State){
-                        state.Id = update.Id + completeSource.Id;
-                    }
-                }
-            }
+           
             return update;
         }
 

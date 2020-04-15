@@ -58,11 +58,10 @@ namespace ConsumerAzure {
                 foreach (LastReport lr in r.LastReports) {
                     Source source = new Source();
                     source.Type = "Occupancy";
-                    source.Id = r.Id + source.Type;
                     source.TimeStamp = lr.TimeStamp;
-                    State MotionDetected = new State() { Id = location.ExternalId + source.Id, Property = "MotionDetected", Value = lr.MotionDetected.ToString() };
-                    State PersonCount = new State() { Id = location.ExternalId + source.Id, Property = "PersonCount", Value = lr.PersonCount.ToString() };
-                    State SignsOfLife = new State() { Id = location.ExternalId + source.Id, Property = "SignsOfLife", Value = lr.SignsOfLife.ToString() };
+                    State MotionDetected = new State() { Property = "MotionDetected", Value = lr.MotionDetected.ToString() };
+                    State PersonCount = new State() { Property = "PersonCount", Value = lr.PersonCount.ToString() };
+                    State SignsOfLife = new State() { Property = "SignsOfLife", Value = lr.SignsOfLife.ToString() };
                     source.State.Add(MotionDetected);
                     source.State.Add(PersonCount);
                     source.State.Add(SignsOfLife);

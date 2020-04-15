@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLConsumer", "XMLConsumer\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLSource2", "XMLSource2\XMLSource2\XMLSource2.csproj", "{B8DBBA1D-A66F-4BA6-AD40-E5628A3C3A2A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsumerTest", "ConsumerTest\ConsumerTest\ConsumerTest.csproj", "{F8EF49ED-420B-4D0D-8A28-0A6753A968E6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleClient", "ConsumerTest\ConsumerTest\ConsoleClient.csproj", "{F8EF49ED-420B-4D0D-8A28-0A6753A968E6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
