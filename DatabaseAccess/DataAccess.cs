@@ -45,62 +45,58 @@ namespace DatabaseAccess
             foreach (Source source in location.Sources) {
                 //checks if the source exists in the database and sets its properties if it does
                 var foundSources = client.Cypher
-                  .Match("(source: Source { Id: {id}})")
+                  .Match("(source: Source { Type: {type}})")
                   .Where("(source)-[:Located_In]->(:Location { Id: {locationId}})")
                   .Set("source.TimeStamp = {timeStamp}")
-                  .Set("source.Type = {type}")
-                  .WithParams(new { id = source.Id, timeStamp = source.TimeStamp, type = source.Type, locationId = location.Id })
+                  .WithParams(new { timeStamp = source.TimeStamp, type = source.Type, locationId = location.Id })
                   .Return<Source>("source")
                   .Results;
 
                 //if the source does not exist a new one is created
                 if (foundSources.Count() == 0) {
                     client.Cypher
-                    .Create("(source:Source {Id: {sourceId}})")
-                    .Set("source.Type = {sourceType}")
+                    .Create("(source:Source { Type: {type}})")
                     .Set("source.TimeStamp = {sourceTimeStamp}")
                     .With("source")
                     .Match("(parent:Location)")
                     .Where((Location parent) => parent.Id == location.Id)
                     .Create("(source)-[r:Located_In]->(parent)")
-                    .WithParams(new { sourceId = source.Id, sourceType = source.Type, sourceTimeStamp = source.TimeStamp })
+                    .WithParams(new { type = source.Type, sourceTimeStamp = source.TimeStamp })
                     .ExecuteWithoutResults();
 
                 }
                 // the id for the states to be inserted into the database
-                string stateId = location.Id + source.Id;
-                CreateStates(source, stateId);
+                CreateStates(source, location);
             }
             client.Dispose();
         }
 
         //this method creates states and relations to the source they belong to 
         //parameter: the source where the states to be inserted into the database belongs to and the id for all the states
-        private void CreateStates(Source source, string stateId) {
+        private void CreateStates(Source source, Location location) {
             client.Connect();
             //runs through all the states for a source
             foreach (var state in source.State) {
                 //checks if the state exists and sets its properties if it does
                 var foundStates = client.Cypher
                   .Match("(state: State { Property: {property}})")
-                  .Where("(state)-[:State_For]->(:Source { Id: {sourceId}})")
-                  .Set("state.Id = {id}")
+                  .Where("(state)-[:State_For]->(:Source { Type: {type}})-[:Located_In]->(:Location{Id: {id}})")
                   .Set("state.Value = {value}")
-                  .WithParams(new { id = stateId, property = state.Property, value = state.Value, sourceId = source.Id })
+                  .WithParams(new { property = state.Property, value = state.Value, type = source.Type, id = location.Id })
                   .Return<State>("state")
                   .Results;
 
                 //if the state deos not exists it is created
                 if (foundStates.Count() == 0) {
                     client.Cypher
-                    .Create("(state:State {Id: {id}})")
-                    .Set("state.Property = {property}")
+                    .Create("(state:State { Property: {property}})")
                     .Set("state.Value = {value}")
                     .With("state")
-                    .Match("(parent:Source)")
-                    .Where((Source parent) => parent.Id == source.Id)
+                    .Match("(parent:Source{Type: {type}})")
+                    .Where("(parent)-[:Located_In]->(:Location{Id: {id}})")
+                    //.Where((Source parent) => parent.Type == source.Type)
                     .Merge("(state)-[r:State_For]->(parent)")
-                    .WithParams(new { property = state.Property, value = state.Value, id = stateId })
+                    .WithParams(new { property = state.Property, value = state.Value, type = source.Type, id = location.Id })
                     .ExecuteWithoutResults();
                 }
             }
@@ -215,8 +211,8 @@ namespace DatabaseAccess
             //checks if the states exists in the database and returns them if they do
             var states = client.Cypher
             .Match("(state:State)")
-            .Where("(state)-[:State_For]->(:Source {Id: {sourceId}})")
-            .WithParams(new { sourceId = source.Id })
+            .Where("(state)-[:State_For]->(:Source {Type: {type}})")
+            .WithParams(new { type = source.Type })
             .Return<State>("(state)")
             .Results;
 
