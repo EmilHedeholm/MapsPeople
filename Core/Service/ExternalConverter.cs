@@ -32,11 +32,11 @@ namespace Core.Service {
         //Param: a Location object.
         //Return: A string stack of the parent IDs.
         private Stack<string> FindParentIds(Location location) {
-            IDataAccess dataAccess = new Noe4jDataAccess();
+            IDataAccess dataAccess = new MongoDBDataAccess();
             Stack<string> parentIds = new Stack<string>();
             parentIds.Push(location.Id);
             
-            while (!location.ParentId.Equals("0")) {           
+            while (location.ParentId != null && !location.ParentId.Equals("0")) {           
                 location= dataAccess.GetLocationById(location.ParentId);
                 parentIds.Push(location.Id);
             }
