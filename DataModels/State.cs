@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataModels {
     public class State : IEquatable<State> {
+
         public string Property { get; set; }
         public string Value { get; set; }
 

@@ -8,7 +8,7 @@ using Neo4jClient;
 
 namespace DatabaseAccess
 {
-    public class DataAccess : IDataAccess {
+    public class Noe4jDataAccess : IDataAccess {
 
         //makes a graph client with the vuri and the credentials for the database
         GraphClient client = new GraphClient(new Uri("http://localhost:7474/db/data"), "neo4j", "1234");
