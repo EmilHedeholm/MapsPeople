@@ -1,13 +1,15 @@
-﻿using System;
+﻿using DatabaseAccess;
+using DataModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using DatabaseAccess;
-using DataModels;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace CoreForRabbitMQ {
-    public class ExternalConverter {
-
+namespace ExternalConverter
+{
+    public class Converter
+    {
         //This method Converts data from the location to the external Datamodel format. 
         //Param: a Location object. 
         //Return: A list of externalmodels. 
@@ -16,12 +18,12 @@ namespace CoreForRabbitMQ {
             ExternalModel externalModel = new ExternalModel();
             if (location != null) {
                 externalModel.ParentIds = FindParentIds(location);
-                if (location.Sources != null && location.Sources.Count() > 0) {                                               
-                    for (int i = 0; i < location.Sources.Count(); i++) {                   
+                if (location.Sources != null && location.Sources.Count() > 0) {
+                    for (int i = 0; i < location.Sources.Count(); i++) {
                         externalModel.Source = location.Sources[i];
                         externalModels.Add(externalModel);
                     }
-                } else {                          
+                } else {
                     externalModels.Add(externalModel);
                 }
             }
@@ -35,13 +37,16 @@ namespace CoreForRabbitMQ {
             IDataAccess dataAccess = new DataAccess();
             Stack<string> parentIds = new Stack<string>();
             parentIds.Push(location.Id);
-            
-            while (location.ParentId != null && !location.ParentId.Equals("0")) {           
-                location= dataAccess.GetLocationById(location.ParentId);
+
+            while (!location.ParentId.Equals("0")) {
+                try {
+                    location = dataAccess.GetLocationById(location.ParentId);
+                }catch(Exception e) {
+                    Console.WriteLine(e.Message);
+                }
                 parentIds.Push(location.Id);
             }
             return parentIds;
         }
-
     }
 }

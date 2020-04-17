@@ -161,7 +161,6 @@
     </Compile>
     <Compile Include="Models\MappingEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Service\ExternalConverter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />
@@ -254,6 +253,10 @@
     <ProjectReference Include="..\DataModels\DataModels.csproj">
       <Project>{1372fd92-3251-46bc-8109-fc2f9222246c}</Project>
       <Name>DataModels</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ExternalConverter\ExternalConverter.csproj">
+      <Project>{1be2ee70-524b-44b5-93e8-81db3a0db8e3}</Project>
+      <Name>ExternalConverter</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

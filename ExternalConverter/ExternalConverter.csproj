@@ -4,17 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{299A5EC8-1433-4383-80D0-56AFFD877FC2}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>CoreForRabbitMQ</RootNamespace>
-    <AssemblyName>CoreForRabbitMQ</AssemblyName>
+    <ProjectGuid>{1BE2EE70-524B-44B5-93E8-81DB3A0DB8E3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ExternalConverter</RootNamespace>
+    <AssemblyName>ExternalConverter</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -33,15 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Diagnostics.Tracing.EventSource, Version=1.1.28.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Diagnostics.Tracing.EventSource.Redist.1.1.28\lib\net46\Microsoft.Diagnostics.Tracing.EventSource.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="RabbitMQ.Client, Version=5.0.0.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
-      <HintPath>..\packages\RabbitMQ.Client.5.1.2\lib\net451\RabbitMQ.Client.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -52,30 +41,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MappingEntry.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Converter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\DatabaseAccess\DatabaseAccess.csproj">
-      <Project>{f93b9729-7e94-45b7-9711-b3758dae71f4}</Project>
+      <Project>{F93B9729-7E94-45B7-9711-B3758DAE71F4}</Project>
       <Name>DatabaseAccess</Name>
     </ProjectReference>
     <ProjectReference Include="..\DataModels\DataModels.csproj">
-      <Project>{1372fd92-3251-46bc-8109-fc2f9222246c}</Project>
+      <Project>{1372FD92-3251-46BC-8109-FC2F9222246C}</Project>
       <Name>DataModels</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ExternalConverter\ExternalConverter.csproj">
-      <Project>{1be2ee70-524b-44b5-93e8-81db3a0db8e3}</Project>
-      <Name>ExternalConverter</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Send\Send.csproj">
-      <Project>{beed99b4-3757-499a-926b-b284117c5e52}</Project>
-      <Name>Send</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
