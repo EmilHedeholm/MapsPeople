@@ -21,6 +21,23 @@ namespace DatabaseAccess {
             using (SqlConnection connection = new SqlConnection(conString)) {
                 var sql = "INSERT INTO LocationMP (id, parentId, externalId, consumerId) VALUES (@id, @parentId, @externalId, @consumerId);";
                 connection.Execute(sql, location);
+
+                CreateSource(location);
+            }
+        }
+
+        private void CreateSource(Location location) {
+            using (SqlConnection connection = new SqlConnection(conString)) {
+                var sql = "INSERT INTO Source (locationId, type, timeStamp) VALUES (@locationId, @type, @timeStamp);";
+                connection.Execute(sql, location);
+            }
+        }
+
+        private void CreateState(Source source) {
+            using (SqlConnection connection = new SqlConnection(conString)) {
+                var sql = "SELECT* FROM Source WHERE locationId = @locationId";
+
+                connection.Execute
             }
         }
 
