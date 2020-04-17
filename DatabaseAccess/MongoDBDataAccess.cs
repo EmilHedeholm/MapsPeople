@@ -44,16 +44,20 @@ namespace DatabaseAccess {
 
         public Location GetLocationByExternalId(string externalId) {
             Location location = null;
-            var filter = Builders<Location>.Filter.Eq("ExternalId", externalId);
             if (externalId != null) {
+                var filter = Builders<Location>.Filter.Eq("ExternalId", externalId);
                 location = collection.Find(filter).FirstOrDefault();
             }
             return location;
         }
 
         public Location GetLocationById(string id) {
-            var filter = Builders<Location>.Filter.Eq("_id", id);
-            return collection.Find(filter).FirstOrDefault();
+            Location location = null;
+            if (id != null) {
+                var filter = Builders<Location>.Filter.Eq("_id", id);
+                location = collection.Find(filter).FirstOrDefault();
+            }
+            return location;
         }
 
         public List<Location> GetLocations() {
