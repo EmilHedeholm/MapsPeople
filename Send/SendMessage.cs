@@ -37,12 +37,12 @@ namespace Send {
                             routingKey += queueId;
                             bindingKey = routingKey;
                         }
-                        channel.QueueDeclare(queueId, durable: true,
+                        /*channel.QueueDeclare(queueId, durable: true,
                                exclusive: false,
                                autoDelete: false,
                                arguments: args);
                         channel.QueueBind(queue: queueId, exchange: "Customer1", routingKey: $"{bindingKey}");
-
+                        */
                     }
                     externalMessage.ParentIds = parentsForDelivery;
                     string json = JsonConvert.SerializeObject(externalMessage);

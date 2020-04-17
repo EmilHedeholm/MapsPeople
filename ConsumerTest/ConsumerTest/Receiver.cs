@@ -19,14 +19,20 @@ namespace ConsumerTest
             IModel channel = conn.CreateModel();
             channel.ExchangeDeclare(exchange: "Customer1",
                                         type: "topic");
-            while (true){
+            Console.WriteLine("Enter Username");
+            string userQueue = Console.ReadLine();
+            Console.WriteLine("Enter a queue ID");
+            string queueID = Console.ReadLine();
+            var args = new Dictionary<string, object>();
+            args.Add("x-message-ttl", 30000);
 
-                Console.WriteLine("Enter a queue ID");
-                string queueID = Console.ReadLine();
+            channel.QueueDeclare(queue: userQueue, durable: true,
+                               exclusive: false,
+                               autoDelete: true,
+                               arguments: args);
+            channel.QueueBind(queue: userQueue, exchange: "Customer1", routingKey: $"#.{queueID}.#");
 
-                var response = channel.QueueDeclarePassive(queueID);
-
-                var consumer = new EventingBasicConsumer(channel);
+            var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (sender, ea) =>{
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
@@ -39,12 +45,12 @@ namespace ConsumerTest
                     }
                     channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                 };
-                channel.BasicConsume(queue: queueID,
+                channel.BasicConsume(queue: userQueue,
                                      autoAck: false,
                                      consumer: consumer);
                 Console.ReadLine();
-            }
         }
+        
     }
 }
 
