@@ -10,12 +10,26 @@ using MongoDB.Bson;
 namespace DatabaseAccess {
     public class MongoDBDataAccess : IDataAccess {
 
-        private static MongoClient client = new MongoClient("mongodb://localhost:27017");
-        private static IMongoDatabase database = client.GetDatabase("MapsPeople");
-        private static IMongoCollection<Location> collection = database.GetCollection<Location>("Locations");
+        MongoClient client { get; set; }
+        IMongoDatabase database { get; set; }
+        IMongoCollection<Location> collection { get; set; }
+
+        public MongoDBDataAccess() {
+            try {
+                client = new MongoClient("mongodb://localhost:27017");
+                database = client.GetDatabase("MapsPeople");
+                collection = database.GetCollection<Location>("Locations");
+            }catch(MongoException me) {
+                throw new Exception("Something went wrong when trying to connect to the database", me);
+            }
+
+        }
         public void CreateLocation(Location location) {
-            collection.InsertOne(location);
-            //collection.ReplaceOne(new BsonDocument("_id", location.Id), location, new ReplaceOptions { IsUpsert = true });
+            try {
+                collection.InsertOne(location);
+            }catch(MongoException me) {
+                throw new Exception("Something went wrong when trying to insert a location", me);
+            }
         }
 
         public void DeleteLocationAndSubLocations(string locationId) {
@@ -27,47 +41,68 @@ namespace DatabaseAccess {
         }
 
         public List<Location> GetAllConnectedLocations(string id, List<Location> foundLocations) {
-            var builder = Builders<Location>.Filter;
-            var filter = builder.Or(builder.Eq("_id", id), builder.Eq("ParentId", id));
-            var locations = collection.Find(filter).ToList();
+            try {
+                var builder = Builders<Location>.Filter;
+                var filter = builder.Or(builder.Eq("_id", id), builder.Eq("ParentId", id));
+                var locations = collection.Find(filter).ToList();
 
-            foreach (var location in locations) {
-                if (location.Id.Equals(id)) {
-                    foundLocations.Add(location);
-                } else {
-                    foundLocations.Add(location);
-                    GetAllConnectedLocations(location.Id, foundLocations);
+                foreach (var location in locations) {
+                    if (location.Id.Equals(id)) {
+                        foundLocations.Add(location);
+                    } else {
+                        foundLocations.Add(location);
+                        GetAllConnectedLocations(location.Id, foundLocations);
+                    }
                 }
+            }catch(MongoException me) {
+                throw new Exception("Something went wrong when trying to get a location", me);
             }
             return foundLocations;
         }
 
         public Location GetLocationByExternalId(string externalId) {
             Location location = null;
+            try { 
             if (externalId != null) {
                 var filter = Builders<Location>.Filter.Eq("ExternalId", externalId);
                 location = collection.Find(filter).FirstOrDefault();
+            }
+            } catch (MongoException me) {
+                throw new Exception("Something went wrong when trying to get a location", me);
             }
             return location;
         }
 
         public Location GetLocationById(string id) {
             Location location = null;
+            try { 
             if (id != null) {
                 var filter = Builders<Location>.Filter.Eq("_id", id);
                 location = collection.Find(filter).FirstOrDefault();
+            }
+            } catch (MongoException me) {
+                throw new Exception("Something went wrong when trying to get a location", me);
             }
             return location;
         }
 
         public List<Location> GetLocations() {
+            List<Location> foundLocations = null;
+            try { 
             var filter = Builders<Location>.Filter.Empty;
-            return collection.Find(filter).ToList();
-            
+            foundLocations = collection.Find(filter).ToList();
+            } catch (MongoException me) {
+                throw new Exception("Something went wrong when trying to get a location", me);
+            }
+            return foundLocations;
         }
 
         public void UpdateLocation(Location location) {
+            try { 
             collection.ReplaceOne(new BsonDocument("_id", location.Id), location, new ReplaceOptions { IsUpsert = true });
+            } catch (MongoException me) {
+                throw new Exception("Something went wrong when trying to update a location", me);
+            }
         }
     }
 }
