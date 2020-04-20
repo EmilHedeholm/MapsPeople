@@ -20,16 +20,28 @@ namespace DatabaseAccess {
         }
 
         public void CreateLocation(Location location) {
+            //using (SqlConnection connection = new SqlConnection(conString)) {
+            //    //findSourcesByLocationID(location);
+            //    var sql = "INSERT INTO LocationMP (id, parentId, externalId, consumerId) VALUES (@id, @parentId, @externalId, @consumerId);";
+            //    connection.Execute(sql, location);
+
+            //    CreateSources(location);
+            //}
             using (SqlConnection connection = new SqlConnection(conString)) {
-                //findSourcesByLocationID(location);
-                var sql = "INSERT INTO LocationMP (id, parentId, externalId, consumerId) VALUES (@id, @parentId, @externalId, @consumerId);";
-                connection.Execute(sql, location);
-
-                CreateSources(location);
+                connection.Open();
+                using (SqlCommand cmdInsertLocation = connection.CreateCommand()) {
+                    cmdInsertLocation.CommandText = "INSERT INTO LocationMP(id, parentId, externalId, consumerId) VALUES(@id, @parentId, @externalId, @consumerId)";
+                    cmdInsertLocation.Parameters.AddWithValue("@id", location.Id);
+                    cmdInsertLocation.Parameters.AddWithValue("@parentId", location.ParentId);
+                    cmdInsertLocation.Parameters.AddWithValue("@externalId", location.ExternalId);
+                    cmdInsertLocation.Parameters.AddWithValue("@consumerId", location.ConsumerId);
+                    cmdInsertLocation.ExecuteNonQuery();
+                    CreateSources(location);
+                }
             }
-        }
+         }
 
-        private List<Source> findSourcesByLocationID(Location location) {
+        private List<Source> FindSourcesByLocationID(Location location) {
             List<Source> sources = new List<Source>();
             using (SqlConnection connection = new SqlConnection(conString)) {
                 connection.Open();
@@ -47,7 +59,7 @@ namespace DatabaseAccess {
                 }
             }
             foreach (var source in sources) {
-                var foundStates = findStatesBySource(source, location);
+                var foundStates = FindStatesBySource(source, location);
                 source.State.AddRange(foundStates);
             }
 
@@ -66,7 +78,7 @@ namespace DatabaseAccess {
             using (SqlConnection connection = new SqlConnection(conString)) {
                 connection.Open();
                 foreach (Source source in location.Sources) {
-                    var sources = findSourcesByLocationID(location);
+                    var sources = FindSourcesByLocationID(location);
                     if (sources.Count() == 0) {
                         //Source source2 = new Source {
                         //    Type = source.Type,
@@ -94,7 +106,7 @@ namespace DatabaseAccess {
             }
         }
 
-        private List<State> findStatesBySource(Source source, Location location) {
+        private List<State> FindStatesBySource(Source source, Location location) {
             List<State> states = new List<State>();
             using (SqlConnection connection = new SqlConnection(conString)) {
                 connection.Open();
@@ -125,7 +137,7 @@ namespace DatabaseAccess {
             using (SqlConnection connection = new SqlConnection(conString)) {
                 connection.Open();
                 foreach (State state in source.State) {
-                    var states = findStatesBySource(source, location);
+                    var states = FindStatesBySource(source, location);
                     if (states.Count() == 0) {
                         using (SqlCommand cmdInsertState = connection.CreateCommand()) {
                             cmdInsertState.CommandText = "INSERT INTO State(source, property, value) VALUES(@source, @property, @value)";
@@ -148,9 +160,24 @@ namespace DatabaseAccess {
         }
 
         public List<Location> GetAllConnectedLocations(string id, List<Location> foundLocations) {
+            List<Location> locations = new List<Location>();
             using (SqlConnection connection = new SqlConnection(conString)) {
-                var locations = connection.Query<Location>("select * from(select Id as Id union all select parentId) as X where Id in (@Id, @ParentId)").ToList();
-                foreach (var location in locations) {
+                connection.Open();
+                using (SqlCommand cmdGetAllConnectedLocations = connection.CreateCommand()) {
+                    cmdGetAllConnectedLocations.CommandText = "SELECT * FROM LocationMP WHERE id=@id OR parentId=@id2";
+                    cmdGetAllConnectedLocations.Parameters.AddWithValue("@id", id);
+                    cmdGetAllConnectedLocations.Parameters.AddWithValue("@id2", id);
+                    SqlDataReader locationReader = cmdGetAllConnectedLocations.ExecuteReader();
+                    while (locationReader.Read()) {
+                        object[] values = new object[5];
+                        var columns = locationReader.GetValues(values);
+
+                        locations.Add(MapLocation(locationReader));
+                    }
+
+
+                }
+                    foreach (var location in locations) {
                     if (location.Id.Equals(id)) {
                         foundLocations.Add(location);
                     } else {
@@ -161,22 +188,77 @@ namespace DatabaseAccess {
                 return foundLocations;
             }
         }
-        public Location GetLocationByExternalId(string externalId) {
-            using (SqlConnection connection = new SqlConnection(conString)) {
-                return connection.Query<Location>("SELECT Id, parentId, externalId, consumerId FROM LocationMP WHERE externalId = @externalId", new { externalId }).SingleOrDefault();
-            }
+
+        private Location MapLocation(IDataReader locationReader) {
+            Location location = new Location {
+                Id = locationReader.GetString(0),
+                ParentId  = locationReader.GetString(1),
+                ExternalId = locationReader.GetString(2),
+                ConsumerId = locationReader.GetInt32(3)
+            };
+            location.Sources = FindSourcesByLocationID(location);
+            return location;
         }
 
-        public Location GetLocationById(string id) {
-            using (SqlConnection connection = new SqlConnection(conString)) {
-                return connection.Query<Location>("SELECT Id, parentId, externalId, consumerId FROM LocationMP WHERE id = @id", new { id }).SingleOrDefault();
+        public Location GetLocationByExternalId(string externalId) {
+            //using (SqlConnection connection = new SqlConnection(conString)) {
+            //    return connection.Query<Location>("SELECT Id, parentId, externalId, consumerId FROM LocationMP WHERE externalId = @externalId", new { externalId }).SingleOrDefault();
+            //}
+            Location foundLocation = null;
+             using (SqlConnection connection = new SqlConnection(conString)) {
+                connection.Open();
+                using (SqlCommand cmdFoundLocation = connection.CreateCommand()) {
+                    cmdFoundLocation.CommandText = "SELECT * FROM LocationMP WHERE externalId=@externalId";
+                    cmdFoundLocation.Parameters.AddWithValue("@externalId", externalId);
+                    SqlDataReader foundLocationReader = cmdFoundLocation.ExecuteReader();
+                    if (foundLocationReader.Read()) {
+                        foundLocation = MapLocation(foundLocationReader);
+                        foundLocation.Sources = FindSourcesByLocationID(foundLocation);
+                    }
+                }
             }
+            return foundLocation;
+        }
+        public Location GetLocationById(string id) {
+            //using (SqlConnection connection = new SqlConnection(conString)) {
+            //    return connection.Query<Location>("SELECT Id, parentId, externalId, consumerId FROM LocationMP WHERE id = @id", new { id }).SingleOrDefault();
+            //}
+            Location foundLocation = null;
+            using (SqlConnection connection = new SqlConnection(conString)) {
+                connection.Open();
+                using (SqlCommand cmdFoundLocation = connection.CreateCommand()) {
+                    cmdFoundLocation.CommandText = "SELECT * FROM LocationMP WHERE id=@id";
+                    cmdFoundLocation.Parameters.AddWithValue("@id", id);
+                    SqlDataReader foundLocationReader = cmdFoundLocation.ExecuteReader();
+                    if (foundLocationReader.Read()) {
+                        foundLocation = MapLocation(foundLocationReader);
+                        foundLocation.Sources = FindSourcesByLocationID(foundLocation);
+                    }
+                }
+            }
+            return foundLocation;
         }
 
         public List<Location> GetLocations() {
+            //using (SqlConnection connection = new SqlConnection(conString)) {
+            //    return connection.Query<Location>("SELECT Id, parentId, externalId, consumerId FROM LocationMP").ToList();
+            //}
+            List<Location> locations = new List<Location>();
             using (SqlConnection connection = new SqlConnection(conString)) {
-                return connection.Query<Location>("SELECT Id, parentId, externalId, consumerId FROM LocationMP").ToList();
+                connection.Open();
+                using (SqlCommand cmdFoundAllLocation = connection.CreateCommand()) {
+                    cmdFoundAllLocation.CommandText = "SELECT * FROM LocationMP";
+                    SqlDataReader foundAllReader = cmdFoundAllLocation.ExecuteReader();
+                    while (foundAllReader.Read()) {
+                        object[] values = new object[5];
+                        var columns = foundAllReader.GetValues(values);
+
+                        locations.Add(MapLocation(foundAllReader));
+                    }
+
+                }
             }
+            return locations;
         }
 
         public void UpdateLocation(Location location) {
