@@ -5,6 +5,7 @@ using System.Configuration;
 using System.Data.SqlClient;
 using Dapper;
 using System.Linq;
+using System.Data;
 
 namespace DatabaseAccess {
     public class SQLDataAccess : IDataAccess {
@@ -24,40 +25,103 @@ namespace DatabaseAccess {
                 var sql = "INSERT INTO LocationMP (id, parentId, externalId, consumerId) VALUES (@id, @parentId, @externalId, @consumerId);";
                 connection.Execute(sql, location);
 
-                CreateSource(location);
+                CreateSources(location);
             }
         }
 
         private List<Source> findSourcesByLocationID(Location location) {
+            List<Source> sources = new List<Source>();
             using (SqlConnection connection = new SqlConnection(conString)) {
-                return connection.Query<Source>("SELECT * FROM Source WHERE locationId =@locationId").ToList();
+                connection.Open();
+                using (SqlCommand cmdFoundSource = connection.CreateCommand()) {
+                    cmdFoundSource.CommandText = "SELECT * FROM Source WHERE locationId = @locationId";
+                    cmdFoundSource.Parameters.AddWithValue("@locationId", location.Id);
+                    SqlDataReader sourceReader = cmdFoundSource.ExecuteReader();
+                    while (sourceReader.Read()) {
+                        object[] values = new object[5];
+                        var columns = sourceReader.GetValues(values);
+
+                        sources.Add(MapSource(sourceReader));
+                    }
+
+                }
             }
+            foreach (var source in sources) {
+                var foundStates = findStatesBySource(source, location);
+                source.State.AddRange(foundStates);
+            }
+
+            return sources;
         }
 
-        private void CreateSource(Location location) {
+        private Source MapSource(IDataReader sourceReader) {
+            return new Source {
+                Type = sourceReader.GetString(1),
+                TimeStamp = sourceReader.GetDateTime(2)
+            };
+        }
+
+        private void CreateSources(Location location) {
+           
             using (SqlConnection connection = new SqlConnection(conString)) {
-                var sources = findSourcesByLocationID(location);
-                foreach (var source in sources) {
-                    var foundStates = findStatesBySource(source);
-                    source.State.AddRange(foundStates);
+                connection.Open();
+                foreach (Source source in location.Sources) {
+                    var sources = findSourcesByLocationID(location);
+                    if (sources.Count() == 0) {
+                        Source source2 = new Source {
+                            Type = source.Type,
+                            TimeStamp = source.TimeStamp
+                        };
+                        
+                        using (SqlCommand cmdInsertSource = connection.CreateCommand()) {
+                            cmdInsertSource.CommandText = "INSERT INTO Source(locationId, type, timeStamp) VALUES(@locationId, @type,@timeStamp)";
+                            cmdInsertSource.Parameters.AddWithValue("locationId", location.Id);
+                            cmdInsertSource.Parameters.AddWithValue("type", source.Type);
+                            cmdInsertSource.Parameters.AddWithValue("timeStamp", source.TimeStamp);
+                            cmdInsertSource.ExecuteNonQuery();
+
+                        }
+                    }
+                    CreateStates(source, location);
                 }
 
-                var foundSources = "SELECT * FROM LocationMP WHERE locationId = @locationId, type = @type";
-                connection.Execute(foundSources, location);
-                var updateSource = "UPDATE Source SET timeStamp WHERE locationId = @locationId, type = @type";
-                connection.Execute(updateSource, location);
-                var sql = "INSERT INTO Source (locationId, type, timeStamp) VALUES (@locationId, @type, @timeStamp);";
-                connection.Execute(sql, location);
+                //var foundSources = "SELECT * FROM LocationMP WHERE locationId = @locationId, type = @type";
+                //connection.Execute(foundSources, location);
+                //var updateSource = "UPDATE Source SET timeStamp WHERE locationId = @locationId, type = @type";
+                //connection.Execute(updateSource, location);
+                //var sql = "INSERT INTO Source (locationId, type, timeStamp) VALUES (@locationId, @type, @timeStamp);";
+                //connection.Execute(sql, location);
             }
         }
 
-        private List<State> findStatesBySource(Source source) {
+        private List<State> findStatesBySource(Source source, Location location) {
+            List<State> states = new List<State>();
             using (SqlConnection connection = new SqlConnection(conString)) {
-                return connection.Query<State>("Select * From State Where source = @locationId + @type").ToList();
-            } 
+                connection.Open();
+                using (SqlCommand cmdFoundStates = connection.CreateCommand()) {
+                    cmdFoundStates.CommandText = "SELECT * FROM State WHERE source = @source";
+                    cmdFoundStates.Parameters.AddWithValue("@source", location.Id + source.Type);
+                    SqlDataReader stateReader = cmdFoundStates.ExecuteReader();
+                    while (stateReader.Read()) {
+                        object[] values = new object[5];
+                        var columns = stateReader.GetValues(values);
+
+                        states.Add(MapState(stateReader));
+                    }
+
+                }
+            }
+            return states;
         }
 
-        private void CreateState(Source source) {
+        private State MapState(IDataReader stateReader) {
+            return new State {
+                Property = stateReader.GetString(1),
+                Value = stateReader.GetString(2)
+            };
+        }
+
+        private void CreateStates(Source source, Location location) {
             using (SqlConnection connection = new SqlConnection(conString)) {
                 
                 var sql = "SELECT* FROM Source WHERE locationId = @locationId";
