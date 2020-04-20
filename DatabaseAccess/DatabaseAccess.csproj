@@ -34,6 +34,9 @@
     <Reference Include="Dapper, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Dapper.2.0.35\lib\net461\Dapper.dll</HintPath>
     </Reference>
+    <Reference Include="DapperPlus, Version=1.1.0.2, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DapperPlus.1.1.0.2\lib\net45\DapperPlus.dll</HintPath>
+    </Reference>
     <Reference Include="Neo4j.Driver, Version=1.7.91.0, Culture=neutral, PublicKeyToken=c08b0bc1c355082b, processorArchitecture=MSIL">
       <HintPath>..\packages\Neo4j.Driver.Signed.1.7.0\lib\net452\Neo4j.Driver.dll</HintPath>
     </Reference>
@@ -56,7 +59,6 @@
   <ItemGroup>
     <Compile Include="DataAccess.cs" />
     <Compile Include="IDataAccess.cs" />
-    <Compile Include="LocationMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SQLDataAccess.cs" />
   </ItemGroup>
