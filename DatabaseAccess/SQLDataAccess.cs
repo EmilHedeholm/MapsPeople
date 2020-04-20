@@ -262,10 +262,14 @@ namespace DatabaseAccess {
         }
 
         public void UpdateLocation(Location location) {
-            using (SqlConnection connection = new SqlConnection(conString)) {
-                var sql = "UPDATE LocationMP SET parentId = @parentId, externalId = @externalId, consumerId = @consumerId  WHERE id = @id;";
-                connection.Execute(sql, location);
-            }
-        }
+            //using (SqlConnection connection = new SqlConnection(conString)) {
+            //    var sql = "UPDATE LocationMP SET parentId = @parentId, externalId = @externalId, consumerId = @consumerId  WHERE id = @id;";
+            //    connection.Execute(sql, location);
+            //}
+
+            if (GetLocationById(location.Id) != null) {
+                CreateSources(location);
+            }           
+         }
     }
 }
