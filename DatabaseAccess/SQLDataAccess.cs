@@ -20,26 +20,26 @@ namespace DatabaseAccess {
         }
 
         public void CreateLocation(Location location) {
-            //using (SqlConnection connection = new SqlConnection(conString)) {
-            //    //findSourcesByLocationID(location);
-            //    var sql = "INSERT INTO LocationMP (id, parentId, externalId, consumerId) VALUES (@id, @parentId, @externalId, @consumerId);";
-            //    connection.Execute(sql, location);
-
-            //    CreateSources(location);
-            //}
             using (SqlConnection connection = new SqlConnection(conString)) {
-                connection.Open();
-                using (SqlCommand cmdInsertLocation = connection.CreateCommand()) {
-                    cmdInsertLocation.CommandText = "INSERT INTO LocationMP(id, parentId, externalId, consumerId) VALUES(@id, @parentId, @externalId, @consumerId)";
-                    cmdInsertLocation.Parameters.AddWithValue("@id", location.Id);
-                    cmdInsertLocation.Parameters.AddWithValue("@parentId", location.ParentId);
-                    cmdInsertLocation.Parameters.AddWithValue("@externalId", location.ExternalId);
-                    cmdInsertLocation.Parameters.AddWithValue("@consumerId", location.ConsumerId);
-                    cmdInsertLocation.ExecuteNonQuery();
-                    CreateSources(location);
-                }
+                //findSourcesByLocationID(location);
+                var sql = "INSERT INTO LocationMP (id, parentId, externalId, consumerId) VALUES (@id, @parentId, @externalId, @consumerId);";
+                connection.Execute(sql, location);
+
+                CreateSources(location);
             }
-         }
+            //using (SqlConnection connection = new SqlConnection(conString)) {
+            //    connection.Open();
+            //    using (SqlCommand cmdInsertLocation = connection.CreateCommand()) {
+            //        cmdInsertLocation.CommandText = "INSERT INTO LocationMP(id, parentId, externalId, consumerId) VALUES(@id, @parentId, @externalId, @consumerId)";
+            //        cmdInsertLocation.Parameters.AddWithValue("@id", location.Id);
+            //        cmdInsertLocation.Parameters.AddWithValue("@parentId", location.ParentId);
+            //        cmdInsertLocation.Parameters.AddWithValue("@externalId", location.ExternalId);
+            //        cmdInsertLocation.Parameters.AddWithValue("@consumerId", location.ConsumerId);
+            //        cmdInsertLocation.ExecuteNonQuery();
+            //        CreateSources(location);
+            //    }
+            //}
+        }
 
         private List<Source> FindSourcesByLocationID(Location location) {
             List<Source> sources = new List<Source>();
@@ -201,42 +201,42 @@ namespace DatabaseAccess {
         }
 
         public Location GetLocationByExternalId(string externalId) {
-            //using (SqlConnection connection = new SqlConnection(conString)) {
-            //    return connection.Query<Location>("SELECT Id, parentId, externalId, consumerId FROM LocationMP WHERE externalId = @externalId", new { externalId }).SingleOrDefault();
-            //}
-            Location foundLocation = null;
-             using (SqlConnection connection = new SqlConnection(conString)) {
-                connection.Open();
-                using (SqlCommand cmdFoundLocation = connection.CreateCommand()) {
-                    cmdFoundLocation.CommandText = "SELECT * FROM LocationMP WHERE externalId=@externalId";
-                    cmdFoundLocation.Parameters.AddWithValue("@externalId", externalId);
-                    SqlDataReader foundLocationReader = cmdFoundLocation.ExecuteReader();
-                    if (foundLocationReader.Read()) {
-                        foundLocation = MapLocation(foundLocationReader);
-                        foundLocation.Sources = FindSourcesByLocationID(foundLocation);
-                    }
-                }
+            using (SqlConnection connection = new SqlConnection(conString)) {
+                return connection.Query<Location>("SELECT Id, parentId, externalId, consumerId FROM LocationMP WHERE externalId = @externalId", new { externalId }).SingleOrDefault();
             }
-            return foundLocation;
+            //Location foundLocation = null;
+            // using (SqlConnection connection = new SqlConnection(conString)) {
+            //    connection.Open();
+            //    using (SqlCommand cmdFoundLocation = connection.CreateCommand()) {
+            //        cmdFoundLocation.CommandText = "SELECT * FROM LocationMP WHERE externalId=@externalId";
+            //        cmdFoundLocation.Parameters.AddWithValue("@externalId", externalId);
+            //        SqlDataReader foundLocationReader = cmdFoundLocation.ExecuteReader();
+            //        if (foundLocationReader.Read()) {
+            //            foundLocation = MapLocation(foundLocationReader);
+            //            foundLocation.Sources = FindSourcesByLocationID(foundLocation);
+            //        }
+            //    }
+            //}
+            //return foundLocation;
         }
         public Location GetLocationById(string id) {
-            //using (SqlConnection connection = new SqlConnection(conString)) {
-            //    return connection.Query<Location>("SELECT Id, parentId, externalId, consumerId FROM LocationMP WHERE id = @id", new { id }).SingleOrDefault();
-            //}
-            Location foundLocation = null;
             using (SqlConnection connection = new SqlConnection(conString)) {
-                connection.Open();
-                using (SqlCommand cmdFoundLocation = connection.CreateCommand()) {
-                    cmdFoundLocation.CommandText = "SELECT * FROM LocationMP WHERE id=@id";
-                    cmdFoundLocation.Parameters.AddWithValue("@id", id);
-                    SqlDataReader foundLocationReader = cmdFoundLocation.ExecuteReader();
-                    if (foundLocationReader.Read()) {
-                        foundLocation = MapLocation(foundLocationReader);
-                        foundLocation.Sources = FindSourcesByLocationID(foundLocation);
-                    }
-                }
+                return connection.Query<Location>("SELECT Id, parentId, externalId, consumerId FROM LocationMP WHERE id = @id", new { id }).SingleOrDefault();
             }
-            return foundLocation;
+            //Location foundLocation = null;
+            //using (SqlConnection connection = new SqlConnection(conString)) {
+            //    connection.Open();
+            //    using (SqlCommand cmdFoundLocation = connection.CreateCommand()) {
+            //        cmdFoundLocation.CommandText = "SELECT * FROM LocationMP WHERE id=@id";
+            //        cmdFoundLocation.Parameters.AddWithValue("@id", id);
+            //        SqlDataReader foundLocationReader = cmdFoundLocation.ExecuteReader();
+            //        if (foundLocationReader.Read()) {
+            //            foundLocation = MapLocation(foundLocationReader);
+            //            foundLocation.Sources = FindSourcesByLocationID(foundLocation);
+            //        }
+            //    }
+            //}
+            //return foundLocation;
         }
 
         public List<Location> GetLocations() {
