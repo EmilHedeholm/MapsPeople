@@ -21,7 +21,7 @@ namespace DatabaseAccess {
 
         public void CreateLocation(Location location) {
             using (SqlConnection connection = new SqlConnection(conString)) {
-                findSourcesByLocationID(location);
+                //findSourcesByLocationID(location);
                 var sql = "INSERT INTO LocationMP (id, parentId, externalId, consumerId) VALUES (@id, @parentId, @externalId, @consumerId);";
                 connection.Execute(sql, location);
 
@@ -68,16 +68,16 @@ namespace DatabaseAccess {
                 foreach (Source source in location.Sources) {
                     var sources = findSourcesByLocationID(location);
                     if (sources.Count() == 0) {
-                        Source source2 = new Source {
-                            Type = source.Type,
-                            TimeStamp = source.TimeStamp
-                        };
+                        //Source source2 = new Source {
+                        //    Type = source.Type,
+                        //    TimeStamp = source.TimeStamp
+                        //};
                         
                         using (SqlCommand cmdInsertSource = connection.CreateCommand()) {
-                            cmdInsertSource.CommandText = "INSERT INTO Source(locationId, type, timeStamp) VALUES(@locationId, @type,@timeStamp)";
-                            cmdInsertSource.Parameters.AddWithValue("locationId", location.Id);
-                            cmdInsertSource.Parameters.AddWithValue("type", source.Type);
-                            cmdInsertSource.Parameters.AddWithValue("timeStamp", source.TimeStamp);
+                            cmdInsertSource.CommandText = "INSERT INTO Source(locationId, type, timeStamp) VALUES(@locationId, @type, @timeStamp)";
+                            cmdInsertSource.Parameters.AddWithValue("@locationId", location.Id);
+                            cmdInsertSource.Parameters.AddWithValue("@type", source.Type);
+                            cmdInsertSource.Parameters.AddWithValue("@timeStamp", source.TimeStamp);
                             cmdInsertSource.ExecuteNonQuery();
 
                         }
@@ -123,13 +123,22 @@ namespace DatabaseAccess {
 
         private void CreateStates(Source source, Location location) {
             using (SqlConnection connection = new SqlConnection(conString)) {
-                
-                var sql = "SELECT* FROM Source WHERE locationId = @locationId";
+                connection.Open();
+                foreach (State state in source.State) {
+                    var states = findStatesBySource(source, location);
+                    if (states.Count() == 0) {
+                        using (SqlCommand cmdInsertState = connection.CreateCommand()) {
+                            cmdInsertState.CommandText = "INSERT INTO State(source, property, value) VALUES(@source, @property, @value)";
+                            cmdInsertState.Parameters.AddWithValue("@source", location.Id + source.Type);
+                            cmdInsertState.Parameters.AddWithValue("@property", state.Property);
+                            cmdInsertState.Parameters.AddWithValue("@value", state.Value);
+                            cmdInsertState.ExecuteNonQuery();
 
-                connection.Execute;
+                        }
+                    }
+                }
             }
         }
-
         public void DeleteLocationAndSubLocations(string locationId) {
             throw new NotImplementedException();
         }
