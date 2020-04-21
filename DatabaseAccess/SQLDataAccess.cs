@@ -13,7 +13,7 @@ namespace DatabaseAccess {
         private string clientConString;
 
         public SQLDataAccess() {
-            conString = @"data Source = .\SQLEXPRESS; database = MapsPeople; integrated security=True";
+            conString = @"data Source = .\SQLEXPRESS; database = MapsPeopleDB; integrated security=True";
             SqlConnection conn = new SqlConnection(conString);
             //conString = ConfigurationManager.ConnectionStrings["Con"].ConnectionString;
             //clientConString = ConfigurationManager.ConnectionStrings["ClientConnection"].ConnectionString;
@@ -86,10 +86,10 @@ namespace DatabaseAccess {
                         //};
                         
                         using (SqlCommand cmdInsertSource = connection.CreateCommand()) {
-                            cmdInsertSource.CommandText = "INSERT INTO Source(locationId, type, timeStamp) VALUES(@locationId, @type, @timeStamp)";
+                            cmdInsertSource.CommandText = "INSERT INTO Source(locationId, sourceType, sourceTimeStamp) VALUES(@locationId, @sourceType, @sourceTimeStamp)";
                             cmdInsertSource.Parameters.AddWithValue("@locationId", location.Id);
-                            cmdInsertSource.Parameters.AddWithValue("@type", source.Type);
-                            cmdInsertSource.Parameters.AddWithValue("@timeStamp", source.TimeStamp);
+                            cmdInsertSource.Parameters.AddWithValue("@sourceType", source.Type);
+                            cmdInsertSource.Parameters.AddWithValue("@sourceTimeStamp", source.TimeStamp);
                             cmdInsertSource.ExecuteNonQuery();
 
                         }
@@ -111,8 +111,9 @@ namespace DatabaseAccess {
             using (SqlConnection connection = new SqlConnection(conString)) {
                 connection.Open();
                 using (SqlCommand cmdFoundStates = connection.CreateCommand()) {
-                    cmdFoundStates.CommandText = "SELECT * FROM State WHERE source = @source";
-                    cmdFoundStates.Parameters.AddWithValue("@source", location.Id + source.Type);
+                    cmdFoundStates.CommandText = "SELECT * FROM StateMP WHERE locationId = @LocationId AND sourceType = @sourceType";
+                    cmdFoundStates.Parameters.AddWithValue("@locationId", location.Id);
+                    cmdFoundStates.Parameters.AddWithValue("@sourceType", source.Type);
                     SqlDataReader stateReader = cmdFoundStates.ExecuteReader();
                     while (stateReader.Read()) {
                         object[] values = new object[5];
@@ -140,10 +141,11 @@ namespace DatabaseAccess {
                     var states = FindStatesBySource(source, location);
                     if (states.Count() == 0) {
                         using (SqlCommand cmdInsertState = connection.CreateCommand()) {
-                            cmdInsertState.CommandText = "INSERT INTO State(source, property, value) VALUES(@source, @property, @value)";
-                            cmdInsertState.Parameters.AddWithValue("@source", location.Id + source.Type);
+                            cmdInsertState.CommandText = "INSERT INTO StateMP(locationId, sourceType, property, stateValue) VALUES(@locationId, @sourceType, @property, @stateValue)";
+                            cmdInsertState.Parameters.AddWithValue("@locationId", location.Id);
+                            cmdInsertState.Parameters.AddWithValue("@sourceType", source.Type);
                             cmdInsertState.Parameters.AddWithValue("@property", state.Property);
-                            cmdInsertState.Parameters.AddWithValue("@value", state.Value);
+                            cmdInsertState.Parameters.AddWithValue("@stateValue", state.Value);
                             cmdInsertState.ExecuteNonQuery();
 
                         }
