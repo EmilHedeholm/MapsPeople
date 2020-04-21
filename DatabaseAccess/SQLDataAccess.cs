@@ -223,7 +223,7 @@ namespace DatabaseAccess {
         }
         public Location GetLocationById(string id) {
             using (SqlConnection connection = new SqlConnection(conString)) {
-                return connection.Query<Location>("SELECT Id, parentId, externalId, consumerId FROM LocationMP WHERE id = @id", new { id }).SingleOrDefault();
+                return connection.Query<Location>("SELECT id, parentId, externalId, consumerId from locationMP WHERE id = id", new { id }).SingleOrDefault();
             }
             //Location foundLocation = null;
             //using (SqlConnection connection = new SqlConnection(conString)) {
@@ -252,7 +252,7 @@ namespace DatabaseAccess {
                     cmdFoundAllLocation.CommandText = "SELECT * FROM LocationMP";
                     SqlDataReader foundAllReader = cmdFoundAllLocation.ExecuteReader();
                     while (foundAllReader.Read()) {
-                        object[] values = new object[5];
+                        object[] values = new object[4];
                         var columns = foundAllReader.GetValues(values);
 
                         locations.Add(MapLocation(foundAllReader));
@@ -264,14 +264,43 @@ namespace DatabaseAccess {
         }
 
         public void UpdateLocation(Location location) {
-            //using (SqlConnection connection = new SqlConnection(conString)) {
-            //    var sql = "UPDATE LocationMP SET parentId = @parentId, externalId = @externalId, consumerId = @consumerId  WHERE id = @id;";
-            //    connection.Execute(sql, location);
-            //}
+            using (SqlConnection connection = new SqlConnection(conString)) {
+                var sql = "UPDATE LocationMP SET parentId = @parentId, externalId = @externalId, consumerId = @consumerId  WHERE id = @id;";
+                connection.Execute(sql, location);
 
-            if (GetLocationById(location.Id) != null) {
-                CreateSources(location);
-            }           
+                List<Source> sources = FindSourcesByLocationID(location);
+                if (sources.Count > 0) {
+                    foreach (var source in sources) {
+                        using (SqlCommand updateSources = connection.CreateCommand()) {
+                            var sourceSQL = "UPDATE source SET sourceTimestamp = @Timestamp WHERE locationId = @locationId AND sourceType = @sourceType";
+                            updateSources.CommandText = sourceSQL;
+                            updateSources.Parameters.AddWithValue("@Timestamp", source.TimeStamp);
+                            updateSources.Parameters.AddWithValue("@locationId", location.Id);
+                            updateSources.Parameters.AddWithValue("@sourceType", source.Type);
+                            updateSources.ExecuteNonQuery();
+                            List<State> states = FindStatesBySource(source, location);
+                            if (states.Count > 0) {
+                                foreach (var state in states) {
+                                    using (SqlCommand updateStates = connection.CreateCommand()) {
+                                        var stateSQL = "UPDATE stateMP SET property = @property, stateValue = @stateValue WHERE locationId = @locationId AND sourceType = @sourceType";
+                                        updateStates.CommandText = stateSQL;
+                                        updateStates.Parameters.AddWithValue("@property", state.Property);
+                                        updateStates.Parameters.AddWithValue("@stateValue", state.Value);
+                                        updateStates.Parameters.AddWithValue("@locationId", location.Id);
+                                        updateStates.Parameters.AddWithValue("@sourceType", source.Type);
+                                        updateStates.ExecuteNonQuery();
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+            //if (GetLocationById(location.Id) != null) {
+            //    CreateSources(location);
+            //} 
+            }
          }
     }
 }
