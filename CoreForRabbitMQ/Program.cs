@@ -200,7 +200,7 @@ namespace CoreForRabbitMQ {
                 string json = Encoding.UTF8.GetString(message.Value);
                 List<Location> locations = JsonConvert.DeserializeObject<List<Location>>(json);
                 Receive(locations);
-               
+                Console.WriteLine(json);
             }
             //Console.ReadLine();
         }
