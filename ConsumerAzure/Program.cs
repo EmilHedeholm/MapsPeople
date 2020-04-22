@@ -173,7 +173,7 @@ namespace ConsumerAzure {
 
         private static void SendWithKafka(List<Location> locations) {
             var jsonString = JsonConvert.SerializeObject(locations);
-            var topic = "¨Consumer_Topic";
+            var topic = "Consumer_Topic";
             Message msg = new Message(jsonString);
             Uri uri = new Uri("http://localhost:9092");
             var options = new KafkaOptions(uri);
