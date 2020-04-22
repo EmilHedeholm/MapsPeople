@@ -197,9 +197,12 @@ namespace CoreForRabbitMQ {
             var router = new BrokerRouter(options);
             var consumer = new Consumer(new ConsumerOptions(topic, router));
             foreach (var message in consumer.Consume()) {
-                Console.WriteLine(Encoding.UTF8.GetString(message.Value));
+                string json = Encoding.UTF8.GetString(message.Value);
+                List<Location> locations = JsonConvert.DeserializeObject<List<Location>>(json);
+                Receive(locations);
+               
             }
-            Console.ReadLine();
+            //Console.ReadLine();
         }
         private static List<ExternalModel> ConvertToExternal(Location location) {
             ExternalConverter externalConverter = new ExternalConverter();
