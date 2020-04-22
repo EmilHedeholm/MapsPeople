@@ -12,6 +12,9 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using KafkaNet;
+using KafkaNet.Model;
+using KafkaNet.Protocol;
 
 
 namespace MapspeopleConsumer {
@@ -21,7 +24,7 @@ namespace MapspeopleConsumer {
                 Thread.Sleep(3000);           
                 List<Location> data = GetData();
                 if (!(data.Count == 0)) {
-                  SendDataWithRabbitMQ(data);
+                  SendWithKafka(data);
               // }
             }
         }
@@ -108,6 +111,18 @@ namespace MapspeopleConsumer {
                 Console.WriteLine();
                 Console.WriteLine();
             }
+        }
+
+        private static void SendWithKafka(List<Location> locations) {
+            var jsonString = JsonConvert.SerializeObject(locations);
+            var topic = "Consumer_Topic";
+            Message msg = new Message(jsonString);
+            Uri uri = new Uri("http://localhost:9092");
+            var options = new KafkaOptions(uri);
+            var router = new BrokerRouter(options);
+            var client = new Producer(router);
+            client.SendMessageAsync(topic, new List<Message> { msg }).Wait();
+            Console.WriteLine(jsonString);
         }
         //This method sends data to the Core Controller. 
         //Param: Is a list of locations. 

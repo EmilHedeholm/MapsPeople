@@ -10,6 +10,9 @@ using DataModels;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RestSharp;
+using KafkaNet;
+using KafkaNet.Model;
+using KafkaNet.Protocol;
 
 namespace ConsumerAzure {
     class Program {
@@ -23,7 +26,7 @@ namespace ConsumerAzure {
                 Thread.Sleep(3000);
                 List<Location> data = GetData();
                 if (!(data.Count == 0)) {
-                    SendDataWithRabbitMQ(data);
+                    SendWithKafka(data);
                 }
            }
         }
@@ -166,6 +169,18 @@ namespace ConsumerAzure {
                 Console.WriteLine();
                 Console.WriteLine();
             }
+        }
+
+        private static void SendWithKafka(List<Location> locations) {
+            var jsonString = JsonConvert.SerializeObject(locations);
+            var topic = "¨Consumer_Topic";
+            Message msg = new Message(jsonString);
+            Uri uri = new Uri("http://localhost:9092");
+            var options = new KafkaOptions(uri);
+            var router = new BrokerRouter(options);
+            var client = new Producer(router);
+            client.SendMessageAsync(topic, new List<Message> { msg }).Wait();
+            Console.ReadLine();
         }
     }
 }

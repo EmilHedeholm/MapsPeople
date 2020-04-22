@@ -7,11 +7,15 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Newtonsoft.Json;
 using Send;
+using KafkaNet;
+using KafkaNet.Model;
+using KafkaNet.Protocol;
 
 namespace CoreForRabbitMQ {
     public class Program {
         public static void Main(string[] args) {
-            ReceiveDataFromRabbitMQ();
+            //ReceiveDataFromRabbitMQ();
+            ReceiveFromKafka();
         }
 
         static IDataAccess dataAccess = new DataAccess();
@@ -184,6 +188,18 @@ namespace CoreForRabbitMQ {
                                      consumer: consumer);
                 Console.ReadLine();
             }
+        }
+
+        private static void ReceiveFromKafka() {
+            string topic = "Consumer_Topic";
+            Uri uri = new Uri("http://localhost:9092");
+            var options = new KafkaOptions(uri);
+            var router = new BrokerRouter(options);
+            var consumer = new Consumer(new ConsumerOptions(topic, router));
+            foreach (var message in consumer.Consume()) {
+                Console.WriteLine(Encoding.UTF8.GetString(message.Value));
+            }
+            Console.ReadLine();
         }
         private static List<ExternalModel> ConvertToExternal(Location location) {
             ExternalConverter externalConverter = new ExternalConverter();

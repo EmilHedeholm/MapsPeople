@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using Newtonsoft.Json;
 using DataModels;
+using KafkaNet;
+using KafkaNet.Model;
+using KafkaNet.Protocol;
 
 namespace Send {
     public class SendMessage {
@@ -57,7 +60,35 @@ namespace Send {
 
             }
         }
-    }
 
+        //private void DistributeMessage(string topicName, List<ExternalModel> messages) {
+        //    foreach (var message in messages) {
+        //        var jsonString = JsonConvert.SerializeObject(message);
+        //        var topic = topicName;
+        //        Message msg = new Message(jsonString);
+        //        Uri uri = new Uri("http://localhost:9092");
+        //        var options = new KafkaOptions(uri);
+        //        var router = new BrokerRouter(options);
+        //        var client = new Producer(router);
+
+        //        client.SendMessageAsync(topic, new List<Message> { msg }).Wait();
+        //    }
+            
+        //}
+
+        //public void SendUpdateWithKafka(List<ExternalModel> messages) {
+        //    foreach (var externalMessage in messages) {
+        //        Stack<string> parentsForDelivery = new Stack<string>(externalMessage.ParentIds);
+        //        int repeatTimes = externalMessage.ParentIds.Count;
+        //        string topic = "";
+        //        for (int i = 0; i < repeatTimes; i++) {
+        //            topic= externalMessage.ParentIds.Pop();
+        //            DistributeMessage(topic, messages);
+        //        }
+
+
+        //    }
+        //}
+    }
 
 }
