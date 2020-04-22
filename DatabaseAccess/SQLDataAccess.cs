@@ -13,7 +13,7 @@ namespace DatabaseAccess {
         private string clientConString;
 
         public SQLDataAccess() {
-            conString = @"data Source = .\SQLEXPRESS; database = MapsPeopleDB; integrated security=True";
+            conString = @"data Source = .\sqlexpress; database = MapsPeopleDB; integrated security=True";
             SqlConnection conn = new SqlConnection(conString);
             //conString = ConfigurationManager.ConnectionStrings["Con"].ConnectionString;
             //clientConString = ConfigurationManager.ConnectionStrings["ClientConnection"].ConnectionString;
