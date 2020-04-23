@@ -16,6 +16,7 @@ namespace CoreForRabbitMQ {
     public class Program {
         static IDataAccess dataAccess { get; set; }
         public static void Main(string[] args) {
+            //there are three implemented databases and the while loop lets you choose which one to use when running the program
             var choice = true;
             var database = "";
             while (choice) {
@@ -244,6 +245,9 @@ namespace CoreForRabbitMQ {
                 }
             }
         }
+
+        //this method calls the external converter 
+        //parameters: location is the location to be converted, db is the database to use
         private static List<ExternalModel> ConvertToExternal(Location location, IDataAccess db) {
             Converter externalConverter = new Converter();
             return externalConverter.Convert(location, db);

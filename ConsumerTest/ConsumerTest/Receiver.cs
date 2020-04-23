@@ -12,6 +12,8 @@ namespace ConsumerTest
 {
     class Receiver
     {
+        //This method takes a username and a queue ID and creates a queue with the username and binds it to the selected queue id
+        //afterwards it creates the consumer and links it to the queue.
         public void Consume()
         {
             try { 
@@ -51,7 +53,7 @@ namespace ConsumerTest
                                      autoAck: false,
                                      consumer: consumer);
                 Console.ReadLine();
-            }
+            
             } catch (Exception e) {
                 if (e is AlreadyClosedException) {
                     Console.WriteLine("The connectionis already closed");
