@@ -17,32 +17,21 @@ namespace Send {
             using (var channel = connection.CreateModel()) {
                 channel.ExchangeDeclare(exchange: "Customer1",
                                         type: "topic");
-                //Setting Time to live of the message
-                var args = new Dictionary<string, object>();
-                args.Add("x-message-ttl", 30000);
                 
                 foreach (var externalMessage in messages) {
-                    string routingKey = "", bindingKey = "", queueId = "";
+                    string routingKey = "", id = "";
                     int repeatTimes = externalMessage.ParentIds.Count;
                     Stack<string> parentsForDelivery = new Stack<string>(externalMessage.ParentIds);
 
                     //Iterating through the parent id's to create queues, routingkeys and bindings.
                     for (int i = 0; i < repeatTimes; i++) {
                         if (externalMessage.ParentIds.Count > 1) {
-                            queueId = externalMessage.ParentIds.Pop();
-                            routingKey += queueId + ".";
-                            bindingKey = routingKey + "#";
+                            id = externalMessage.ParentIds.Pop();
+                            routingKey += id + ".";
                         } else {
-                            queueId = externalMessage.ParentIds.Pop();
-                            routingKey += queueId;
-                            bindingKey = routingKey;
+                            id = externalMessage.ParentIds.Pop();
+                            routingKey += id;
                         }
-                        channel.QueueDeclare(queueId, durable: true,
-                               exclusive: false,
-                               autoDelete: false,
-                               arguments: args);
-                        channel.QueueBind(queue: queueId, exchange: "Customer1", routingKey: $"{bindingKey}");
-
                     }
                     externalMessage.ParentIds = parentsForDelivery;
                     string json = JsonConvert.SerializeObject(externalMessage);
