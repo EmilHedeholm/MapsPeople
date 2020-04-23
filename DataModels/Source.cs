@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataModels {
     public class Source : IEquatable<Source> {
+        
         public string Type { get; set; }
         public List<State> State { get; set; }
         public DateTime TimeStamp { get; set; }

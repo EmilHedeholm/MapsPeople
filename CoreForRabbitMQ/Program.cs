@@ -17,7 +17,7 @@ namespace CoreForRabbitMQ {
             ReceiveDataFromRabbitMQ();
         }
 
-        static IDataAccess dataAccess = new SQLDataAccess();
+        static IDataAccess dataAccess = new MongoDBDataAccess();
         //This post method receives location data from consumers and maps them with data from other consumers before
         //savin the changes to database, converting to the external message format and sending it out of the system.
         public static void Receive(IEnumerable<Location> locations) {

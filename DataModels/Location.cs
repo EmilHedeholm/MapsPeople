@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace DataModels
 {
     public class Location
     {
+        [BsonId]
         public string Id { get; set; }
         public string ParentId { get; set; }
         public string ExternalId { get; set; }

@@ -34,11 +34,11 @@ namespace ExternalConverter
         //Param: a Location object.
         //Return: A string stack of the parent IDs.
         private Stack<string> FindParentIds(Location location) {
-            IDataAccess dataAccess = new SQLDataAccess();
+            IDataAccess dataAccess = new MongoDBDataAccess();
             Stack<string> parentIds = new Stack<string>();
             parentIds.Push(location.Id);
 
-            while (!location.ParentId.Equals("0")) {
+            while (location.ParentId != null && !location.ParentId.Equals("0")) {
                 try {
                     location = dataAccess.GetLocationById(location.ParentId);
                 }catch(Exception e) {
