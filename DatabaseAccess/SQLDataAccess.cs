@@ -228,7 +228,7 @@ namespace DatabaseAccess {
                 }
             }catch(SqlException se) {
                 connection.Dispose();
-                throw new Exception("something went wrong when trying to find a location" se);
+                throw new Exception("something went wrong when trying to find a location",se);
             }
             return location;
         }
