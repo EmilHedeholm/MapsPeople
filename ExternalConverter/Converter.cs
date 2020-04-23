@@ -13,11 +13,11 @@ namespace ExternalConverter
         //This method Converts data from the location to the external Datamodel format. 
         //Param: a Location object. 
         //Return: A list of externalmodels. 
-        public List<ExternalModel> Convert(Location location) {
+        public List<ExternalModel> Convert(Location location, IDataAccess db) {
             List<ExternalModel> externalModels = new List<ExternalModel>();
             ExternalModel externalModel = new ExternalModel();
             if (location != null) {
-                externalModel.ParentIds = FindParentIds(location);
+                externalModel.ParentIds = FindParentIds(location, db);
                 if (location.Sources != null && location.Sources.Count() > 0) {
                     for (int i = 0; i < location.Sources.Count(); i++) {
                         externalModel.Source = location.Sources[i];
@@ -33,14 +33,13 @@ namespace ExternalConverter
         //This method find all the parent IDs of a clocation
         //Param: a Location object.
         //Return: A string stack of the parent IDs.
-        private Stack<string> FindParentIds(Location location) {
-            IDataAccess dataAccess = new MongoDBDataAccess();
+        private Stack<string> FindParentIds(Location location, IDataAccess db) {
             Stack<string> parentIds = new Stack<string>();
             parentIds.Push(location.Id);
 
             while (location.ParentId != null && !location.ParentId.Equals("0")) {
                 try {
-                    location = dataAccess.GetLocationById(location.ParentId);
+                    location = db.GetLocationById(location.ParentId);
                 }catch(Exception e) {
                     Console.WriteLine(e.Message);
                 }

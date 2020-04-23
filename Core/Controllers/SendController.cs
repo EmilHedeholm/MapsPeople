@@ -12,6 +12,8 @@ using ExternalConverter;
 namespace Core.Controllers
 {
     public class SendController : ApiController {
+
+        //TODO: make possible to choose the database
         IDataAccess dataAccess = new MongoDBDataAccess();
 
         public IEnumerable<ExternalModel> Get(string id) {
@@ -25,7 +27,7 @@ namespace Core.Controllers
 
         private List<ExternalModel> Convert(Location location) {
             Converter externalConverter = new Converter();
-            return externalConverter.Convert(location);
+            return externalConverter.Convert(location, dataAccess);
         }
 
         private List<Location> GetLocation(string id) {

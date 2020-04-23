@@ -9,18 +9,43 @@ using Newtonsoft.Json;
 using Send;
 using ExternalConverter;
 using RabbitMQ.Client.Exceptions;
+using System.Xml.Serialization;
 //using RabbitMQ.Client.Exceptions;
 
 namespace CoreForRabbitMQ {
     public class Program {
+        static IDataAccess dataAccess { get; set; }
         public static void Main(string[] args) {
-            ReceiveDataFromRabbitMQ();
+            var choice = true;
+            var database = "";
+            while (choice) {
+                Console.WriteLine("input the name of the database you want to use(neo4j, mongodb, mssql)");
+                database = Console.ReadLine();
+                switch (database) {
+                    case "neo4j":
+                        dataAccess = new Neo4jDataAccess();
+                        choice = false;
+                        break;
+                    case "mongodb":
+                        dataAccess = new MongoDBDataAccess();
+                        choice = false;
+                        break;
+                    case "mssql":
+                        dataAccess = new SQLDataAccess();
+                        choice = false;
+                        break;
+                    default:
+                        Console.WriteLine("not a recognized database, try again");
+                        break;
+                }
+            }
+            ReceiveDataFromRabbitMQ(dataAccess);
         }
 
-        static IDataAccess dataAccess = new MongoDBDataAccess();
+        
         //This post method receives location data from consumers and maps them with data from other consumers before
         //savin the changes to database, converting to the external message format and sending it out of the system.
-        public static void Receive(IEnumerable<Location> locations) {
+        public static void Receive(IEnumerable<Location> locations, IDataAccess db) {
             foreach (var location in locations) {
                 Location existingLocation = null, update = null; 
                 //Getting the location data from the DB via ID.
@@ -54,7 +79,7 @@ namespace CoreForRabbitMQ {
                     }
                     //Location update = PrepareUpdate(completeLocation, existingLocation);
                     if (update.Sources.Count > 0) {
-                        var external = ConvertToExternal(update);
+                        var external = ConvertToExternal(update, db);
                         SendMessage(external);
                     }
                     
@@ -174,7 +199,7 @@ namespace CoreForRabbitMQ {
         }
 
         //This method uses RabbitMQ to get data from the the customer consumers. 
-        public static void ReceiveDataFromRabbitMQ() {
+        public static void ReceiveDataFromRabbitMQ(IDataAccess db) {
             try {
                 var factory = new ConnectionFactory() { HostName = "localhost" };
                 using (var connection = factory.CreateConnection())
@@ -196,7 +221,7 @@ namespace CoreForRabbitMQ {
                         if (message != null) {
                             //The message is converted from JSON to IEnumerable<Location>.
                             var deserializedMessage = JsonConvert.DeserializeObject<IEnumerable<Location>>(message);
-                            Receive(deserializedMessage);
+                            Receive(deserializedMessage, db);
                         }
                         channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                     };
@@ -219,9 +244,9 @@ namespace CoreForRabbitMQ {
                 }
             }
         }
-        private static List<ExternalModel> ConvertToExternal(Location location) {
+        private static List<ExternalModel> ConvertToExternal(Location location, IDataAccess db) {
             Converter externalConverter = new Converter();
-            return externalConverter.Convert(location);
+            return externalConverter.Convert(location, db);
         }
     }
 }
