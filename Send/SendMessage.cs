@@ -10,7 +10,8 @@ using RabbitMQ.Client.Exceptions;
 
 namespace Send {
     public class SendMessage {
-
+        //This method receives mapped messasages from CoreForRabbitMQ and use RabbitMQ to send messages to the system  
+        //Param: Is a list of external models. 
         public void SendUpdate(List<ExternalModel> messages) {
             try { 
             var factory = new ConnectionFactory() { HostName = "localhost" };
