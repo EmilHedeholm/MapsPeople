@@ -5,9 +5,9 @@ using System.Net;
 using System.Net.Http;
 using System.Web;
 using System.Web.Http;
-using Core.Service;
 using DatabaseAccess;
 using DataModels;
+using ExternalConverter;
 
 namespace Core.Controllers
 {
@@ -24,7 +24,7 @@ namespace Core.Controllers
         }
 
         private List<ExternalModel> Convert(Location location) {
-            ExternalConverter externalConverter = new ExternalConverter();
+            Converter externalConverter = new Converter();
             return externalConverter.Convert(location);
         }
 

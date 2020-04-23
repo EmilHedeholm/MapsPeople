@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using Newtonsoft.Json;
 using DataModels;
+using RabbitMQ.Client.Exceptions;
 
 namespace Send {
     public class SendMessage {
 
         public void SendUpdate(List<ExternalModel> messages) {
-
+            try { 
             var factory = new ConnectionFactory() { HostName = "localhost" };
             using (var connection = factory.CreateConnection())
             using (var channel = connection.CreateModel()) {
@@ -37,16 +38,28 @@ namespace Send {
                     string json = JsonConvert.SerializeObject(externalMessage);
                     var body = Encoding.UTF8.GetBytes(json);
 
-                    channel.BasicPublish(exchange: "Customer1",
-                                            routingKey: routingKey,
-                                            basicProperties: null,
-                                            body: body);
-                    Console.WriteLine(" [x] Sent '{0}':'{1}'", routingKey, json + "\n");
+                        channel.BasicPublish(exchange: "Customer1",
+                                                routingKey: routingKey,
+                                                basicProperties: null,
+                                                body: body);
+                        Console.WriteLine(" [x] Sent '{0}':'{1}'", routingKey, json + "\n");
+                    }
                 }
-
+            } catch (Exception e) {
+                if (e is AlreadyClosedException) {
+                    Console.WriteLine("The connectionis already closed");
+                } else if (e is BrokerUnreachableException) {
+                    Console.WriteLine("The broker cannot be reached");
+                } else if (e is OperationInterruptedException) {
+                    Console.WriteLine("The operation was interupted");
+                } else if (e is ConnectFailureException) {
+                    Console.WriteLine("Could not connect to the broker broker");
+                } else {
+                    Console.WriteLine("Something went wrong");
+                }
             }
+
         }
     }
-
-
 }
+

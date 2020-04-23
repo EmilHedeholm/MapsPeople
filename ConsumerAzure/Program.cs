@@ -9,6 +9,7 @@ using ConsumerAzure.JsonModel;
 using DataModels;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
 using RestSharp;
 
 namespace ConsumerAzure {
@@ -143,28 +144,42 @@ namespace ConsumerAzure {
         //This method sends data to the Core Controller for RabbitMQ. 
         //Param: Is a list of locations. 
         private static void SendDataWithRabbitMQ(List<Location> locations) {
-            var factory = new ConnectionFactory() { HostName = "localhost" };
-            using (var connection = factory.CreateConnection())
-            using (var channel = connection.CreateModel()) {
-                channel.QueueDeclare(queue: "Consumer_Queue",
-                                     durable: true,
-                                     exclusive: false,
-                                     autoDelete: false,
-                                     arguments: null);
+            try {
+                var factory = new ConnectionFactory() { HostName = "localhost" };
+                using (var connection = factory.CreateConnection())
+                using (var channel = connection.CreateModel()) {
+                    channel.QueueDeclare(queue: "Consumer_Queue",
+                                         durable: true,
+                                         exclusive: false,
+                                         autoDelete: false,
+                                         arguments: null);
 
-                var message = JsonConvert.SerializeObject(locations);
-                var body = Encoding.UTF8.GetBytes(message);
+                    var message = JsonConvert.SerializeObject(locations);
+                    var body = Encoding.UTF8.GetBytes(message);
 
-                var properties = channel.CreateBasicProperties();
-                properties.Persistent = true;
+                    var properties = channel.CreateBasicProperties();
+                    properties.Persistent = true;
 
-                channel.BasicPublish(exchange: "",
-                                     routingKey: "Consumer_Queue",
-                                     basicProperties: properties,
-                                     body: body);
-                Console.WriteLine(message);
-                Console.WriteLine();
-                Console.WriteLine();
+                    channel.BasicPublish(exchange: "",
+                                         routingKey: "Consumer_Queue",
+                                         basicProperties: properties,
+                                         body: body);
+                    Console.WriteLine(message);
+                    Console.WriteLine();
+                    Console.WriteLine();
+                }
+            } catch (Exception e) {
+                if (e is AlreadyClosedException) {
+                    Console.WriteLine("The connectionis already closed");
+                } else if (e is BrokerUnreachableException) {
+                    Console.WriteLine("The broker cannot be reached");
+                } else if (e is OperationInterruptedException) {
+                    Console.WriteLine("The operation was interupted");
+                } else if (e is ConnectFailureException) {
+                    Console.WriteLine("Could not connect to the broker broker");
+                } else {
+                    Console.WriteLine("Something went wrong");
+                }
             }
         }
     }

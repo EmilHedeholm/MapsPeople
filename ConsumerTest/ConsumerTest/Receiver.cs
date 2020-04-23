@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
 
 namespace ConsumerTest
 {
@@ -13,6 +14,7 @@ namespace ConsumerTest
     {
         public void Consume()
         {
+            try { 
             ConnectionFactory factory = new ConnectionFactory();
             factory.HostName = "localhost";
             IConnection conn = factory.CreateConnection();
@@ -49,8 +51,21 @@ namespace ConsumerTest
                                      autoAck: false,
                                      consumer: consumer);
                 Console.ReadLine();
+            }
+            } catch (Exception e) {
+                if (e is AlreadyClosedException) {
+                    Console.WriteLine("The connectionis already closed");
+                } else if (e is BrokerUnreachableException) {
+                    Console.WriteLine("The broker cannot be reached");
+                } else if (e is OperationInterruptedException) {
+                    Console.WriteLine("The operation was interupted");
+                } else if (e is ConnectFailureException) {
+                    Console.WriteLine("Could not connect to the broker broker");
+                } else {
+                    Console.WriteLine("Something went wrong");
+                }
+            }
         }
-        
     }
 }
 

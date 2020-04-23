@@ -7,6 +7,9 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Newtonsoft.Json;
 using Send;
+using ExternalConverter;
+using RabbitMQ.Client.Exceptions;
+//using RabbitMQ.Client.Exceptions;
 
 namespace CoreForRabbitMQ {
     public class Program {
@@ -19,13 +22,22 @@ namespace CoreForRabbitMQ {
         //savin the changes to database, converting to the external message format and sending it out of the system.
         public static void Receive(IEnumerable<Location> locations) {
             foreach (var location in locations) {
+                Location existingLocation = null, update = null; 
                 //Getting the location data from the DB via ID.
-                Location existingLocation = GetLocationById(location.Id),
-                        update = null;
+                try {
+                    existingLocation = GetLocationById(location.Id);
+                            
+                }catch(Exception e) {
+                    Console.WriteLine(e.Message);
+                }
                 //Checking if the location was found in the DB, if not get it by ExternalId.
                 if (existingLocation == null || existingLocation.Id.Equals("0")) {
                     //Getting the location data from the DB via externalID.
-                    existingLocation = GetLocationByExternalId(location.ExternalId);
+                    try {
+                        existingLocation = GetLocationByExternalId(location.ExternalId);
+                    }catch(Exception e) {
+                        Console.WriteLine(e.Message);
+                    }
                     if (existingLocation == null || existingLocation.Id.Equals("0")) {
                         //Going through the mapping table to find the location.
                         existingLocation = FindLocationByMappingTable(location);
@@ -35,7 +47,11 @@ namespace CoreForRabbitMQ {
                 if (existingLocation != null && !existingLocation.Id.Equals("0")) {
                     //If found then combine the data from both location and existingLocation
                     update = Map(location, existingLocation);
-                    UpdateLocation(update);
+                    try {
+                        UpdateLocation(update);
+                    }catch(Exception e) {
+                        Console.WriteLine(e.Message);
+                    }
                     //Location update = PrepareUpdate(completeLocation, existingLocation);
                     if (update.Sources.Count > 0) {
                         var external = ConvertToExternal(update);
@@ -44,7 +60,11 @@ namespace CoreForRabbitMQ {
                     
                 } else if (location.Id != "0") {
                     //If the existingLocation is still null, insert it into the database as is.
-                    InsertIntoDB(location);
+                    try {
+                        InsertIntoDB(location);
+                    }catch(Exception e) {
+                        Console.WriteLine(e.Message);
+                    }
                 }
 
             }
@@ -155,38 +175,52 @@ namespace CoreForRabbitMQ {
 
         //This method uses RabbitMQ to get data from the the customer consumers. 
         public static void ReceiveDataFromRabbitMQ() {
-            var factory = new ConnectionFactory() { HostName = "localhost" };
-            using (var connection = factory.CreateConnection())
-            using (var channel = connection.CreateModel()) {
-                channel.QueueDeclare(queue: "Consumer_Queue",
-                                     durable: true,
-                                     exclusive: false,
-                                     autoDelete: false,
-                                     arguments: null);
+            try {
+                var factory = new ConnectionFactory() { HostName = "localhost" };
+                using (var connection = factory.CreateConnection())
+                using (var channel = connection.CreateModel()) {
+                    channel.QueueDeclare(queue: "Consumer_Queue",
+                                         durable: true,
+                                         exclusive: false,
+                                         autoDelete: false,
+                                         arguments: null);
 
-                channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+                    channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
-                Console.WriteLine(" [*] Waiting for messages.");
+                    Console.WriteLine(" [*] Waiting for messages.");
 
-                var consumer = new EventingBasicConsumer(channel);
-                consumer.Received += (sender, ea) => {
-                    var body = ea.Body;
-                    var message = Encoding.UTF8.GetString(body);
-                    if (message != null) {
-                        //The message is converted from JSON to IEnumerable<Location>.
-                        var deserializedMessage = JsonConvert.DeserializeObject<IEnumerable<Location>>(message);
-                        Receive(deserializedMessage);
-                    }
-                    channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
-                };
-                channel.BasicConsume(queue: "Consumer_Queue",
-                                     autoAck: false,
-                                     consumer: consumer);
-                Console.ReadLine();
+                    var consumer = new EventingBasicConsumer(channel);
+                    consumer.Received += (sender, ea) => {
+                        var body = ea.Body;
+                        var message = Encoding.UTF8.GetString(body);
+                        if (message != null) {
+                            //The message is converted from JSON to IEnumerable<Location>.
+                            var deserializedMessage = JsonConvert.DeserializeObject<IEnumerable<Location>>(message);
+                            Receive(deserializedMessage);
+                        }
+                        channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+                    };
+                    channel.BasicConsume(queue: "Consumer_Queue",
+                                         autoAck: false,
+                                         consumer: consumer);
+                    Console.ReadLine();
+                }
+            } catch (Exception e) {
+                if (e is AlreadyClosedException) {
+                    Console.WriteLine("The connectionis already closed");
+                } else if (e is BrokerUnreachableException) {
+                    Console.WriteLine("The broker cannot be reached");
+                } else if (e is OperationInterruptedException) {
+                    Console.WriteLine("The operation was interupted");
+                } else if (e is ConnectFailureException) {
+                    Console.WriteLine("Could not connect to the broker broker");
+                } else {
+                    Console.WriteLine("Something went wrong");
+                }
             }
         }
         private static List<ExternalModel> ConvertToExternal(Location location) {
-            ExternalConverter externalConverter = new ExternalConverter();
+            Converter externalConverter = new Converter();
             return externalConverter.Convert(location);
         }
     }
