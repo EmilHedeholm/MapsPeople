@@ -34,7 +34,7 @@ namespace ExternalConverter
         //Param: a Location object.
         //Return: A string stack of the parent IDs.
         private Stack<string> FindParentIds(Location location) {
-            IDataAccess dataAccess = new DataAccess();
+            IDataAccess dataAccess = new SQLDataAccess();
             Stack<string> parentIds = new Stack<string>();
             parentIds.Push(location.Id);
 

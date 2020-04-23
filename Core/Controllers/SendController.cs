@@ -12,7 +12,7 @@ using ExternalConverter;
 namespace Core.Controllers
 {
     public class SendController : ApiController {
-        IDataAccess dataAccess = new DataAccess();
+        IDataAccess dataAccess = new SQLDataAccess();
 
         public IEnumerable<ExternalModel> Get(string id) {
             List<Location> locations = GetLocation(id);
