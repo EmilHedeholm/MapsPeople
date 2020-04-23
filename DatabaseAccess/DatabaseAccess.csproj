@@ -85,7 +85,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MongoDBDataAccess.cs" />
-    <Compile Include="Noe4jDataAccess.cs" />
+    <Compile Include="Neo4jDataAccess.cs" />
     <Compile Include="IDataAccess.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
