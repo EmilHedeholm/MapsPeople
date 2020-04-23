@@ -29,6 +29,8 @@ namespace XMLConsumer {
             }
         }
 
+        //This method gets data from the data provided by XMLSource, and uses the method FilterData on that data. After that it returns a list of filtered data that has been converted to Internal Data Model by using the method ConvertFromJsonToInternalModel. 
+        //Return: Is a list of locations in the internal Data model format. 
         private static List<DataModels.Location> GetData() {
             HttpWebRequest req = null;
             HttpWebResponse res = null;
@@ -59,6 +61,8 @@ namespace XMLConsumer {
             return ConvertToInternalModel(filteredData);
         }
 
+        //This method filters data so that it only keeps data that has been changed. 
+        //Param: a ArrayOfLocation object.
         private static ArrayOfLocation FilterData(ArrayOfLocation newData) {
             ArrayOfLocation filteredData = new ArrayOfLocation();
 
@@ -86,6 +90,9 @@ namespace XMLConsumer {
             return filteredData;
         }
 
+        //This method Converts data from the deserialized XML to the Internal Datamodel format. 
+        //Param: a ArrayOfLocation object. 
+        //Return: A list of locations (internal)   
         private static List<DataModels.Location> ConvertToInternalModel(ArrayOfLocation filteredData) {
             List<DataModels.Location> convertedLocations = new List<DataModels.Location>();
 
@@ -104,6 +111,8 @@ namespace XMLConsumer {
             return convertedLocations;
         }
 
+        //This method sends data to the Core Controller for RabbitMQ. 
+        //Param: Is a list of locations. 
         private static void SendDataWithRabbitMQ(List<DataModels.Location> data) {
             try { 
             var factory = new ConnectionFactory() { HostName = "localhost" };
