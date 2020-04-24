@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DataModels
 {
-    public class Location
+    public class Location : IEquatable<Location>
     {
         [BsonId]
         public string Id { get; set; }
@@ -22,6 +22,17 @@ namespace DataModels
             ParentId = "0";
             ExternalId = "0";
             ConsumerId = 0;
+        }
+
+        public override int GetHashCode() {
+            return Id.GetHashCode();
+        }
+        public bool Equals(Location other) {
+            if (this.Id.Equals(other.Id)) {
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 }

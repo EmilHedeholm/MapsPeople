@@ -14,15 +14,36 @@ namespace Core.Controllers
     public class SendController : ApiController {
 
         //TODO: make possible to choose the database
-        IDataAccess dataAccess = new MongoDBDataAccess();
+        IDataAccess dataAccess { get; set; }
 
-        public IEnumerable<ExternalModel> Get(string id) {
-            List<Location> locations = GetLocation(id);
-            List<ExternalModel> messages = new List<ExternalModel>();
-            foreach (var location in locations) {
-                messages.AddRange(Convert(location));
+        public HttpResponseMessage Get(string id, string database) {
+            HttpResponseMessage response = new HttpResponseMessage();
+                switch (database) {
+                    case "neo4j":
+                        dataAccess = new Neo4jDataAccess();
+                        response.StatusCode = HttpStatusCode.OK;
+                        break;
+                    case "mongodb":
+                        dataAccess = new MongoDBDataAccess();
+                        response.StatusCode = HttpStatusCode.OK;
+                        break;
+                    case "mssql":
+                        dataAccess = new SQLDataAccess();
+                        response.StatusCode = HttpStatusCode.OK;
+                        break;
+                    default:
+                        response.StatusCode = HttpStatusCode.BadRequest;
+                        break;
             }
-            return messages;
+            if (response.StatusCode == HttpStatusCode.OK) {
+                HashSet<Location> locations = GetLocation(id);
+                List<ExternalModel> messages = new List<ExternalModel>();
+                foreach (var location in locations) {
+                    messages.AddRange(Convert(location));
+                }
+                return Request.CreateResponse(response.StatusCode, messages);
+            }
+            return new HttpResponseMessage(HttpStatusCode.BadRequest);
         }
 
         private List<ExternalModel> Convert(Location location) {
@@ -30,8 +51,8 @@ namespace Core.Controllers
             return externalConverter.Convert(location, dataAccess);
         }
 
-        private List<Location> GetLocation(string id) {
-            List<Location> foundLocations = new List<Location>();
+        private HashSet<Location> GetLocation(string id) {
+            HashSet<Location> foundLocations = new HashSet<Location>();
             foundLocations = dataAccess.GetAllConnectedLocations(id, foundLocations);
             return foundLocations;
         }

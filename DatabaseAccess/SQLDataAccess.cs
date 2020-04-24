@@ -63,10 +63,18 @@ namespace DatabaseAccess {
 
         //this method maps data from a datareader to source objects
         private Source MapSource(IDataReader sourceReader) {
-            return new Source {
-                Type = sourceReader.GetString(1),
-                TimeStamp = sourceReader.GetDateTime(2)
-            };
+            Source source = new Source();
+            if (!sourceReader.IsDBNull(1)) {
+                source.Type = sourceReader.GetString(1);
+            } else {
+                source.Type = null;
+            }
+            if (!sourceReader.IsDBNull(2)) {
+                source.TimeStamp = sourceReader.GetDateTime(2);
+            } else {
+                source.TimeStamp = DateTime.Now;
+            }
+            return source;
         }
 
         //this method inserts sources with all its states into the database 
@@ -118,10 +126,18 @@ namespace DatabaseAccess {
 
         //this method maps data from a datareader to state objects
         private State MapState(IDataReader stateReader) {
-            return new State {
-                Property = stateReader.GetString(1),
-                Value = stateReader.GetString(2)
-            };
+            State state = new State();
+            if (!stateReader.IsDBNull(1)) {
+                state.Property = stateReader.GetString(1);
+            } else {
+                state.Property = null;
+            }
+            if (!stateReader.IsDBNull(2)) {
+                state.Value = stateReader.GetString(2);
+            } else {
+                state.Value = null;
+            }
+            return state;
         }
          //this method inserts states into the database
         private void CreateStates(Source source, Location location) {
@@ -154,9 +170,9 @@ namespace DatabaseAccess {
         }
 
         //this method find a location and all the locations below it in the hierarki of locations
-        public List<Location> GetAllConnectedLocations(string id, List<Location> foundLocations) {
+        public HashSet<Location> GetAllConnectedLocations(string id, HashSet<Location> foundLocations) {
             SqlConnection connection = null;
-            List<Location> locations = new List<Location>();
+            HashSet<Location> locations = new HashSet<Location>();
             try {
                 using (connection = new SqlConnection(conString)) {
                     connection.Open();
@@ -187,12 +203,27 @@ namespace DatabaseAccess {
 
         //this method maps data from a datareader to location objects
         private Location MapLocation(IDataReader locationReader) {
-            Location location = new Location {
-                Id = locationReader.GetString(0),
-                ParentId = locationReader.GetString(1),
-                ExternalId = locationReader.GetString(2),
-                ConsumerId = locationReader.GetInt32(3)
-            };
+            Location location = new Location();
+            if (!locationReader.IsDBNull(0)) {
+                location.Id = locationReader.GetString(0);
+            } else {
+                location.Id = null;
+            }
+            if (!locationReader.IsDBNull(1)) {
+                location.ConsumerId = locationReader.GetInt32(1);
+            } else {
+                location.ConsumerId = 0;
+            }
+            if (!locationReader.IsDBNull(2)) {
+                location.ParentId = locationReader.GetString(2);
+            } else {
+                location.ParentId = null;
+            }
+            if (!locationReader.IsDBNull(3)) {
+                location.ExternalId = locationReader.GetString(3);
+            } else {
+                location.ExternalId = null;
+            }
             location.Sources = FindSourcesByLocationID(location);
             return location;
         }
@@ -205,7 +236,9 @@ namespace DatabaseAccess {
                 using (connection = new SqlConnection(conString)) {
                     connection.Open();
                     location = connection.Query<Location>("SELECT Id, parentId, externalId, consumerId FROM LocationMP WHERE externalId = @externalId", new { externalId }).SingleOrDefault();
-                    location.Sources = FindSourcesByLocationID(location);
+                    if (location != null) {
+                        location.Sources = FindSourcesByLocationID(location);
+                    }
                 }
                 
             }catch(SqlException se) {
@@ -223,8 +256,9 @@ namespace DatabaseAccess {
                 using (connection = new SqlConnection(conString)) {
                     connection.Open();
                     location = connection.Query<Location>("SELECT id, parentId, externalId, consumerId from locationMP WHERE id = @id", new { id }).SingleOrDefault();
+                    if (location != null) { 
                     location.Sources = FindSourcesByLocationID(location);
-
+                    }
                 }
             }catch(SqlException se) {
                 connection.Dispose();

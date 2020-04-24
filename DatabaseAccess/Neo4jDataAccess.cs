@@ -189,7 +189,7 @@ namespace DatabaseAccess
             return foundLocation;
         }
 
-        public List<Location> GetAllConnectedLocations(string id, List<Location> foundLocations) {
+        public HashSet<Location> GetAllConnectedLocations(string id, HashSet<Location> foundLocations) {
             try {
                 client.Connect();
                 var locations = client.Cypher

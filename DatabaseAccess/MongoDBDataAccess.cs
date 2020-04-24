@@ -47,7 +47,7 @@ namespace DatabaseAccess {
         //This method gets a list of all the locations that are connected through a specified Id.
         //parameter: the Id of the location, an empty List of locations 
         //return the list of locations
-        public List<Location> GetAllConnectedLocations(string id, List<Location> foundLocations) {
+        public HashSet<Location> GetAllConnectedLocations(string id, HashSet<Location> foundLocations) {
             try {
                 var builder = Builders<Location>.Filter;
                 var filter = builder.Or(builder.Eq("_id", id), builder.Eq("ParentId", id));
