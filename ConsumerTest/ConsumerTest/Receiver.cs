@@ -14,7 +14,7 @@ namespace ConsumerTest
     {
         //This method takes a username and a queue ID and creates a queue with the username and binds it to the selected queue id
         //afterwards it creates the consumer and links it to the queue.
-        public void Consume()
+        public void Consume(string userQueue, string queueID)
         {
             try { 
             ConnectionFactory factory = new ConnectionFactory();
@@ -23,10 +23,6 @@ namespace ConsumerTest
             IModel channel = conn.CreateModel();
             channel.ExchangeDeclare(exchange: "Customer1",
                                         type: "topic");
-            Console.WriteLine("Enter Username");
-            string userQueue = Console.ReadLine();
-            Console.WriteLine("Enter a queue ID");
-            string queueID = Console.ReadLine();
             var args = new Dictionary<string, object>();
             args.Add("x-message-ttl", 30000);
 
@@ -41,11 +37,12 @@ namespace ConsumerTest
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
                     if (message != null) {
-                        var deserializedMessage = JsonConvert.DeserializeObject<ExternalModel>(message);
-                        foreach (var parentId in deserializedMessage.ParentIds){
-                            Console.Write(parentId + ", ");
-                            Console.WriteLine();
-                        }
+                        //var deserializedMessage = JsonConvert.DeserializeObject<ExternalModel>(message);
+                        //foreach (var parentId in deserializedMessage.ParentIds){
+                        //    Console.Write(parentId + ", ");
+                        //    Console.WriteLine();
+                        //}
+                        Console.WriteLine(message);
                     }
                     channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                 };
