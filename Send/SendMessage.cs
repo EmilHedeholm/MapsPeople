@@ -73,7 +73,7 @@ namespace Send {
 
         //        client.SendMessageAsync(topic, new List<Message> { msg }).Wait();
         //    }
-            
+
         //}
 
         //public void SendUpdateWithKafka(List<ExternalModel> messages) {
@@ -82,7 +82,7 @@ namespace Send {
         //        int repeatTimes = externalMessage.ParentIds.Count;
         //        string topic = "";
         //        for (int i = 0; i < repeatTimes; i++) {
-        //            topic= externalMessage.ParentIds.Pop();
+        //            topic = externalMessage.ParentIds.Pop();
         //            DistributeMessage(topic, messages);
         //        }
 
