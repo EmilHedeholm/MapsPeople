@@ -101,16 +101,16 @@ namespace DatabaseAccess {
 
         // This method gets a list of all the locations
         //returns all locations
-        public List<Location> GetLocations() {
-            List<Location> foundLocations = null;
-            try { 
-            var filter = Builders<Location>.Filter.Empty;
-            foundLocations = collection.Find(filter).ToList();
-            } catch (MongoException me) {
-                throw new Exception("Something went wrong when trying to get a location", me);
-            }
-            return foundLocations;
-        }
+        //public List<Location> GetLocations() {
+        //    List<Location> foundLocations = null;
+        //    try { 
+        //    var filter = Builders<Location>.Filter.Empty;
+        //    foundLocations = collection.Find(filter).ToList();
+        //    } catch (MongoException me) {
+        //        throw new Exception("Something went wrong when trying to get a location", me);
+        //    }
+        //    return foundLocations;
+        //}
 
         //This method updates a location if the id provided matches one in the database otherwise it inserts it.
         //parameter: location

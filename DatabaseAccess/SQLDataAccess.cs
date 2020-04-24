@@ -267,23 +267,23 @@ namespace DatabaseAccess {
             return location;
         }
 
-        public List<Location> GetLocations() {
-            List<Location> locations = new List<Location>();
-            using (SqlConnection connection = new SqlConnection(conString)) {
-                connection.Open();
-                using (SqlCommand cmdFoundAllLocation = connection.CreateCommand()) {
-                    cmdFoundAllLocation.CommandText = "SELECT * FROM LocationMP";
-                    SqlDataReader foundAllReader = cmdFoundAllLocation.ExecuteReader();
-                    while (foundAllReader.Read()) {
-                        locations.Add(MapLocation(foundAllReader));
-                    }
-                }
-            }
-            foreach (var location in locations) {
-                location.Sources = FindSourcesByLocationID(location);
-            }
-            return locations;
-        }
+        //public List<Location> GetLocations() {
+        //    List<Location> locations = new List<Location>();
+        //    using (SqlConnection connection = new SqlConnection(conString)) {
+        //        connection.Open();
+        //        using (SqlCommand cmdFoundAllLocation = connection.CreateCommand()) {
+        //            cmdFoundAllLocation.CommandText = "SELECT * FROM LocationMP";
+        //            SqlDataReader foundAllReader = cmdFoundAllLocation.ExecuteReader();
+        //            while (foundAllReader.Read()) {
+        //                locations.Add(MapLocation(foundAllReader));
+        //            }
+        //        }
+        //    }
+        //    foreach (var location in locations) {
+        //        location.Sources = FindSourcesByLocationID(location);
+        //    }
+        //    return locations;
+        //}
 
         //this method updates a location and all its sources and states
         public void UpdateLocation(Location location) {

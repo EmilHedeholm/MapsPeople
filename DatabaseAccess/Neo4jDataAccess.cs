@@ -295,27 +295,27 @@ namespace DatabaseAccess
             }
         }
 
-        public List<Location> GetLocations() {
-            List<Location> completeLocations = new List<Location>();
-            try {
-                client.Connect();
+        //public List<Location> GetLocations() {
+        //    List<Location> completeLocations = new List<Location>();
+        //    try {
+        //        client.Connect();
 
-                var locations = client.Cypher
-                    .Match("(location:Location)")
-                    .Return<Location>("location")
-                    .Results;
+        //        var locations = client.Cypher
+        //            .Match("(location:Location)")
+        //            .Return<Location>("location")
+        //            .Results;
 
                 
-                foreach (var location in locations) {
-                    var foundLocation = GetLocationById(location.Id);
-                    completeLocations.Add(foundLocation);
-                }
-                client.Dispose();  
-            }catch(NeoException ne) {
-                client.Dispose();
-                throw new Exception("Something went wrong when trying to get a location", ne);
-            }
-            return completeLocations;
-        }
+        //        foreach (var location in locations) {
+        //            var foundLocation = GetLocationById(location.Id);
+        //            completeLocations.Add(foundLocation);
+        //        }
+        //        client.Dispose();  
+        //    }catch(NeoException ne) {
+        //        client.Dispose();
+        //        throw new Exception("Something went wrong when trying to get a location", ne);
+        //    }
+        //    return completeLocations;
+        //}
     }
 }
