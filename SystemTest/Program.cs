@@ -23,48 +23,29 @@ namespace SystemTest {
             //Stopwatch stopWatch = new Stopwatch();
             //stopWatch.Start();
             //Thread.Sleep(10000);
-            
+            Stopwatch sendWatch = new Stopwatch();
             while (true) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
+                sendWatch.Start();
                 List<Location> data = GetData();
-                Location testData = data[0];
-                List<Location> testDatas = new List<Location>();
-                testDatas.Add(testData);
-                if (!(testDatas.Count == 0)) {
-                    Stopwatch sendWatch = new Stopwatch();
-                    sendWatch.Start();
-                    SendDataWithRabbitMQ(testDatas);
-                    sendWatch.Stop();
-                    // Get the elapsed time as a TimeSpan value.
-                    TimeSpan ts1 = sendWatch.Elapsed;
-                    // Format and display the TimeSpan value.
-                    string elapsedTime1 = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                        ts1.Hours, ts1.Minutes, ts1.Seconds,
-                        ts1.Milliseconds / 10);
-                    Console.WriteLine("Send RunTime " + elapsedTime1);
+                if (!(data.Count == 0)) {
+                    SendDataWithRabbitMQ(data);
                 }
-                Console.WriteLine("Enter Username");
-                string userQueue = Console.ReadLine();
-                Console.WriteLine("Enter a queue ID");
-                string queueID = Console.ReadLine();
-                Console.WriteLine("Enter the name of the database you want to use(neo4j, mongodb, mssql)");
-                string database = Console.ReadLine();
-                GetAllLocations(queueID, database);
-                Stopwatch stopWatch = new Stopwatch();
-                stopWatch.Start();
-                //Thread.Sleep(10000);
+                string userQueue = "testUser";
+                string queueID = "287d4074d6c647a49f215fb1";
                 Receiver receiver = new Receiver();
                 receiver.Consume(userQueue, queueID);
 
-                stopWatch.Stop();
+                sendWatch.Stop();
                 // Get the elapsed time as a TimeSpan value.
-                TimeSpan ts = stopWatch.Elapsed;
+                TimeSpan ts = sendWatch.Elapsed;
                 // Format and display the TimeSpan value.
                 string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
                     ts.Hours, ts.Minutes, ts.Seconds,
                     ts.Milliseconds / 10);
                 Console.WriteLine("Receive RunTime " + elapsedTime);
+                sendWatch.Reset();
             }    
             
         }
@@ -73,17 +54,34 @@ namespace SystemTest {
         //This method gets data from the test data source provided by MapsPeople, and uses the method FilterData on that data. After that it returns a list of filtered data that has been converted to Internal Data Model by using the method ConvertFromJsonToInternalModel. 
         //Return: Is a list of locations in the internal Data model format. 
         private static List<Location> GetData() {
-            string jsonstr;
-            var request = WebRequest.Create("https://mi-ucn-live-data.azurewebsites.net/occupancy?datasetid=6fbb3035c7e2436ba335edac") as HttpWebRequest;
-            var response = request.GetResponse();
-            using (StreamReader sr = new StreamReader(response.GetResponseStream())) {
-                jsonstr = sr.ReadToEnd();
-            }
-            //The Data is in JSON, so it is deserialized so that it will be objects instead. 
-            List<RootObject> data = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
+            //string jsonstr;
+            //var request = WebRequest.Create("https://mi-ucn-live-data.azurewebsites.net/occupancy?datasetid=6fbb3035c7e2436ba335edac") as HttpWebRequest;
+            //var response = request.GetResponse();
+            //using (StreamReader sr = new StreamReader(response.GetResponseStream())) {
+            //    jsonstr = sr.ReadToEnd();
+            //}
+            ////The Data is in JSON, so it is deserialized so that it will be objects instead. 
+            //List<RootObject> data = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
 
-            List<RootObject> filteredData = FilterData(data);
-            return ConvertToInternalModel(filteredData);
+            //List<RootObject> filteredData = FilterData(data);
+            //return ConvertToInternalModel(filteredData);
+            List<Location> data = new List<Location>();
+            for (int i = 1; i < 201; i++) {
+                Location location = new Location();
+                location.Id = i + "";
+                location.ConsumerId = 3;
+                Source source = new Source();
+                State state = new State();
+                state.Property = "testState";
+                Random rand = new Random();
+                state.Value = rand.Next() % 2 == 0 ? true.ToString() : false.ToString();
+                source.State.Add(state);
+                source.Type = "testSource";
+                source.TimeStamp = DateTime.Now;
+                location.Sources.Add(source);
+                data.Add(location);
+            }
+            return data;
         }
 
         //This method Converts data from the deserialized JSON to the Internal Datamodel format. 
@@ -205,9 +203,9 @@ namespace SystemTest {
                                          routingKey: "Consumer_Queue",
                                          basicProperties: properties,
                                          body: body);
-                    Console.WriteLine(message);
-                    Console.WriteLine();
-                    Console.WriteLine();
+                    //Console.WriteLine(message);
+                    //Console.WriteLine();
+                    //Console.WriteLine();
                 }
             } catch (Exception e) {
                 if (e is AlreadyClosedException) {
@@ -222,15 +220,6 @@ namespace SystemTest {
                     Console.WriteLine("Something went wrong");
                 }
             }
-        }
-        private static void GetAllLocations(string queueId, string database) {
-            string jsonstr;
-            var request = WebRequest.Create($"https://localhost:44346/api/Send?id={queueId}&database={database}") as HttpWebRequest;
-            var response = request.GetResponse();
-            using (StreamReader sr = new StreamReader(response.GetResponseStream())) {
-                jsonstr = sr.ReadToEnd();
-            }
-            Console.WriteLine(jsonstr);
         }
     }
 }

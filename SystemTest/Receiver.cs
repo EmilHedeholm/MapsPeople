@@ -39,7 +39,7 @@ namespace SystemTest {
                         //    Console.Write(parentId + ", ");
                         //    Console.WriteLine();
                         //}
-                        Console.WriteLine(message);
+                       // Console.WriteLine(message);
                     }
                     channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                 };
