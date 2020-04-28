@@ -46,7 +46,7 @@ namespace SystemTest {
                 channel.BasicConsume(queue: userQueue,
                                      autoAck: false,
                                      consumer: consumer);
-                Console.ReadLine();
+                //Console.ReadLine();
 
             } catch (Exception e) {
                 if (e is AlreadyClosedException) {
