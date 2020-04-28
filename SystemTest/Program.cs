@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using ConsumerAzure.JsonModel;
 using DataModels;
 using Newtonsoft.Json;
@@ -16,13 +17,18 @@ using RestSharp;
 namespace SystemTest {
     class Program {
         static List<RootObject> oldData = new List<RootObject>();
+        private static System.Timers.Timer aTimer;
         static void Main(string[] args) {
+            SetTimer();
             while (true) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
                 List<Location> data = GetData();
-                if (!(data.Count == 0)) {
-                    SendDataWithRabbitMQ(data);
+                Location testData = data[0];
+                List<Location> testDatas = new List<Location>();
+                testDatas.Add(testData);
+                if (!(testDatas.Count == 0)) {
+                    SendDataWithRabbitMQ(testDatas);
                 }
                 Console.WriteLine("Enter Username");
                 string userQueue = Console.ReadLine();
@@ -33,7 +39,23 @@ namespace SystemTest {
                 GetAllLocations(queueID, database);
                 Receiver receiver = new Receiver();
                 receiver.Consume(userQueue, queueID);
+                aTimer.Stop();
+                aTimer.Dispose();
             }         
+        }
+
+        private static void SetTimer() {
+            // Create a timer with a two second interval.
+            aTimer = new System.Timers.Timer(2000);
+            // Hook up the Elapsed event for the timer. 
+            aTimer.Elapsed += OnTimedEvent;
+            aTimer.AutoReset = true;
+            aTimer.Enabled = true;
+        }
+
+        private static void OnTimedEvent(Object source, ElapsedEventArgs e) {
+            Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
+                              e.SignalTime);
         }
         //This method gets data from the test data source provided by MapsPeople, and uses the method FilterData on that data. After that it returns a list of filtered data that has been converted to Internal Data Model by using the method ConvertFromJsonToInternalModel. 
         //Return: Is a list of locations in the internal Data model format. 

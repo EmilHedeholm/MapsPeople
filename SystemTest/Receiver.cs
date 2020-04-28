@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -30,7 +31,7 @@ namespace SystemTest {
 
                 var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (sender, ea) => {
-                    var body = ea.Body;
+                    byte[] body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
                     if (message != null) {
                         //var deserializedMessage = JsonConvert.DeserializeObject<ExternalModel>(message);
