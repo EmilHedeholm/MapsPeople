@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Confluent.Kafka;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -62,6 +63,25 @@ namespace ConsumerTest
                     Console.WriteLine("Could not connect to the broker broker");
                 } else {
                     Console.WriteLine("Something went wrong");
+                }
+            }
+        }
+
+        public void ReceiveDataFromKafka(string topic) {
+            //this code is a hack to make consumers for kafka with different groupids 
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var stringChars = new char[10];
+            var random = new Random();
+            for (int i = 0; i < stringChars.Length; i++) {
+                stringChars[i] = chars[random.Next(chars.Length)];
+            }
+            var groupId = new String(stringChars);
+
+            using (var consumer = new ConsumerBuilder<Ignore, string>(new ConsumerConfig { BootstrapServers = "localhost", GroupId = groupId }).Build()) {
+                consumer.Subscribe(topic);
+                while (true) {
+                    var result = consumer.Consume();
+                    Console.WriteLine(result.Message.Value);
                 }
             }
         }
