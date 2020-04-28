@@ -32,7 +32,17 @@ namespace SystemTest {
                 List<Location> testDatas = new List<Location>();
                 testDatas.Add(testData);
                 if (!(testDatas.Count == 0)) {
+                    Stopwatch sendWatch = new Stopwatch();
+                    sendWatch.Start();
                     SendDataWithRabbitMQ(testDatas);
+                    sendWatch.Stop();
+                    // Get the elapsed time as a TimeSpan value.
+                    TimeSpan ts1 = sendWatch.Elapsed;
+                    // Format and display the TimeSpan value.
+                    string elapsedTime1 = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                        ts1.Hours, ts1.Minutes, ts1.Seconds,
+                        ts1.Milliseconds / 10);
+                    Console.WriteLine("Send RunTime " + elapsedTime1);
                 }
                 Console.WriteLine("Enter Username");
                 string userQueue = Console.ReadLine();
@@ -54,7 +64,7 @@ namespace SystemTest {
                 string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
                     ts.Hours, ts.Minutes, ts.Seconds,
                     ts.Milliseconds / 10);
-                Console.WriteLine("RunTime " + elapsedTime);
+                Console.WriteLine("Receive RunTime " + elapsedTime);
             }    
             
         }
