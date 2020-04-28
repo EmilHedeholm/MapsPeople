@@ -67,17 +67,8 @@ namespace ConsumerTest
             }
         }
 
-        public void ReceiveDataFromKafka(string topic) {
-            //this code is a hack to make consumers for kafka with different groupids 
-            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            var stringChars = new char[10];
-            var random = new Random();
-            for (int i = 0; i < stringChars.Length; i++) {
-                stringChars[i] = chars[random.Next(chars.Length)];
-            }
-            var groupId = new String(stringChars);
-
-            using (var consumer = new ConsumerBuilder<Ignore, string>(new ConsumerConfig { BootstrapServers = "localhost", GroupId = groupId }).Build()) {
+        public void ReceiveDataFromKafka(string userName, string topic) {
+            using (var consumer = new ConsumerBuilder<Ignore, string>(new ConsumerConfig { BootstrapServers = "localhost", GroupId = userName }).Build()) {
                 consumer.Subscribe(topic);
                 while (true) {
                     var result = consumer.Consume();

@@ -12,6 +12,13 @@ namespace ConsumerTest {
         static void Main(string[] args) {
             Receiver receiver = new Receiver();
             var choice = true;
+            Console.WriteLine("Enter Username");
+            string userName = Console.ReadLine();
+            string database = "";
+            while (database != "neo4j" && database != "mongodb" && database != "mssql") { 
+            Console.WriteLine("Enter the name of the database you want to use(neo4j, mongodb, mssql)");
+            database = Console.ReadLine();
+            }
             while (choice) {
                 Console.WriteLine("input the name of the messagebroker you want to use(kafka, rabbitmq)");
                 var messageBroker = Console.ReadLine();
@@ -19,21 +26,15 @@ namespace ConsumerTest {
                     case "kafka":
                         Console.WriteLine("Enter a topic");
                         string topic = Console.ReadLine();
-                        Console.WriteLine("Enter the name of the database you want to use(neo4j, mongodb, mssql)");
-                        string databasek = Console.ReadLine();
-                        GetAllLocations(topic, databasek);
-                        receiver.ReceiveDataFromKafka(topic);
+                        GetAllLocations(topic, database);
+                        receiver.ReceiveDataFromKafka(userName, topic);
                         choice = false;
                         break;
                     case "rabbitmq":
-                        Console.WriteLine("Enter Username");
-                        string userQueue = Console.ReadLine();
                         Console.WriteLine("Enter a queue ID");
                         string queueID = Console.ReadLine();
-                        Console.WriteLine("Enter the name of the database you want to use(neo4j, mongodb, mssql)");
-                        string databaser = Console.ReadLine();
-                        GetAllLocations(queueID, databaser);
-                        receiver.Consume(userQueue, queueID);
+                        GetAllLocations(queueID, database);
+                        receiver.Consume(userName, queueID);
                         choice = false;
                         break;
                     default:
