@@ -13,13 +13,17 @@ using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using RestSharp;
+using System.Diagnostics;
 
 namespace SystemTest {
     class Program {
         static List<RootObject> oldData = new List<RootObject>();
-        private static System.Timers.Timer aTimer;
+        
         static void Main(string[] args) {
-            SetTimer();
+            //Stopwatch stopWatch = new Stopwatch();
+            //stopWatch.Start();
+            //Thread.Sleep(10000);
+            
             while (true) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
@@ -37,26 +41,25 @@ namespace SystemTest {
                 Console.WriteLine("Enter the name of the database you want to use(neo4j, mongodb, mssql)");
                 string database = Console.ReadLine();
                 GetAllLocations(queueID, database);
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
+                //Thread.Sleep(10000);
                 Receiver receiver = new Receiver();
                 receiver.Consume(userQueue, queueID);
-                aTimer.Stop();
-                aTimer.Dispose();
-            }         
+
+                stopWatch.Stop();
+                // Get the elapsed time as a TimeSpan value.
+                TimeSpan ts = stopWatch.Elapsed;
+                // Format and display the TimeSpan value.
+                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                    ts.Hours, ts.Minutes, ts.Seconds,
+                    ts.Milliseconds / 10);
+                Console.WriteLine("RunTime " + elapsedTime);
+            }    
+            
         }
 
-        private static void SetTimer() {
-            // Create a timer with a two second interval.
-            aTimer = new System.Timers.Timer(2000);
-            // Hook up the Elapsed event for the timer. 
-            aTimer.Elapsed += OnTimedEvent;
-            aTimer.AutoReset = true;
-            aTimer.Enabled = true;
-        }
-
-        private static void OnTimedEvent(Object source, ElapsedEventArgs e) {
-            Console.WriteLine("The Elapsed event was raised at {0:HH:mm:ss.fff}",
-                              e.SignalTime);
-        }
+      
         //This method gets data from the test data source provided by MapsPeople, and uses the method FilterData on that data. After that it returns a list of filtered data that has been converted to Internal Data Model by using the method ConvertFromJsonToInternalModel. 
         //Return: Is a list of locations in the internal Data model format. 
         private static List<Location> GetData() {

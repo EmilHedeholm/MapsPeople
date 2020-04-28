@@ -31,7 +31,7 @@ namespace SystemTest {
 
                 var consumer = new EventingBasicConsumer(channel);
                 consumer.Received += (sender, ea) => {
-                    byte[] body = ea.Body;
+                    var body = ea.Body.ToArray();
                     var message = Encoding.UTF8.GetString(body);
                     if (message != null) {
                         //var deserializedMessage = JsonConvert.DeserializeObject<ExternalModel>(message);
