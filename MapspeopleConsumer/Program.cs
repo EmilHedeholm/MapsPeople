@@ -22,7 +22,7 @@ namespace MapspeopleConsumer {
         public static void Main(string[] args) {
             var choice = true;
             while (choice) {
-                Console.WriteLine("input the name of the database you want to use(neo4j, mongodb, mssql)");
+                Console.WriteLine("input the name of the messagebroker you want to use(kafka, rabbitmq)");
                 messageBroker = Console.ReadLine();
                 switch (messageBroker) {
                     case "kafka":
@@ -36,7 +36,7 @@ namespace MapspeopleConsumer {
                         break;
                 }
             }
-            while (true) {
+           // while (true) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
                 List<DataModels.Location> data = GetData();
@@ -47,7 +47,7 @@ namespace MapspeopleConsumer {
                         SendDataWithRabbitMQ(data);
                     }
                 }
-            }
+            //}
         }
 
         //This method request a token using a post Request using your credentials from Mapspeoples CMS, which gives you a token that you

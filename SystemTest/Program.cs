@@ -25,7 +25,7 @@ namespace SystemTest {
             //Thread.Sleep(10000);
             List<double> times = new List<double>();
             //Stopwatch sendWatch = new Stopwatch();
-            for (int i = 0; i < 11; i++) {
+            for (int i = 0; i < 51; i++) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
                 //sendWatch.Start();
@@ -56,7 +56,7 @@ namespace SystemTest {
             foreach (var time in times) {
                 total += time;
             }
-            double average = total / 10;
+            double average = total / 50;
             Console.WriteLine(average);
             Console.ReadLine();
         }
