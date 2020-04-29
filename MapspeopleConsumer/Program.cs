@@ -22,7 +22,7 @@ namespace MapspeopleConsumer {
         public static void Main(string[] args) {
             var choice = true;
             while (choice) {
-                Console.WriteLine("input the name of the database you want to use(neo4j, mongodb, mssql)");
+                Console.WriteLine("input the name of the messagebroker you want to use(rabbitmq, kafka)");
                 messageBroker = Console.ReadLine();
                 switch (messageBroker) {
                     case "kafka":
@@ -36,7 +36,6 @@ namespace MapspeopleConsumer {
                         break;
                 }
             }
-            while (true) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
                 List<DataModels.Location> data = GetData();
@@ -46,7 +45,6 @@ namespace MapspeopleConsumer {
                     } else if (messageBroker.Equals("rabbitmq")) {
                         SendDataWithRabbitMQ(data);
                     }
-                }
             }
         }
 
