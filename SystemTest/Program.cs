@@ -23,12 +23,14 @@ namespace SystemTest {
             //Stopwatch stopWatch = new Stopwatch();
             //stopWatch.Start();
             //Thread.Sleep(10000);
-            Stopwatch sendWatch = new Stopwatch();
-            while (true) {
+            List<double> times = new List<double>();
+            //Stopwatch sendWatch = new Stopwatch();
+            for (int i = 0; i < 11; i++) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
-                sendWatch.Start();
+                //sendWatch.Start();
                 List<Location> data = GetData();
+                var start = DateTime.Now;
                 if (!(data.Count == 0)) {
                     SendDataWithRabbitMQ(data);
                 }
@@ -36,52 +38,44 @@ namespace SystemTest {
                 string queueID = "287d4074d6c647a49f215fb1";
                 Receiver receiver = new Receiver();
                 receiver.Consume(userQueue, queueID);
+                var stop = DateTime.Now;
 
-                sendWatch.Stop();
+                var elapsedTime = stop - start;
+                //sendWatch.Stop();
                 // Get the elapsed time as a TimeSpan value.
-                TimeSpan ts = sendWatch.Elapsed;
-                // Format and display the TimeSpan value.
-                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                    ts.Hours, ts.Minutes, ts.Seconds,
-                    ts.Milliseconds / 10);
+                //TimeSpan ts = sendWatch.Elapsed;
+                //// Format and display the TimeSpan value.
+                //string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                //    ts.Hours, ts.Minutes, ts.Seconds,
+                //    ts.Milliseconds / 10);
                 Console.WriteLine("Receive RunTime " + elapsedTime);
-                sendWatch.Reset();
-            }    
-            
+                times.Add(elapsedTime.TotalSeconds);
+                //sendWatch.Reset();
+            }
+            double total = 0;
+            foreach (var time in times) {
+                total += time;
+            }
+            double average = total / 10;
+            Console.WriteLine(average);
+            Console.ReadLine();
         }
 
       
         //This method gets data from the test data source provided by MapsPeople, and uses the method FilterData on that data. After that it returns a list of filtered data that has been converted to Internal Data Model by using the method ConvertFromJsonToInternalModel. 
         //Return: Is a list of locations in the internal Data model format. 
         private static List<Location> GetData() {
-            //string jsonstr;
-            //var request = WebRequest.Create("https://mi-ucn-live-data.azurewebsites.net/occupancy?datasetid=6fbb3035c7e2436ba335edac") as HttpWebRequest;
-            //var response = request.GetResponse();
-            //using (StreamReader sr = new StreamReader(response.GetResponseStream())) {
-            //    jsonstr = sr.ReadToEnd();
-            //}
-            ////The Data is in JSON, so it is deserialized so that it will be objects instead. 
-            //List<RootObject> data = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
+            string jsonstr;
+            var request = WebRequest.Create("https://mi-ucn-live-data.azurewebsites.net/occupancy?datasetid=6fbb3035c7e2436ba335edac") as HttpWebRequest;
+            var response = request.GetResponse();
+            using (StreamReader sr = new StreamReader(response.GetResponseStream())) {
+                jsonstr = sr.ReadToEnd();
+            }
+            //The Data is in JSON, so it is deserialized so that it will be objects instead. 
+            List<RootObject> data = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
 
             //List<RootObject> filteredData = FilterData(data);
-            //return ConvertToInternalModel(filteredData);
-            List<Location> data = new List<Location>();
-            for (int i = 1; i < 201; i++) {
-                Location location = new Location();
-                location.Id = i + "";
-                location.ConsumerId = 3;
-                Source source = new Source();
-                State state = new State();
-                state.Property = "testState";
-                Random rand = new Random();
-                state.Value = rand.Next() % 2 == 0 ? true.ToString() : false.ToString();
-                source.State.Add(state);
-                source.Type = "testSource";
-                source.TimeStamp = DateTime.Now;
-                location.Sources.Add(source);
-                data.Add(location);
-            }
-            return data;
+            return ConvertToInternalModel(data);
         }
 
         //This method Converts data from the deserialized JSON to the Internal Datamodel format. 
