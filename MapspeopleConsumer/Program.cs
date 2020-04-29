@@ -172,7 +172,6 @@ namespace MapspeopleConsumer {
                                                                                          NumPartitions = 1 }
                                                                 });
                 } catch (CreateTopicsException e) {
-                    Console.WriteLine($"An error occured creating topic {e.Results[0].Topic}: {e.Results[0].Error.Reason}");
                 }
             }
             using (var producer = new ProducerBuilder<string, string>(new ProducerConfig { BootstrapServers = "localhost" }).Build()) {
