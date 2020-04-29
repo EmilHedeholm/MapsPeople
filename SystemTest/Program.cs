@@ -25,17 +25,18 @@ namespace SystemTest {
             //Thread.Sleep(10000);
             List<double> times = new List<double>();
             //Stopwatch sendWatch = new Stopwatch();
+            string userQueue = "testUser";
+            string queueID = "7f29498392eb4d40a1e17731";
+            string spaceRefId = "GS202";
             for (int i = 0; i < 51; i++) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
                 //sendWatch.Start();
-                List<Location> data = GetData();
+                List<Location> data = GetData(spaceRefId);
                 var start = DateTime.Now;
                 if (!(data.Count == 0)) {
                     SendDataWithRabbitMQ(data);
                 }
-                string userQueue = "testUser";
-                string queueID = "287d4074d6c647a49f215fb1";
                 Receiver receiver = new Receiver();
                 receiver.Consume(userQueue, queueID);
                 var stop = DateTime.Now;
@@ -64,7 +65,7 @@ namespace SystemTest {
       
         //This method gets data from the test data source provided by MapsPeople, and uses the method FilterData on that data. After that it returns a list of filtered data that has been converted to Internal Data Model by using the method ConvertFromJsonToInternalModel. 
         //Return: Is a list of locations in the internal Data model format. 
-        private static List<Location> GetData() {
+        private static List<Location> GetData(string spaceRefId) {
             string jsonstr;
             var request = WebRequest.Create("https://mi-ucn-live-data.azurewebsites.net/occupancy?datasetid=6fbb3035c7e2436ba335edac") as HttpWebRequest;
             var response = request.GetResponse();
@@ -73,9 +74,8 @@ namespace SystemTest {
             }
             //The Data is in JSON, so it is deserialized so that it will be objects instead. 
             List<RootObject> data = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
-
-            //List<RootObject> filteredData = FilterData(data);
-            return ConvertToInternalModel(data);
+            List<RootObject> filteredData = FilterData(data, spaceRefId);
+            return ConvertToInternalModel(filteredData);
         }
 
         //This method Converts data from the deserialized JSON to the Internal Datamodel format. 
@@ -110,52 +110,12 @@ namespace SystemTest {
 
         //This method filters data so that it only keeps data that has been changed. 
         //Param: a list of RootObject objects 
-        private static List<RootObject> FilterData(List<RootObject> data) {
+        private static List<RootObject> FilterData(List<RootObject> data, string spaceRefId) {
             List<RootObject> filteredData = new List<RootObject>();
-            //If the list filteredData is empty then add all the data from the list rawData. 
-            if (oldData.Count == 0) {
-                oldData.AddRange(data);
-                filteredData.AddRange(data);
-            }
-            //Goes through the raw data list. 
-            foreach (RootObject r in data) {
-                //Goes through a list that has data that has changed. 
-                foreach (RootObject rO in oldData) {
-                    //Checks that it is the same Root object. 
-                    if (r.Id.Equals(rO.Id)) {
-                        //Goes through the list of Last reports in the Root Object, but only those that are in raw data. 
-                        foreach (LastReport l in r.LastReports) {
-                            //Goes though the list of Last reports in the Root Object, but only those that are in filtered data.  
-                            foreach (LastReport lr in rO.LastReports) {
-                                //Checks that it is the same last report. 
-                                if (l.Id.Equals(lr.Id)) {
-                                    //If the property MotionDetected has changed. 
-                                    if (!(l.MotionDetected.Equals(lr.MotionDetected))) {
-                                        //And if it doesn't already exists in the list temp - Then add it to the list. 
-                                        if (!filteredData.Contains(r)) {
-                                            filteredData.Add(r);
-                                        }
-                                    }
-                                    if (!(l.PersonCount.Equals(lr.PersonCount))) {
-                                        if (!filteredData.Contains(r)) {
-                                            filteredData.Add(r);
-                                        }
-                                    }
-                                    if (!(l.SignsOfLife.Equals(lr.SignsOfLife))) {
-                                        if (!filteredData.Contains(r)) {
-                                            filteredData.Add(r);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+            foreach (var rootObject in data) {
+                if (rootObject.SpaceRefId.Equals(spaceRefId)) {
+                    filteredData.Add(rootObject);
                 }
-            }
-            //If there is something in the temp list, then the list filteredData will be cleared first, before the list temp is added. 
-            List<RootObject> temp = new List<RootObject>();
-            if (!(filteredData.Count == 0)) {
-                oldData = data;
             }
             return filteredData;
         }
