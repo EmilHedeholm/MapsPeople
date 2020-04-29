@@ -10,18 +10,19 @@ using Send;
 using ExternalConverter;
 using RabbitMQ.Client.Exceptions;
 using System.Xml.Serialization;
+using Confluent.Kafka;
 //using RabbitMQ.Client.Exceptions;
 
 namespace CoreForRabbitMQ {
     public class Program {
         static IDataAccess dataAccess { get; set; }
+        static string messageBroker { get; set; }
         public static void Main(string[] args) {
             //there are three implemented databases and the while loop lets you choose which one to use when running the program
             var choice = true;
-            var database = "";
             while (choice) {
                 Console.WriteLine("input the name of the database you want to use(neo4j, mongodb, mssql)");
-                database = Console.ReadLine();
+                var database = Console.ReadLine();
                 switch (database) {
                     case "neo4j":
                         dataAccess = new Neo4jDataAccess();
@@ -40,10 +41,29 @@ namespace CoreForRabbitMQ {
                         break;
                 }
             }
-            ReceiveDataFromRabbitMQ(dataAccess);
+            var choice2 = true;
+            while (choice2) {
+                Console.WriteLine("input the name of the messagebroker you want to use(kafka, rabbitmq)");
+                messageBroker = Console.ReadLine();
+                switch (messageBroker) {
+                    case "kafka":
+                        ReceiveDataFromKafka(dataAccess);
+                        choice2 = false;
+                        break;
+                    case "rabbitmq":
+                        ReceiveDataFromRabbitMQ(dataAccess);
+                        choice2 = false;
+                        break;
+                    default:
+                        Console.WriteLine("not a recognized messagebroker, try again");
+                        break;
+                }
+            }
         }
 
         
+
+
         //This post method receives location data from consumers and maps them with data from other consumers before
         //savin the changes to database, converting to the external message format and sending it out of the system.
         public static void Receive(IEnumerable<Location> locations, IDataAccess db) {
@@ -81,7 +101,11 @@ namespace CoreForRabbitMQ {
                     //Location update = PrepareUpdate(completeLocation, existingLocation);
                     if (update.Sources.Count > 0) {
                         var external = ConvertToExternal(update, db);
-                        SendMessage(external);
+                        if (messageBroker.Equals("rabbitmq")) {
+                            SendMessage(external);
+                        } else if(messageBroker.Equals("kafka")){
+                            SendWithKafka(external);
+                        }
                     }
                     
                 } else if (location.Id != "0") {
@@ -99,6 +123,11 @@ namespace CoreForRabbitMQ {
         private static void SendMessage(List<ExternalModel> external) {
             SendMessage sender = new SendMessage();
             sender.SendUpdate(external);
+        }
+
+        private static void SendWithKafka(List<ExternalModel> external) {
+            SendMessage sender = new SendMessage();
+            sender.SendUpdateWithKafka(external);
         }
 
         //This method maps a locations ConsumerId and Id with data from a list and adds an ExternalId if a match is found.
@@ -242,6 +271,18 @@ namespace CoreForRabbitMQ {
                     Console.WriteLine("Could not connect to the broker broker");
                 } else {
                     Console.WriteLine("Something went wrong");
+                }
+            }
+        }
+
+        private static void ReceiveDataFromKafka(IDataAccess dataAccess) {
+            var topic = "Consumer_Topic";
+            using (var consumer = new ConsumerBuilder<Ignore, string>(new ConsumerConfig { BootstrapServers = "localhost", GroupId ="Core_Consumer" }).Build()) {
+                consumer.Subscribe(topic);
+                while (true) {
+                    var result = consumer.Consume();
+                    var json = JsonConvert.DeserializeObject<List<Location>>(result.Message.Value);
+                    Receive(json, dataAccess);
                 }
             }
         }

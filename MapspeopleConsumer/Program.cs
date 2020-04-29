@@ -1,4 +1,6 @@
-﻿using DataModels;
+﻿using Confluent.Kafka;
+using Confluent.Kafka.Admin;
+using DataModels;
 using MapspeopleConsumer.JsonModel;
 using MapspeopleConsumer.TokenModel;
 using Newtonsoft.Json;
@@ -16,13 +18,35 @@ using System.Threading.Tasks;
 
 namespace MapspeopleConsumer {
     class Program {
-        static void Main(string[] args) {
-          // while (true) {
-                Thread.Sleep(3000);           
-                List<Location> data = GetData();
+        static string messageBroker { get; set; }
+        public static void Main(string[] args) {
+            var choice = true;
+            while (choice) {
+                Console.WriteLine("input the name of the database you want to use(neo4j, mongodb, mssql)");
+                messageBroker = Console.ReadLine();
+                switch (messageBroker) {
+                    case "kafka":
+                        choice = false;
+                        break;
+                    case "rabbitmq":
+                        choice = false;
+                        break;
+                    default:
+                        Console.WriteLine("not a recognized messagebroker, try again");
+                        break;
+                }
+            }
+            while (true) {
+                //Wait for 3 sek. 
+                Thread.Sleep(3000);
+                List<DataModels.Location> data = GetData();
                 if (!(data.Count == 0)) {
-                  SendDataWithRabbitMQ(data);
-              // }
+                    if (messageBroker.Equals("kafka")) {
+                        SendDataWithKafka(data);
+                    } else if (messageBroker.Equals("rabbitmq")) {
+                        SendDataWithRabbitMQ(data);
+                    }
+                }
             }
         }
 
@@ -136,6 +160,31 @@ namespace MapspeopleConsumer {
             var response = client.Execute(request);
             Console.WriteLine(json);
             //Console.ReadLine();
+        }
+
+        private async static void SendDataWithKafka(List<Location> locations) {
+            var topic = "Consumer_Topic";
+            using (var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = "localhost" }).Build()) {
+                try {
+                    await adminClient.CreateTopicsAsync(new TopicSpecification[] {
+                                                                new TopicSpecification { Name = topic,
+                                                                                         ReplicationFactor = 1,
+                                                                                         NumPartitions = 1 }
+                                                                });
+                } catch (CreateTopicsException e) {
+                }
+            }
+            using (var producer = new ProducerBuilder<string, string>(new ProducerConfig { BootstrapServers = "localhost" }).Build()) {
+                try {
+                    string json = JsonConvert.SerializeObject(locations);
+                    var deliveryReport = await producer.ProduceAsync(
+                        topic, new Message<string, string> { Key = null, Value = json });
+
+                    Console.WriteLine($"delivered to: {deliveryReport.TopicPartitionOffset}");
+                } catch (ProduceException<string, string> e) {
+                    Console.WriteLine($"failed to deliver message: {e.Message} [{e.Error.Code}]");
+                }
+            }
         }
     }
 }

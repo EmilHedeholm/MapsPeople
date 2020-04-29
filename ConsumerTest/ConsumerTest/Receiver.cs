@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Confluent.Kafka;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -62,6 +63,16 @@ namespace ConsumerTest
                     Console.WriteLine("Could not connect to the broker broker");
                 } else {
                     Console.WriteLine("Something went wrong");
+                }
+            }
+        }
+
+        public void ReceiveDataFromKafka(string userName, string topic) {
+            using (var consumer = new ConsumerBuilder<Ignore, string>(new ConsumerConfig { BootstrapServers = "localhost", GroupId = userName }).Build()) {
+                consumer.Subscribe(topic);
+                while (true) {
+                    var result = consumer.Consume();
+                    Console.WriteLine(result.Message.Value);
                 }
             }
         }

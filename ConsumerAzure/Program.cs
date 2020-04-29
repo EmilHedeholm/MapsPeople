@@ -5,6 +5,8 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Confluent.Kafka;
+using Confluent.Kafka.Admin;
 using ConsumerAzure.JsonModel;
 using DataModels;
 using Newtonsoft.Json;
@@ -16,17 +18,36 @@ namespace ConsumerAzure {
     class Program {
 
         static List<RootObject> oldData = new List<RootObject>();
-
-        //TODO: make this better polling and not garbage as it is right now
-        static void Main() {
-           while (true) {
+        static string messageBroker { get; set; }
+        public static void Main(string[] args) {
+            var choice = true;
+            while (choice) {
+                Console.WriteLine("input the name of the messagebroker you want to use(kafka, rabbitmq)");
+                messageBroker = Console.ReadLine();
+                switch (messageBroker) {
+                    case "kafka":
+                        choice = false;
+                        break;
+                    case "rabbitmq":
+                        choice = false;
+                        break;
+                    default:
+                        Console.WriteLine("not a recognized messagebroker, try again");
+                        break;
+                }
+            }
+            while (true) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
-                List<Location> data = GetData();
+                List<DataModels.Location> data = GetData();
                 if (!(data.Count == 0)) {
-                    SendDataWithRabbitMQ(data);
+                    if (messageBroker.Equals("kafka")) {
+                        SendDataWithKafka(data);
+                    } else if (messageBroker.Equals("rabbitmq")) {
+                        SendDataWithRabbitMQ(data);
+                    }
                 }
-           }
+            }
         }
 
         //This method gets data from the test data source provided by MapsPeople, and uses the method FilterData on that data. After that it returns a list of filtered data that has been converted to Internal Data Model by using the method ConvertFromJsonToInternalModel. 
@@ -179,6 +200,31 @@ namespace ConsumerAzure {
                     Console.WriteLine("Could not connect to the broker broker");
                 } else {
                     Console.WriteLine("Something went wrong");
+                }
+            }
+        }
+
+        private async static void SendDataWithKafka(List<Location> locations) {
+            var topic = "Consumer_Topic";
+            using (var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = "localhost" }).Build()) {
+                try {
+                    await adminClient.CreateTopicsAsync(new TopicSpecification[] {
+                                                                new TopicSpecification { Name = topic,
+                                                                                         ReplicationFactor = 1,
+                                                                                         NumPartitions = 1 }
+                                                                });
+                } catch (CreateTopicsException e) {
+                }
+            }
+            using (var producer = new ProducerBuilder<string, string>(new ProducerConfig { BootstrapServers = "localhost" }).Build()) {
+                try {
+                    string json = JsonConvert.SerializeObject(locations);
+                    var deliveryReport = await producer.ProduceAsync(
+                        topic, new Message<string, string> { Key = null, Value = json });
+
+                    Console.WriteLine($"delivered to: {deliveryReport.TopicPartitionOffset}");
+                } catch (ProduceException<string, string> e) {
+                    Console.WriteLine($"failed to deliver message: {e.Message} [{e.Error.Code}]");
                 }
             }
         }
