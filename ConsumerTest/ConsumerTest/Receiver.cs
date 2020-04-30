@@ -25,11 +25,12 @@ namespace ConsumerTest
             channel.ExchangeDeclare(exchange: "Customer1",
                                         type: "topic");
             var args = new Dictionary<string, object>();
-            args.Add("x-message-ttl", 30000);
+            args.Add("x-message-ttl", 60000);
+            args.Add("x-expires", 60000);
 
             channel.QueueDeclare(queue: userQueue, durable: true,
                                exclusive: false,
-                               autoDelete: true,
+                               autoDelete: false,
                                arguments: args);
             channel.QueueBind(queue: userQueue, exchange: "Customer1", routingKey: $"#.{queueID}.#");
 
