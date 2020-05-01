@@ -29,16 +29,16 @@
             this.databaseListBox = new System.Windows.Forms.ListBox();
             this.dataListLabel = new System.Windows.Forms.Label();
             this.messageLabel = new System.Windows.Forms.Label();
-            this.MessageTextBox = new System.Windows.Forms.TextBox();
+            this.messageTextBox = new System.Windows.Forms.TextBox();
             this.messageListBox = new System.Windows.Forms.ListBox();
             this.messageBLabel = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.queTextBox = new System.Windows.Forms.TextBox();
+            this.QueTopicLabel = new System.Windows.Forms.Label();
+            this.queTopTextBox = new System.Windows.Forms.TextBox();
             this.userNameTextBox = new System.Windows.Forms.TextBox();
-            this.topicTextBox = new System.Windows.Forms.TextBox();
-            this.topicLabel = new System.Windows.Forms.Label();
             this.choiceLabel = new System.Windows.Forms.Label();
             this.warningLabel = new System.Windows.Forms.Label();
+            this.okButton = new System.Windows.Forms.Button();
+            this.nextButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // userNameLabel
@@ -94,12 +94,12 @@
             this.messageLabel.TabIndex = 6;
             this.messageLabel.Text = "Messagebroker";
             // 
-            // MessageTextBox
+            // messageTextBox
             // 
-            this.MessageTextBox.Location = new System.Drawing.Point(141, 233);
-            this.MessageTextBox.Name = "MessageTextBox";
-            this.MessageTextBox.Size = new System.Drawing.Size(162, 26);
-            this.MessageTextBox.TabIndex = 7;
+            this.messageTextBox.Location = new System.Drawing.Point(141, 233);
+            this.messageTextBox.Name = "messageTextBox";
+            this.messageTextBox.Size = new System.Drawing.Size(162, 26);
+            this.messageTextBox.TabIndex = 7;
             // 
             // messageListBox
             // 
@@ -120,21 +120,20 @@
             this.messageBLabel.TabIndex = 9;
             this.messageBLabel.Text = "Messagebroker";
             // 
-            // label1
+            // QueTopicLabel
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(52, 394);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(78, 20);
-            this.label1.TabIndex = 10;
-            this.label1.Text = "Queue ID";
+            this.QueTopicLabel.AutoSize = true;
+            this.QueTopicLabel.Location = new System.Drawing.Point(53, 368);
+            this.QueTopicLabel.Name = "QueTopicLabel";
+            this.QueTopicLabel.Size = new System.Drawing.Size(0, 20);
+            this.QueTopicLabel.TabIndex = 10;
             // 
-            // queTextBox
+            // queTopTextBox
             // 
-            this.queTextBox.Location = new System.Drawing.Point(136, 388);
-            this.queTextBox.Name = "queTextBox";
-            this.queTextBox.Size = new System.Drawing.Size(235, 26);
-            this.queTextBox.TabIndex = 11;
+            this.queTopTextBox.Location = new System.Drawing.Point(141, 365);
+            this.queTopTextBox.Name = "queTopTextBox";
+            this.queTopTextBox.Size = new System.Drawing.Size(235, 26);
+            this.queTopTextBox.TabIndex = 11;
             // 
             // userNameTextBox
             // 
@@ -142,22 +141,6 @@
             this.userNameTextBox.Name = "userNameTextBox";
             this.userNameTextBox.Size = new System.Drawing.Size(162, 26);
             this.userNameTextBox.TabIndex = 12;
-            // 
-            // topicTextBox
-            // 
-            this.topicTextBox.Location = new System.Drawing.Point(136, 340);
-            this.topicTextBox.Name = "topicTextBox";
-            this.topicTextBox.Size = new System.Drawing.Size(235, 26);
-            this.topicTextBox.TabIndex = 13;
-            // 
-            // topicLabel
-            // 
-            this.topicLabel.AutoSize = true;
-            this.topicLabel.Location = new System.Drawing.Point(52, 346);
-            this.topicLabel.Name = "topicLabel";
-            this.topicLabel.Size = new System.Drawing.Size(47, 20);
-            this.topicLabel.TabIndex = 14;
-            this.topicLabel.Text = "Topic";
             // 
             // choiceLabel
             // 
@@ -175,21 +158,41 @@
             this.warningLabel.Size = new System.Drawing.Size(0, 20);
             this.warningLabel.TabIndex = 16;
             // 
+            // okButton
+            // 
+            this.okButton.Location = new System.Drawing.Point(331, 401);
+            this.okButton.Name = "okButton";
+            this.okButton.Size = new System.Drawing.Size(99, 37);
+            this.okButton.TabIndex = 17;
+            this.okButton.Text = "OK";
+            this.okButton.UseVisualStyleBackColor = true;
+            this.okButton.Click += new System.EventHandler(this.okButton_Click);
+            // 
+            // nextButton
+            // 
+            this.nextButton.Location = new System.Drawing.Point(451, 402);
+            this.nextButton.Name = "nextButton";
+            this.nextButton.Size = new System.Drawing.Size(90, 36);
+            this.nextButton.TabIndex = 18;
+            this.nextButton.Text = "Next";
+            this.nextButton.UseVisualStyleBackColor = true;
+            this.nextButton.Click += new System.EventHandler(this.nextButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(562, 450);
+            this.Controls.Add(this.nextButton);
+            this.Controls.Add(this.okButton);
             this.Controls.Add(this.warningLabel);
             this.Controls.Add(this.choiceLabel);
-            this.Controls.Add(this.topicLabel);
-            this.Controls.Add(this.topicTextBox);
             this.Controls.Add(this.userNameTextBox);
-            this.Controls.Add(this.queTextBox);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.queTopTextBox);
+            this.Controls.Add(this.QueTopicLabel);
             this.Controls.Add(this.messageBLabel);
             this.Controls.Add(this.messageListBox);
-            this.Controls.Add(this.MessageTextBox);
+            this.Controls.Add(this.messageTextBox);
             this.Controls.Add(this.messageLabel);
             this.Controls.Add(this.dataListLabel);
             this.Controls.Add(this.databaseListBox);
@@ -210,16 +213,16 @@
         private System.Windows.Forms.ListBox databaseListBox;
         private System.Windows.Forms.Label dataListLabel;
         private System.Windows.Forms.Label messageLabel;
-        private System.Windows.Forms.TextBox MessageTextBox;
+        private System.Windows.Forms.TextBox messageTextBox;
         private System.Windows.Forms.ListBox messageListBox;
         private System.Windows.Forms.Label messageBLabel;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox queTextBox;
+        private System.Windows.Forms.Label QueTopicLabel;
+        private System.Windows.Forms.TextBox queTopTextBox;
         private System.Windows.Forms.TextBox userNameTextBox;
-        private System.Windows.Forms.TextBox topicTextBox;
-        private System.Windows.Forms.Label topicLabel;
         private System.Windows.Forms.Label choiceLabel;
         private System.Windows.Forms.Label warningLabel;
+        private System.Windows.Forms.Button okButton;
+        private System.Windows.Forms.Button nextButton;
     }
 }
 
