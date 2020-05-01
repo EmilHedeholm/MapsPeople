@@ -117,15 +117,14 @@ namespace ClientGUI {
                         //warningLabel.Text = "not a recognized messagebroker, try again";
                         break;
                 }
-            
-        }
-
-        private void nextButton_Click(object sender, EventArgs e) {
             List<string> locationIds = GetLocationIds(messages);
             LocationGUI openForm = new LocationGUI(Database, locationIds);
             openForm.Show();
             this.Hide();
+
         }
+
+      
 
         private List<string> GetLocationIds(List<ExternalModel> messages) {
             List<string> locationIds = new List<string>();

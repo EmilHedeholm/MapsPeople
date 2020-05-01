@@ -38,7 +38,6 @@
             this.choiceLabel = new System.Windows.Forms.Label();
             this.warningLabel = new System.Windows.Forms.Label();
             this.okButton = new System.Windows.Forms.Button();
-            this.nextButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // userNameLabel
@@ -168,22 +167,11 @@
             this.okButton.UseVisualStyleBackColor = true;
             this.okButton.Click += new System.EventHandler(this.okButton_Click);
             // 
-            // nextButton
-            // 
-            this.nextButton.Location = new System.Drawing.Point(451, 402);
-            this.nextButton.Name = "nextButton";
-            this.nextButton.Size = new System.Drawing.Size(90, 36);
-            this.nextButton.TabIndex = 18;
-            this.nextButton.Text = "Next";
-            this.nextButton.UseVisualStyleBackColor = true;
-            this.nextButton.Click += new System.EventHandler(this.nextButton_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(562, 450);
-            this.Controls.Add(this.nextButton);
             this.Controls.Add(this.okButton);
             this.Controls.Add(this.warningLabel);
             this.Controls.Add(this.choiceLabel);
@@ -222,7 +210,6 @@
         private System.Windows.Forms.Label choiceLabel;
         private System.Windows.Forms.Label warningLabel;
         private System.Windows.Forms.Button okButton;
-        private System.Windows.Forms.Button nextButton;
     }
 }
 

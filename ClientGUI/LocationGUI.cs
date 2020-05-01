@@ -41,6 +41,7 @@ namespace ClientGUI {
         }
 
         private void UpdateLocationListBox(List<string> locationIds) {
+            locationListBox.ClearSelected();
             foreach( string locationId in locationIds) {
                 locationListBox.Items.Add(locationId);
             }
@@ -54,6 +55,8 @@ namespace ClientGUI {
         }
 
         private void UpdateSoureListBox(List<Source> sources) {
+            sourceListBox.Items.Clear();
+            stateTable.Clear();
             foreach(var source in sources) {
                 sourceListBox.Items.Add(source.Type + "" + "" + source.TimeStamp.ToString());
                 List<State> states = source.State;
