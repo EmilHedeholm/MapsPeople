@@ -18,7 +18,9 @@ using System.Diagnostics;
 namespace SystemTest {
     class Program {
         static List<RootObject> oldData = new List<RootObject>();
-        
+        static KafkaTest kafkaSender = new KafkaTest();
+        static KafkaTest kafkaReceiver = new KafkaTest();
+        static string MessageBroker { get; set; }
         static void Main(string[] args) {
             //Stopwatch stopWatch = new Stopwatch();
             //stopWatch.Start();
@@ -28,17 +30,38 @@ namespace SystemTest {
             string userQueue = "testUser";
             string queueID = "7f29498392eb4d40a1e17731";
             string spaceRefId = "GS202";
+            var choice = true;
+            while (choice) {
+                Console.WriteLine("input the name of the messagebroker you want to use(kafka, rabbitmq)");
+                MessageBroker = Console.ReadLine();
+                switch (MessageBroker) {
+                    case "kafka":
+                        choice = false;
+                        break;
+                    case "rabbitmq":
+                        choice = false;
+                        break;
+                    default:
+                        Console.WriteLine("not a recognized messagebroker, try again");
+                        break;
+                }
+            }
             for (int i = 0; i < 51; i++) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
                 //sendWatch.Start();
                 List<Location> data = GetData(spaceRefId);
                 var start = DateTime.Now;
-                if (!(data.Count == 0)) {
-                    SendDataWithRabbitMQ(data);
+                if (MessageBroker.Equals("rabbitmq")) {
+                    if (!(data.Count == 0)) {
+                        SendDataWithRabbitMQ(data);
+                    }
+                    Receiver receiver = new Receiver();
+                    receiver.Consume(userQueue, queueID);
+                } else if (data.Count != 0) {
+                    kafkaSender.SendDataWithKafka(data);
+                    kafkaReceiver.ReceiveDataFromKafka(userQueue, queueID);
                 }
-                Receiver receiver = new Receiver();
-                receiver.Consume(userQueue, queueID);
                 var stop = DateTime.Now;
 
                 var elapsedTime = stop - start;
@@ -50,6 +73,7 @@ namespace SystemTest {
                 //    ts.Hours, ts.Minutes, ts.Seconds,
                 //    ts.Milliseconds / 10);
                 Console.WriteLine("Receive RunTime " + elapsedTime);
+                Console.WriteLine();
                 times.Add(elapsedTime.TotalSeconds);
                 //sendWatch.Reset();
             }
