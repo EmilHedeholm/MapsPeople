@@ -9,11 +9,13 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DataModels;
+using Newtonsoft.Json;
 
 namespace ClientGUI {
     public partial class Form1 : Form {
         Receiver receiver = new Receiver();
-
+        List<ExternalModel> messages = new List<ExternalModel>();
         public string Database { get; set;}
         public Form1() {
             InitializeComponent();
@@ -80,14 +82,15 @@ namespace ClientGUI {
                 }        
         }
 
-        private void GetAllLocations(string queueId, string database) {
+        private List<ExternalModel> GetAllLocations(string queueId, string database) {
             string jsonstr;
             var request = WebRequest.Create($"https://localhost:44346/api/Send?id={queueId}&database={database}") as HttpWebRequest;
             var response = request.GetResponse();
             using (StreamReader sr = new StreamReader(response.GetResponseStream())) {
                 jsonstr = sr.ReadToEnd();
             }
-            Console.WriteLine(jsonstr);
+            messages = JsonConvert.DeserializeObject<List<ExternalModel>>(jsonstr);
+            return messages;
         }
 
         private void okButton_Click(object sender, EventArgs e) {
@@ -118,9 +121,25 @@ namespace ClientGUI {
         }
 
         private void nextButton_Click(object sender, EventArgs e) {
-            LocationGUI openForm = new LocationGUI(Database);
+            List<string> locationIds = GetLocationIds(messages);
+            LocationGUI openForm = new LocationGUI(Database, locationIds);
             openForm.Show();
             this.Hide();
+        }
+
+        private List<string> GetLocationIds(List<ExternalModel> messages) {
+            List<string> locationIds = new List<string>();
+            foreach (var message in messages) {
+                List<string> parentIds = new List<string>();
+                foreach(var id in message.ParentIds) {
+                    parentIds.Add(id);
+                }
+                locationIds.Add(parentIds[0]);
+                
+            }
+            return locationIds;
+
+           
         }
     }
  }

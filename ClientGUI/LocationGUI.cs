@@ -14,14 +14,14 @@ namespace ClientGUI {
     public partial class LocationGUI : Form {
         public IDataAccess dataAccess { get; set; }
         public DataTable stateTable { get; set; }
-        public LocationGUI(string database) {
+        public LocationGUI(string database, List<string> locationIds) {
             InitializeComponent();
             stateTable = new DataTable();
-            List<string> locationIds = new List<string>();
-            locationIds.Add("287d4074d6c647a49f215fb1");
-            locationIds.Add("ee268551ad3d42218ef83b5c");
-            locationIds.Add("db8929a8474a4752a5a984a8");
-            locationIds.Add("1b4b349a49fa4e22845f6790");
+            //List<string> locationIds = new List<string>();
+            //locationIds.Add("287d4074d6c647a49f215fb1");
+            //locationIds.Add("ee268551ad3d42218ef83b5c");
+            //locationIds.Add("db8929a8474a4752a5a984a8");
+            //locationIds.Add("1b4b349a49fa4e22845f6790");
             UpdateLocationListBox(locationIds);
             switch (database) {
                 case "neo4j":
