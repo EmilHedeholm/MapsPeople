@@ -27,6 +27,7 @@ namespace ConsumerAzure {
                 string messageBrokerChoice = Console.ReadLine();
                 switch (messageBrokerChoice) {
                     case "kafka":
+                        messageBroker = new MessageBrokerKafka();
                         choice = false;
                         break;
                     case "rabbitmq":
