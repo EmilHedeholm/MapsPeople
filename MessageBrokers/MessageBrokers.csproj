@@ -5,19 +5,18 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F5FBFF85-59D1-4D8E-AB71-E6D9536E0032}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>MapspeopleConsumer</RootNamespace>
-    <AssemblyName>MapspeopleConsumer</AssemblyName>
+    <ProjectGuid>{A9DF2725-7E91-4953-AF8E-943962EABBCB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MessageBrokers</RootNamespace>
+    <AssemblyName>MessageBrokers</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -27,7 +26,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -48,9 +46,6 @@
     <Reference Include="RabbitMQ.Client, Version=5.0.0.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
       <HintPath>..\packages\RabbitMQ.Client.5.1.2\lib\net451\RabbitMQ.Client.dll</HintPath>
     </Reference>
-    <Reference Include="RestSharp, Version=106.0.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
-      <HintPath>..\packages\RestSharp.106.10.1\lib\net452\RestSharp.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
@@ -66,7 +61,6 @@
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -75,34 +69,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="JsonModel\Anchor.cs" />
-    <Compile Include="JsonModel\BaseTypeProperties.cs" />
-    <Compile Include="JsonModel\Dataset.cs" />
-    <Compile Include="JsonModel\DisplaySetting.cs" />
-    <Compile Include="JsonModel\Geometry.cs" />
-    <Compile Include="JsonModel\IconSize.cs" />
-    <Compile Include="JsonModel\Properties.cs" />
-    <Compile Include="JsonModel\RootObject.cs" />
-    <Compile Include="JsonModel\State.cs" />
-    <Compile Include="JsonModel\TileStyle.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="MessageBrokerKafka.cs" />
+    <Compile Include="MessageBrokerRabbitMQ.cs" />
+    <Compile Include="IMessageBroker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TokenModel\Token.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
+    <ProjectReference Include="..\DatabaseAccess\DatabaseAccess.csproj">
+      <Project>{f93b9729-7e94-45b7-9711-b3758dae71f4}</Project>
+      <Name>DatabaseAccess</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DataModels\DataModels.csproj">
-      <Project>{1372fd92-3251-46bc-8109-fc2f9222246c}</Project>
+      <Project>{1372FD92-3251-46BC-8109-FC2F9222246C}</Project>
       <Name>DataModels</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MessageBrokers\MessageBrokers.csproj">
-      <Project>{A9DF2725-7E91-4953-AF8E-943962EABBCB}</Project>
-      <Name>MessageBrokers</Name>
+    <ProjectReference Include="..\Receiver\Receiver.csproj">
+      <Project>{cc86ba5f-a4cf-4c5d-9335-8f02b8ca1ac2}</Project>
+      <Name>Receiver</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

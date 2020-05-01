@@ -3,6 +3,7 @@ using Confluent.Kafka.Admin;
 using DataModels;
 using MapspeopleConsumer.JsonModel;
 using MapspeopleConsumer.TokenModel;
+using MessageBrokers;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RestSharp;
@@ -18,17 +19,19 @@ using System.Threading.Tasks;
 
 namespace MapspeopleConsumer {
     class Program {
-        static string messageBroker { get; set; }
+        static IMessageBroker messageBroker { get; set; }
         public static void Main(string[] args) {
             var choice = true;
             while (choice) {
                 Console.WriteLine("input the name of the messagebroker you want to use(rabbitmq, kafka)");
-                messageBroker = Console.ReadLine();
-                switch (messageBroker) {
+                var messageBrokerChoice = Console.ReadLine();
+                switch (messageBrokerChoice) {
                     case "kafka":
+                        messageBroker = new MessageBrokerKafka();
                         choice = false;
                         break;
                     case "rabbitmq":
+                        messageBroker = new MessageBrokerRabbitMQ();
                         choice = false;
                         break;
                     default:
@@ -40,12 +43,8 @@ namespace MapspeopleConsumer {
                 Thread.Sleep(3000);
                 List<DataModels.Location> data = GetData();
                 if (!(data.Count == 0)) {
-                    if (messageBroker.Equals("kafka")) {
-                        SendDataWithKafka(data);
-                    } else if (messageBroker.Equals("rabbitmq")) {
-                        SendDataWithRabbitMQ(data);
-                    }
-            }
+                    SendUpdate(data);
+                }
         }
 
         //This method request a token using a post Request using your credentials from Mapspeoples CMS, which gives you a token that you
@@ -106,83 +105,8 @@ namespace MapspeopleConsumer {
 
         //This method sends data to the Core Controller for RabbitMQ. 
         //Param: Is a list of locations. 
-        private static void SendDataWithRabbitMQ(List<Location> locations) {
-            try {
-                var factory = new ConnectionFactory() { HostName = "localhost" };
-                using (var connection = factory.CreateConnection())
-                using (var channel = connection.CreateModel()) {
-                    channel.QueueDeclare(queue: "Consumer_Queue",
-                                         durable: true,
-                                         exclusive: false,
-                                         autoDelete: false,
-                                         arguments: null);
-
-                    var message = JsonConvert.SerializeObject(locations);
-                    var body = Encoding.UTF8.GetBytes(message);
-
-                    var properties = channel.CreateBasicProperties();
-                    properties.Persistent = true;
-
-                    channel.BasicPublish(exchange: "",
-                                         routingKey: "Consumer_Queue",
-                                         basicProperties: properties,
-                                         body: body);
-                    Console.WriteLine(message);
-                    Console.WriteLine();
-                    Console.WriteLine();
-                }
-             }catch(Exception e) {
-                if(e is RabbitMQ.Client.Exceptions.AlreadyClosedException) {
-                    Console.WriteLine("The connectionis already closed");
-                }else if(e is RabbitMQ.Client.Exceptions.BrokerUnreachableException) {
-                    Console.WriteLine("The broker cannot be reached");
-                } else if(e is RabbitMQ.Client.Exceptions.OperationInterruptedException) {
-                    Console.WriteLine("The operation was interupted");
-                }else if(e is RabbitMQ.Client.Exceptions.ConnectFailureException) {
-                    Console.WriteLine("Could not connect to the broker broker");
-                } else {
-                    Console.WriteLine("Something went wrong");
-                }
-            }
-        }
-        //This method sends data to the Core Controller. 
-        //Param: Is a list of locations. 
-        private static void SendData(List<Location> locations) {
-            var client = new RestClient();
-            //TODO: 
-            client.BaseUrl = new Uri("https://localhost:44346/api/Receiving");
-            string json = JsonConvert.SerializeObject(locations);
-            var request = new RestRequest(Method.POST);
-            request.AddParameter("application/json; charset=utf-8", json, ParameterType.RequestBody);
-            request.RequestFormat = DataFormat.Json;
-            var response = client.Execute(request);
-            Console.WriteLine(json);
-            //Console.ReadLine();
-        }
-
-        private async static void SendDataWithKafka(List<Location> locations) {
-            var topic = "Consumer_Topic";
-            using (var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = "localhost" }).Build()) {
-                try {
-                    await adminClient.CreateTopicsAsync(new TopicSpecification[] {
-                                                                new TopicSpecification { Name = topic,
-                                                                                         ReplicationFactor = 1,
-                                                                                         NumPartitions = 1 }
-                                                                });
-                } catch (CreateTopicsException e) {
-                }
-            }
-            using (var producer = new ProducerBuilder<string, string>(new ProducerConfig { BootstrapServers = "localhost" }).Build()) {
-                try {
-                    string json = JsonConvert.SerializeObject(locations);
-                    var deliveryReport = await producer.ProduceAsync(
-                        topic, new Message<string, string> { Key = null, Value = json });
-
-                    Console.WriteLine($"delivered to: {deliveryReport.TopicPartitionOffset}");
-                } catch (ProduceException<string, string> e) {
-                    Console.WriteLine($"failed to deliver message: {e.Message} [{e.Error.Code}]");
-                }
-            }
+        private static void SendUpdate(List<Location> locations) {
+            messageBroker.SendUpdateToCore(locations);
         }
     }
 }

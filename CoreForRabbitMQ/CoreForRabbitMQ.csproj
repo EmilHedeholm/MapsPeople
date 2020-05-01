@@ -88,13 +88,9 @@
       <Project>{1372fd92-3251-46bc-8109-fc2f9222246c}</Project>
       <Name>DataModels</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ExternalConverter\ExternalConverter.csproj">
-      <Project>{1be2ee70-524b-44b5-93e8-81db3a0db8e3}</Project>
-      <Name>ExternalConverter</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Send\Send.csproj">
-      <Project>{beed99b4-3757-499a-926b-b284117c5e52}</Project>
-      <Name>Send</Name>
+    <ProjectReference Include="..\MessageBrokers\MessageBrokers.csproj">
+      <Project>{a9df2725-7e91-4953-af8e-943962eabbcb}</Project>
+      <Name>MessageBrokers</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
