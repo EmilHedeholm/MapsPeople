@@ -50,11 +50,9 @@ namespace ClientGUI {
 
         private void messageListBox_SelectedIndexChanged(object sender, EventArgs e) {
             
-            //string userName = userNameTextBox.Text;
-            var choice = true;
-             while (choice) {
-                 messageTextBox.Text = messageListBox.Text;
-                string messageBroker = messageTextBox.Text;
+           
+                messageTextBox.Text = messageListBox.Text;
+               string messageBroker = messageTextBox.Text;
                 choiceLabel.Text = "";
                
                 switch (messageBroker) {
@@ -65,7 +63,7 @@ namespace ClientGUI {
                         //string topic = queTopTextBox.Text;
                         //GetAllLocations(topic, Database);
                         //receiver.ReceiveDataFromKafka(userName, topic);
-                        choice = false;
+                      
                         break;
                     case "rabbitmq":
                         choiceLabel.Text = "Enter a queue ID";
@@ -74,13 +72,12 @@ namespace ClientGUI {
                         //string queueId = queTopTextBox.Text;
                         //GetAllLocations(queueId, Database);
                         //receiver.Consume(userName, queueId);
-                        choice = false;
+                        
                         break;
                     default:
                         warningLabel.Visible = true;
                         break;
-                }
-            }
+                }        
         }
 
         private void GetAllLocations(string queueId, string database) {
@@ -98,27 +95,26 @@ namespace ClientGUI {
             string messageBroker = messageTextBox.Text;
             warningLabel.Visible = false;
             warningLabel.Text = "not a recognized messagebroker, try again";
-            var choice = true;
-            while (choice) {
+           
                 switch (messageBroker) {
                     case "kafka":
                         string topic = queTopTextBox.Text;
                         GetAllLocations(topic, Database);
                         receiver.ReceiveDataFromKafka(userName, topic);
-                        choice = false;
+                        //choice = false;
                         break;
                     case "rabbitmq":
                         string queueId = queTopTextBox.Text;
                         GetAllLocations(queueId, Database);
                         receiver.Consume(userName, queueId);
-                        choice = false;
+                        //choice = false;
                         break;
                     default:
                         warningLabel.Visible = true;
                         //warningLabel.Text = "not a recognized messagebroker, try again";
                         break;
                 }
-            }
+            
         }
 
         private void nextButton_Click(object sender, EventArgs e) {

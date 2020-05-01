@@ -121,7 +121,7 @@
       <Name>DatabaseAccess</Name>
     </ProjectReference>
     <ProjectReference Include="..\DataModels\DataModels.csproj">
-      <Project>{1372FD92-3251-46BC-8109-FC2F9222246C}</Project>
+      <Project>{1372fd92-3251-46bc-8109-fc2f9222246c}</Project>
       <Name>DataModels</Name>
     </ProjectReference>
   </ItemGroup>
