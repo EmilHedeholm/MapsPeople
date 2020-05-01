@@ -293,28 +293,33 @@ namespace DatabaseAccess {
                     connection.Open();
                     var sql = "UPDATE LocationMP SET parentId = @parentId, externalId = @externalId, consumerId = @consumerId  WHERE id = @id;";
                     connection.Execute(sql, location);
-
-                    List<Source> sources = FindSourcesByLocationID(location);
-                    if (sources.Count > 0) {
-                        foreach (var source in sources) {
-                            using (SqlCommand updateSources = connection.CreateCommand()) {
-                                var sourceSQL = "UPDATE source SET sourceTimestamp = @Timestamp WHERE locationId = @locationId AND sourceType = @sourceType";
-                                updateSources.CommandText = sourceSQL;
-                                updateSources.Parameters.AddWithValue("@Timestamp", source.TimeStamp);
-                                updateSources.Parameters.AddWithValue("@locationId", location.Id);
-                                updateSources.Parameters.AddWithValue("@sourceType", source.Type);
-                                updateSources.ExecuteNonQuery();
-                                List<State> states = FindStatesBySource(source, location);
-                                if (states.Count > 0) {
-                                    foreach (var state in states) {
-                                        using (SqlCommand updateStates = connection.CreateCommand()) {
-                                            var stateSQL = "UPDATE stateMP SET stateValue = @stateValue WHERE locationId = @locationId AND sourceType = @sourceType AND property = @property";
-                                            updateStates.CommandText = stateSQL;
-                                            updateStates.Parameters.AddWithValue("@property", state.Property);
-                                            updateStates.Parameters.AddWithValue("@stateValue", state.Value);
-                                            updateStates.Parameters.AddWithValue("@locationId", location.Id);
-                                            updateStates.Parameters.AddWithValue("@sourceType", source.Type);
-                                            updateStates.ExecuteNonQuery();
+                    List<Source> dbSources = FindSourcesByLocationID(location);
+                    if (dbSources.Count > 0) {
+                        foreach (var source in dbSources) {
+                            //Checks if the timestamp is different from the timestamp in the db
+                            foreach (var updateSource in location.Sources) {
+                                var updateTimeStamp = updateSource.TimeStamp;
+                                if (source.TimeStamp < updateTimeStamp) {
+                                    using (SqlCommand updateSources = connection.CreateCommand()) {
+                                        var sourceSQL = "UPDATE source SET sourceTimestamp = @Timestamp WHERE locationId = @locationId AND sourceType = @sourceType";
+                                        updateSources.CommandText = sourceSQL;
+                                        updateSources.Parameters.AddWithValue("@Timestamp", source.TimeStamp);
+                                        updateSources.Parameters.AddWithValue("@locationId", location.Id);
+                                        updateSources.Parameters.AddWithValue("@sourceType", source.Type);
+                                        updateSources.ExecuteNonQuery();
+                                        List<State> states = FindStatesBySource(source, location);
+                                        if (states.Count > 0) {
+                                            foreach (var state in states) {
+                                                using (SqlCommand updateStates = connection.CreateCommand()) {
+                                                    var stateSQL = "UPDATE stateMP SET stateValue = @stateValue WHERE locationId = @locationId AND sourceType = @sourceType AND property = @property";
+                                                    updateStates.CommandText = stateSQL;
+                                                    updateStates.Parameters.AddWithValue("@property", state.Property);
+                                                    updateStates.Parameters.AddWithValue("@stateValue", state.Value);
+                                                    updateStates.Parameters.AddWithValue("@locationId", location.Id);
+                                                    updateStates.Parameters.AddWithValue("@sourceType", source.Type);
+                                                    updateStates.ExecuteNonQuery();
+                                                }
+                                            }
                                         }
                                     }
                                 }

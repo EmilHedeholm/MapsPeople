@@ -49,27 +49,30 @@ namespace DatabaseAccess
                 client.Connect();
                 //iterates through the list of sources on location
                 foreach (Source source in location.Sources) {
-                    //checks if the source exists in the database and sets its properties if it does
-                    var foundSources = client.Cypher
-                      .Match("(source: Source { Type: {type}})")
-                      .Where("(source)-[:Located_In]->(:Location { Id: {locationId}})")
-                      .Set("source.TimeStamp = {timeStamp}")
-                      .WithParams(new { timeStamp = source.TimeStamp, type = source.Type, locationId = location.Id })
-                      .Return<Source>("source")
-                      .Results;
-
-                    //if the source does not exist a new one is created
-                    if (foundSources.Count() == 0) {
-                        client.Cypher
-                        .Create("(source:Source { Type: {type}})")
-                        .Set("source.TimeStamp = {sourceTimeStamp}")
-                        .With("source")
-                        .Match("(parent:Location)")
-                        .Where((Location parent) => parent.Id == location.Id)
-                        .Create("(source)-[r:Located_In]->(parent)")
-                        .WithParams(new { type = source.Type, sourceTimeStamp = source.TimeStamp })
-                        .ExecuteWithoutResults();
-
+                    List<Source> dbSources = GetSourcesByLocation(location);
+                    foreach (Source dbSource in dbSources) {
+                        if(dbSource.TimeStamp < source.TimeStamp) {
+                            //checks if the source exists in the database and sets its properties if it does
+                            var foundSources = client.Cypher
+                              .Match("(source: Source { Type: {type}})")
+                              .Where("(source)-[:Located_In]->(:Location { Id: {locationId}})")
+                              .Set("source.TimeStamp = {timeStamp}")
+                              .WithParams(new { timeStamp = source.TimeStamp, type = source.Type, locationId = location.Id })
+                              .Return<Source>("source")
+                              .Results;
+                            //if the source does not exist a new one is created
+                            if (foundSources.Count() == 0) {
+                                client.Cypher
+                                .Create("(source:Source { Type: {type}})")
+                                .Set("source.TimeStamp = {sourceTimeStamp}")
+                                .With("source")
+                                .Match("(parent:Location)")
+                                .Where((Location parent) => parent.Id == location.Id)
+                                .Create("(source)-[r:Located_In]->(parent)")
+                                .WithParams(new { type = source.Type, sourceTimeStamp = source.TimeStamp })
+                                .ExecuteWithoutResults();
+                            }
+                        }
                     }
                     // the id for the states to be inserted into the database
                     CreateStates(source, location);

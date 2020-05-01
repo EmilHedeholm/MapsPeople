@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 
 namespace DatabaseAccess {
     public class MongoDBDataAccess : IDataAccess {
@@ -115,11 +116,37 @@ namespace DatabaseAccess {
         //This method updates a location if the id provided matches one in the database otherwise it inserts it.
         //parameter: location
         public void UpdateLocation(Location location) {
-            try { 
-            collection.ReplaceOne(new BsonDocument("_id", location.Id), location, new ReplaceOptions { IsUpsert = true });
+            try {
+                if (GetLocationById(location.Id) != null) {
+                    List<Source> dbSources = GetSourcesFromLocation(location);
+                    foreach (var source in location.Sources) {
+                        foreach (var dbSource in dbSources) {
+                            if (source.TimeStamp > dbSource.TimeStamp) {
+                                collection.ReplaceOne(new BsonDocument("_id", location.Id), location, new ReplaceOptions { IsUpsert = false });
+                            }
+                        }
+                    }
+                } else {
+                    CreateLocation(location);
+                }    
             } catch (MongoException me) {
                 throw new Exception("Something went wrong when trying to update a location", me);
             }
+        }
+
+        private List<Source> GetSourcesFromLocation(Location location) {
+            var filter = Builders<Location>.Filter.Eq("_id", location.Id);
+            var project = Builders<Location>.Projection.Include("Sources.$");
+            var bsonSources = collection.Find(filter).Project(project).ToList();
+            List<Source> foundSources = new List<Source>();
+            foreach (var source in bsonSources) {
+                Source convertedSource = BsonSerializer.Deserialize<Source>(source);
+                foundSources.Add(convertedSource);
+            }
+            return foundSources;
+
+            
+            
         }
     }
 }
