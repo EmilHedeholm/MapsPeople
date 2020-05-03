@@ -10,12 +10,18 @@ using Newtonsoft.Json;
 
 namespace SystemTest {
     public class KafkaTest {
+
+        IConsumer<Ignore, string> consumer { get; set; }
+
+        public KafkaTest(string userName, string topic) {
+            consumer = new ConsumerBuilder<Ignore, string>(new ConsumerConfig { BootstrapServers = "localhost", GroupId = userName }).Build();
+            consumer.Subscribe(topic);
+        }
         public void ReceiveDataFromKafka(string userName, string topic) {
-            using (var consumer = new ConsumerBuilder<Ignore, string>(new ConsumerConfig { BootstrapServers = "localhost", GroupId = userName }).Build()) {
-                consumer.Subscribe(topic);
+           // using (consumer) {
                 var result = consumer.Consume();
                 Console.WriteLine("Message Received");
-            }
+            //}
         }
         public async void SendDataWithKafka(List<Location> locations) {
             var topic = "Consumer_Topic";

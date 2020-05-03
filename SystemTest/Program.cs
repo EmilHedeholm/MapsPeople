@@ -18,17 +18,19 @@ using System.Diagnostics;
 namespace SystemTest {
     class Program {
         static List<RootObject> oldData = new List<RootObject>();
-        static KafkaTest kafkaSender = new KafkaTest();
-        static KafkaTest kafkaReceiver = new KafkaTest();
+        
+
         static string MessageBroker { get; set; }
+        static string userQueue = "testUser";
+        static string queueID = "7f29498392eb4d40a1e17731";
+        static KafkaTest kafka = new KafkaTest(userQueue, queueID);
         static void Main(string[] args) {
             //Stopwatch stopWatch = new Stopwatch();
             //stopWatch.Start();
             //Thread.Sleep(10000);
             List<double> times = new List<double>();
             //Stopwatch sendWatch = new Stopwatch();
-            string userQueue = "testUser";
-            string queueID = "7f29498392eb4d40a1e17731";
+
             string spaceRefId = "GS202";
             var choice = true;
             while (choice) {
@@ -59,8 +61,8 @@ namespace SystemTest {
                     Receiver receiver = new Receiver();
                     receiver.Consume(userQueue, queueID);
                 } else if (data.Count != 0) {
-                    kafkaSender.SendDataWithKafka(data);
-                    kafkaReceiver.ReceiveDataFromKafka(userQueue, queueID);
+                    kafka.SendDataWithKafka(data);
+                    kafka.ReceiveDataFromKafka(userQueue, queueID);
                 }
                 var stop = DateTime.Now;
 
