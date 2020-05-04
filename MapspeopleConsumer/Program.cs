@@ -37,7 +37,7 @@ namespace MapspeopleConsumer {
                         break;
                 }
             }
-            while (true) {
+           // while (true) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
                 List<DataModels.Location> data = GetData();
@@ -48,7 +48,7 @@ namespace MapspeopleConsumer {
                         SendUpdateWithRabbitMQ(data);
                     }
                 }
-            }
+            //}
         }
 
         //This method request a token using a post Request using your credentials from Mapspeoples CMS, which gives you a token that you

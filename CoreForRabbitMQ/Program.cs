@@ -15,8 +15,11 @@ using MessageBrokers;
 namespace CoreForRabbitMQ {
     public class Program {
         static IDataAccess dataAccess { get; set; }
-        static IMessageBroker messageBroker { get; set; }
+        static string messageBroker { get; set; }
+        static HashSet<string> createdKafkaTopics { get; set; }
         public static void Main(string[] args) {
+            //A list of the topics we already created on kafka. This improves performance.
+            createdKafkaTopics = new HashSet<string>();
             //there are three implemented databases and the while loop lets you choose which one to use when running the program
             var choice = true;
             while (choice) {
