@@ -1,5 +1,4 @@
 ﻿using DataModels;
-using MessageBrokers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,8 +10,9 @@ using System.Threading.Tasks;
 namespace ConsumerTest {
     class Program {
         
-        static IMessageBroker messageBroker { get; set; }
+        static string messageBroker { get; set; }
         static void Main(string[] args) {
+            Receiver receiver = new Receiver();
             var choice = true;
             Console.WriteLine("Enter Username");
             string userName = Console.ReadLine();
@@ -23,16 +23,18 @@ namespace ConsumerTest {
             }
             Console.WriteLine("Enter a LocationID");
             string locationID = Console.ReadLine();
+            GetAllLocations(locationID, database);
             while (choice) {
+                Console.WriteLine();
                 Console.WriteLine("input the name of the messagebroker you want to use(kafka, rabbitmq)");
                 var messageBrokerChoice = Console.ReadLine();
                 switch (messageBrokerChoice) {
                     case "kafka":
-                        messageBroker = new MessageBrokerKafka();
+                        receiver.ReceiveUpdateFromKafka(userName, locationID);
                         choice = false;
                         break;
                     case "rabbitmq":
-                        messageBroker = new MessageBrokerRabbitMQ();
+                        receiver.ReceiveUpdateFromRabbitMQ(userName, locationID);
                         choice = false;
                         break;
                     default:
@@ -40,8 +42,7 @@ namespace ConsumerTest {
                         break;
                 }
             }
-            GetAllLocations(locationID, database);
-            messageBroker.RecieveUpdateFromCore(userName, locationID);
+            
         }
 
         private static void GetAllLocations(string queueId, string database) {

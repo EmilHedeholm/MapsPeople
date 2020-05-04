@@ -99,10 +99,6 @@
       <Project>{1372fd92-3251-46bc-8109-fc2f9222246c}</Project>
       <Name>DataModels</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MessageBrokers\MessageBrokers.csproj">
-      <Project>{A9DF2725-7E91-4953-AF8E-943962EABBCB}</Project>
-      <Name>MessageBrokers</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

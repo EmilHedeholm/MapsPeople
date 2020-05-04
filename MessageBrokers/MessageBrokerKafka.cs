@@ -28,42 +28,7 @@ namespace MessageBrokers {
             }
         }
 
-        public void RecieveUpdateFromCore(string userName, string LocationID) {
-            using (var consumer = new ConsumerBuilder<Ignore, string>(new ConsumerConfig { BootstrapServers = "localhost", GroupId = userName }).Build()) {
-                consumer.Subscribe(LocationID);
-                while (true) {
-                    var result = consumer.Consume();
-                    Console.WriteLine(result.Message.Value);
-                }
-            }
-        }
-
-        public async void SendUpdateToCore(List<Location> locations) {
-            var topic = "Consumer_Topic";
-            using (var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = "localhost" }).Build()) {
-                try {
-                    await adminClient.CreateTopicsAsync(new TopicSpecification[] {
-                                                                new TopicSpecification { Name = topic,
-                                                                                         ReplicationFactor = 1,
-                                                                                         NumPartitions = 1 }
-                                                                });
-                } catch (CreateTopicsException e) {
-                }
-            }
-            using (var producer = new ProducerBuilder<string, string>(new ProducerConfig { BootstrapServers = "localhost" }).Build()) {
-                try {
-                    string json = JsonConvert.SerializeObject(locations);
-                    var deliveryReport = await producer.ProduceAsync(
-                        topic, new Message<string, string> { Key = null, Value = json });
-
-                    Console.WriteLine($"delivered to: {deliveryReport.TopicPartitionOffset}");
-                } catch (ProduceException<string, string> e) {
-                    Console.WriteLine($"failed to deliver message: {e.Message} [{e.Error.Code}]");
-                }
-            }
-        }
-
-        public async void SendUpdateToUsers(List<ExternalModel> messages) {
+        private async void SendUpdateToUsers(List<ExternalModel> messages) {
             foreach (var externalMesssage in messages) {
                 foreach (var parentId in externalMesssage.ParentIds) {
                     using (var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = "localhost" }).Build()) {

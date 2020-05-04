@@ -8,9 +8,6 @@ using System.Threading.Tasks;
 
 namespace MessageBrokers {
     public interface IMessageBroker {
-        void SendUpdateToUsers(List<ExternalModel> messages);
-        void SendUpdateToCore(List<Location> locations);
         void ReceiveUpdateFromConsumer(IDataAccess dataAccess);
-        void RecieveUpdateFromCore(string userName, string LocationID);
     }
 }
