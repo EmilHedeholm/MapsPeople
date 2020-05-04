@@ -48,6 +48,7 @@ namespace ClientGUI {
                                      autoAck: false,
                                      consumer: consumer);
                 Console.ReadLine();
+               
 
             } catch (Exception e) {
                 if (e is AlreadyClosedException) {
@@ -65,14 +66,17 @@ namespace ClientGUI {
             return message1;
         }
 
-        public void ReceiveDataFromKafka(string userName, string topic) {
+        public ExternalModel ReceiveDataFromKafka(string userName, string topic) {
+            ExternalModel message = null;
             using (var consumer = new ConsumerBuilder<Ignore, string>(new ConsumerConfig { BootstrapServers = "localhost", GroupId = userName }).Build()) {
                 consumer.Subscribe(topic);
                 while (true) {
                     var result = consumer.Consume();
+                    message = JsonConvert.DeserializeObject <ExternalModel> (result.Message.Value);
                     Console.WriteLine(result.Message.Value);
-                }
-            }
+                    return message;
+                }              
+            }          
         }
     }
 }

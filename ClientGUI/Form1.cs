@@ -45,6 +45,7 @@ namespace ClientGUI {
         }
 
         private void databaseListBox_SelectedIndexChanged(object sender, EventArgs e) {
+            warningLabel.Text = "";
             databaseTextBox.Text = databaseListBox.Text;
             Database = databaseTextBox.Text;
 
@@ -61,20 +62,10 @@ namespace ClientGUI {
                     case "kafka":
                         choiceLabel.Text = "Enter a topic";
                         QueTopicLabel.Text = "Topic";
-                        //queTopTextBox.Visible = true;
-                        //string topic = queTopTextBox.Text;
-                        //GetAllLocations(topic, Database);
-                        //receiver.ReceiveDataFromKafka(userName, topic);
-                      
                         break;
                     case "rabbitmq":
                         choiceLabel.Text = "Enter a queue ID";
                         QueTopicLabel.Text = "Queque ID";
-                        //queTopTextBox.Visible = true;
-                        //string queueId = queTopTextBox.Text;
-                        //GetAllLocations(queueId, Database);
-                        //receiver.Consume(userName, queueId);
-                        
                         break;
                     default:
                         warningLabel.Visible = true;
@@ -98,41 +89,68 @@ namespace ClientGUI {
             string messageBroker = messageTextBox.Text;
             ExternalModel message = null;
             warningLabel.Visible = false;
-            warningLabel.Text = "not a recognized messagebroker, try again";
+            warningLabel.ForeColor = Color.Red;
+            warningLabel.Text = "";
            
                 switch (messageBroker) {
                     case "kafka":
-                        string topic = queTopTextBox.Text;
-                        GetAllLocations(topic, Database);
-                        receiver.ReceiveDataFromKafka(userName, topic);
-                        //choice = false;
+                        string topic = queTopTextBox.Text;                   
+                        if (topic !=null) {
+                           GetAllLocations(topic, Database);
+                           message = receiver.ReceiveDataFromKafka(userName, topic);                    
+                        } else {
+                             warningLabel.Visible = true;
+                             warningLabel.Text = "Input Topic, try again";
+                        }
                         break;
                     case "rabbitmq":
                         string queueId = queTopTextBox.Text;
-                        GetAllLocations(queueId, Database);
-                        message = receiver.Consume(userName, queueId);
-                        //choice = false;
+                        if (queueId != null) {
+                           GetAllLocations(queueId, Database);
+                           message = receiver.Consume(userName, queueId);
+                        } else {
+                           warningLabel.Visible = true;
+                           warningLabel.Text = "Input Queque ID, try again";
+                        }                   
                         break;
                     default:
                         warningLabel.Visible = true;
-                        //warningLabel.Text = "not a recognized messagebroker, try again";
-                        break;
+                        warningLabel.Text = "not a recognized messagebroker, try again";
+                        break;              
                 }
-            
-            List<Message> msgs = ConvertMessages(messages);
-            if (message!=null) {
-                Message msg = ConvertMessage(message);
-                List<Message> updateMsgs = updateMessages(msgs, msg);
-                LocationGUI openForm = new LocationGUI(updateMsgs);
-                openForm.Show();
-                //this.Hide();
-            } else {
-                LocationGUI openForm = new LocationGUI(msgs);
-                openForm.Show();
-                //this.Hide();
+            if(messages.Count != 0) {
+                List<Message> msgs = ConvertMessages(messages);
+                if (message != null) {
+                    Message msg = ConvertMessage(message);
+                    List<Message> updateMsgs = updateMessages(msgs, msg);
+                    LocationGUI openForm = new LocationGUI(updateMsgs);
+                    openForm.Show();
+                    //this.Hide();
+                } else {
+                    LocationGUI openForm = new LocationGUI(msgs);
+                    openForm.Show();
+                    //this.Hide();
 
-            }      
+                }
+            }
+            if (userName == null) {
+                warningLabel.Visible = true;       
+                warningLabel.Text = "input user name, try again";
 
+            }
+
+            if (Database == null) {
+                warningLabel.Visible = true;
+                warningLabel.Text = "Select a database, try again";
+
+            }
+
+            if (messageBroker == null) {
+                warningLabel.Visible = true;
+                warningLabel.Text = "Select a messageBroker, try again";
+
+            }
+       
         }
 
         private List<Message> updateMessages(List<Message> msgs, Message msg) {
