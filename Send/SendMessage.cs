@@ -63,19 +63,26 @@ namespace Send {
             }
         }
 
-        public async void SendUpdateWithKafka(List<ExternalModel> messages) {
+        public async void SendUpdateWithKafka(List<ExternalModel> messages, HashSet<string> createdKafkaTopics) {
             foreach (var externalMesssage in messages) {
                 foreach (var parentId in externalMesssage.ParentIds) {
-                    using (var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = "localhost" }).Build()) {
-                        try {
-                            await adminClient.CreateTopicsAsync(new TopicSpecification[] {
+                    if (!createdKafkaTopics.Contains(parentId)) {
+                        using (var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = "localhost" }).Build()) {
+                            try {
+                                await adminClient.CreateTopicsAsync(new TopicSpecification[] {
                                                                 new TopicSpecification { Name = parentId,
                                                                                          ReplicationFactor = 1,
                                                                                          NumPartitions = 1 }
                                                                 });
-                        } catch (CreateTopicsException e) {
-                            
-                        }
+                                createdKafkaTopics.Add(parentId);
+                            } catch (CreateTopicsException e) {
+                                Console.WriteLine($"An error occured while creating topic: {e.Error.Reason}");
+                                if (e.Error.Reason.Contains("already exists")) {
+                                    createdKafkaTopics.Add(parentId);
+                                }
+                                
+                            }
+                        } 
                     }
                     using (var producer = new ProducerBuilder<string, string>(new ProducerConfig { BootstrapServers = "localhost" }).Build()) {
                         try {
