@@ -47,9 +47,11 @@ namespace DatabaseAccess
         private void CreateSources(Location location) {
             try {
                 client.Connect();
+                var dbSources = GetSourcesByLocation(location);
                 //iterates through the list of sources on location
                 foreach (Source source in location.Sources) {
-
+                    foreach (var dbsource in dbSources) {
+                        if (source.TimeStamp > dbsource.TimeStamp) {
                             //checks if the source exists in the database and sets its properties if it does
                             var foundSources = client.Cypher
                               .Match("(source: Source { Type: {type}})")
@@ -69,13 +71,15 @@ namespace DatabaseAccess
                                 .Create("(source)-[r:Located_In]->(parent)")
                                 .WithParams(new { type = source.Type, sourceTimeStamp = source.TimeStamp })
                                 .ExecuteWithoutResults();
-                            }
 
-                    // the id for the states to be inserted into the database
-                    CreateStates(source, location);
+                            }
+                            // the id for the states to be inserted into the database
+                            CreateStates(source, location);
+                        }
+                    }
                 }
                 client.Dispose();
-            } catch(NeoException ne) {
+            } catch (NeoException ne) {
                 client.Dispose();
                 throw new Exception("Something went wrong when trying to insert a source", ne);
             }

@@ -39,8 +39,8 @@ namespace ConsumerAzure {
            // while (true) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
-                //SendJSON();
-                
+                SendJSON();
+                /*
                 List<DataModels.Location> data = GetData();
                 if (!(data.Count == 0)) {
                     if (messageBroker.Equals("kafka")) {
@@ -50,7 +50,7 @@ namespace ConsumerAzure {
                     }
                 }
                 
-                
+                */
             //}
         }
 
@@ -249,14 +249,14 @@ namespace ConsumerAzure {
             state1.Value = "True";
             State state2 = new State();
             state2.Property = "PersonCount";
-            state2.Value = "4790";
+            state2.Value = "4760";
             State state3 = new State();
             state3.Property = "SignsOfLife";
             state3.Value = "True";
             source.State.Add(state1);
             source.State.Add(state2);
             source.State.Add(state3);
-            source.TimeStamp = DateTime.Today;
+            source.TimeStamp = DateTime.Now;
             source.Type = "Occupancy";
             sources.Add(source);
             testLocation.Sources = sources;
