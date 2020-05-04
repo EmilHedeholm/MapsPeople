@@ -36,7 +36,7 @@ namespace ConsumerAzure {
                         break;
                 }
             }
-            while (true) {
+           while (true) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
                 List<DataModels.Location> data = GetData();
