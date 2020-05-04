@@ -96,6 +96,7 @@ namespace ClientGUI {
         private void okButton_Click(object sender, EventArgs e) {
             string userName = userNameTextBox.Text;
             string messageBroker = messageTextBox.Text;
+            ExternalModel message = null;
             warningLabel.Visible = false;
             warningLabel.Text = "not a recognized messagebroker, try again";
            
@@ -109,7 +110,7 @@ namespace ClientGUI {
                     case "rabbitmq":
                         string queueId = queTopTextBox.Text;
                         GetAllLocations(queueId, Database);
-                        receiver.Consume(userName, queueId);
+                        message = receiver.Consume(userName, queueId);
                         //choice = false;
                         break;
                     default:
@@ -117,29 +118,53 @@ namespace ClientGUI {
                         //warningLabel.Text = "not a recognized messagebroker, try again";
                         break;
                 }
-            List<string> locationIds = GetLocationIds(messages);
-            LocationGUI openForm = new LocationGUI(Database, locationIds);
-            openForm.Show();
-            this.Hide();
+            
+            List<Message> msgs = ConvertMessages(messages);
+            if (message!=null) {
+                Message msg = ConvertMessage(message);
+                List<Message> updateMsgs = updateMessages(msgs, msg);
+                LocationGUI openForm = new LocationGUI(updateMsgs);
+                openForm.Show();
+                //this.Hide();
+            } else {
+                LocationGUI openForm = new LocationGUI(msgs);
+                openForm.Show();
+                //this.Hide();
+
+            }      
 
         }
 
-      
-
-        private List<string> GetLocationIds(List<ExternalModel> messages) {
-            List<string> locationIds = new List<string>();
-            foreach (var message in messages) {
-                List<string> parentIds = new List<string>();
-                foreach(var id in message.ParentIds) {
-                    parentIds.Add(id);
+        private List<Message> updateMessages(List<Message> msgs, Message msg) {
+            List<Message> upMsgs = new List<Message>();
+            foreach ( var message in msgs) {
+                if (message.LocationId.Equals(msg.LocationId)) {
+                    message.Source = msg.Source;
                 }
-                locationIds.Add(parentIds[0]);
-                
-            }
-            return locationIds;
+                upMsgs.Add(message);
 
-           
+            }
+            return upMsgs;
         }
+
+        private List<Message> ConvertMessages(List<ExternalModel> messages) {
+            List<Message> msgs = new List<Message>();
+            foreach (var message in messages) {
+                msgs.Add(ConvertMessage(message));
+            }
+            return msgs;
+        }
+
+        private Message ConvertMessage(ExternalModel message) {
+            Message msg = new Message();
+            List<string> parentIds = new List<string>();
+            foreach (var id in message.ParentIds) {
+                parentIds.Add(id);
+            }
+            msg.LocationId= parentIds[0];
+            msg.Source = message.Source;
+            return msg;
+        }      
     }
  }
 

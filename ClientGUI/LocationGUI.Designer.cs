@@ -30,6 +30,7 @@
             this.stateDataGridView = new System.Windows.Forms.DataGridView();
             this.stateLabel = new System.Windows.Forms.Label();
             this.warningLabel = new System.Windows.Forms.Label();
+            this.backButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.stateDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -97,11 +98,22 @@
             this.warningLabel.Size = new System.Drawing.Size(0, 20);
             this.warningLabel.TabIndex = 6;
             // 
+            // backButton
+            // 
+            this.backButton.Location = new System.Drawing.Point(541, 344);
+            this.backButton.Name = "backButton";
+            this.backButton.Size = new System.Drawing.Size(133, 45);
+            this.backButton.TabIndex = 7;
+            this.backButton.Text = "Back";
+            this.backButton.UseVisualStyleBackColor = true;
+            this.backButton.Click += new System.EventHandler(this.backButton_Click);
+            // 
             // LocationGUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.backButton);
             this.Controls.Add(this.warningLabel);
             this.Controls.Add(this.stateLabel);
             this.Controls.Add(this.stateDataGridView);
@@ -127,5 +139,6 @@
         private System.Windows.Forms.DataGridView stateDataGridView;
         private System.Windows.Forms.Label stateLabel;
         private System.Windows.Forms.Label warningLabel;
+        private System.Windows.Forms.Button backButton;
     }
 }

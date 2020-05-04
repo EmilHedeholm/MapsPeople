@@ -12,61 +12,56 @@ using DataModels;
 
 namespace ClientGUI {
     public partial class LocationGUI : Form {
-        public IDataAccess dataAccess { get; set; }
+        public List<Message> Messages { get; set; }
         public DataTable stateTable { get; set; }
-        public LocationGUI(string database, List<string> locationIds) {
+        public LocationGUI(List<Message> messages) {
             InitializeComponent();
             stateTable = new DataTable();
-            //List<string> locationIds = new List<string>();
-            //locationIds.Add("287d4074d6c647a49f215fb1");
-            //locationIds.Add("ee268551ad3d42218ef83b5c");
-            //locationIds.Add("db8929a8474a4752a5a984a8");
-            //locationIds.Add("1b4b349a49fa4e22845f6790");
-            UpdateLocationListBox(locationIds);
-            switch (database) {
-                case "neo4j":
-                    dataAccess = new Neo4jDataAccess();
-                    break;
-                case "mongodb":
-                    dataAccess = new MongoDBDataAccess();
-                    break;
-                case "mssql":
-                    dataAccess = new SQLDataAccess();
-                    break;
-                default:
-                    warningLabel.Text = "not a recognized database, try again";
-                    break;
-            }
+            UpdateLocationListBox(messages);
+            Messages = messages;
+          
 
         }
 
-        private void UpdateLocationListBox(List<string> locationIds) {
+        private void UpdateLocationListBox(List<Message> messages) {
             locationListBox.ClearSelected();
-            foreach( string locationId in locationIds) {
-                locationListBox.Items.Add(locationId);
+            foreach( var msg in messages) {
+                locationListBox.Items.Add(msg.LocationId);
             }
         }
 
         private void locationListBox_SelectedIndexChanged(object sender, EventArgs e) {
             string locationId = locationListBox.Text;
-            Location location = dataAccess.GetLocationById(locationId);
-            List<Source> sources = location.Sources;
-            UpdateSoureListBox(sources);
+            Message msg = GetMessageByLocationId(locationId);
+            Source source = msg.Source;
+            if (source != null) {
+                UpdateSoureListBox(source);
+            }
+          
         }
 
-        private void UpdateSoureListBox(List<Source> sources) {
+        private Message GetMessageByLocationId(string locationId) {
+            Message message = null;
+            foreach(var msg in Messages) {
+                if (msg.LocationId.Equals(locationId)) {
+                    message = msg;
+                }
+            }
+            return message;
+        }
+
+        private void UpdateSoureListBox(Source source) {
             sourceListBox.Items.Clear();
-            stateTable.Clear();
-            foreach(var source in sources) {
-                sourceListBox.Items.Add(source.Type + "" + "" + source.TimeStamp.ToString());
-                List<State> states = source.State;
+            stateTable.Clear();         
+            sourceListBox.Items.Add(source.Type + "" + "" + source.TimeStamp.ToString());
+            List<State> states = source.State;
                 if (states.Count != 0) {
                     foreach(var state in states) {
                         stateTable.Rows.Add(locationListBox.Text, source.Type, state.Property, state.Value);
                     }
 
-                }
-            }
+               }
+            
             stateDataGridView.DataSource = stateTable;
         }
 
@@ -77,6 +72,12 @@ namespace ClientGUI {
             stateTable.Columns.Add("Property", typeof(string));
             stateTable.Columns.Add("Value", typeof(string));
             stateDataGridView.DataSource = stateTable;
+        }
+
+        private void backButton_Click(object sender, EventArgs e) {
+            Form1 openForm = new Form1();
+            openForm.Show();
+            this.Hide();
         }
     }
 }

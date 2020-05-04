@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using Confluent.Kafka;
+using DataModels;
+using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -10,7 +12,8 @@ namespace ClientGUI {
     internal class Receiver {
         //This method takes a username and a queue ID and creates a queue with the username and binds it to the selected queue id
         //afterwards it creates the consumer and links it to the queue.
-        public void Consume(string userQueue, string queueID) {
+        public ExternalModel Consume(string userQueue, string queueID) {
+             ExternalModel message1 = null;
             try {
                 ConnectionFactory factory = new ConnectionFactory();
                 factory.HostName = "localhost";
@@ -32,7 +35,7 @@ namespace ClientGUI {
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
                     if (message != null) {
-                        //var deserializedMessage = JsonConvert.DeserializeObject<ExternalModel>(message);
+                         message1 = JsonConvert.DeserializeObject<ExternalModel>(message);
                         //foreach (var parentId in deserializedMessage.ParentIds){
                         //    Console.Write(parentId + ", ");
                         //    Console.WriteLine();
@@ -59,6 +62,7 @@ namespace ClientGUI {
                     Console.WriteLine("Something went wrong");
                 }
             }
+            return message1;
         }
 
         public void ReceiveDataFromKafka(string userName, string topic) {
