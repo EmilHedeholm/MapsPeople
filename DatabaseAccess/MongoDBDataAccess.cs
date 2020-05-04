@@ -136,17 +136,8 @@ namespace DatabaseAccess {
 
         private List<Source> GetSourcesFromLocation(Location location) {
             var filter = Builders<Location>.Filter.Eq("_id", location.Id);
-            var project = Builders<Location>.Projection.Include("Sources.$");
-            var bsonSources = collection.Find(filter).Project(project).ToList();
-            List<Source> foundSources = new List<Source>();
-            foreach (var source in bsonSources) {
-                Source convertedSource = BsonSerializer.Deserialize<Source>(source);
-                foundSources.Add(convertedSource);
-            }
-            return foundSources;
-
-            
-            
+            Location dbLocation = collection.Find(filter).FirstOrDefault();
+            return dbLocation.Sources;
         }
     }
 }

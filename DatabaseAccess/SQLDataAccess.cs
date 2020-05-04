@@ -296,10 +296,9 @@ namespace DatabaseAccess {
                     List<Source> dbSources = FindSourcesByLocationID(location);
                     if (dbSources.Count > 0) {
                         foreach (var source in dbSources) {
-                            //Checks if the timestamp is different from the timestamp in the db
                             foreach (var updateSource in location.Sources) {
-                                var updateTimeStamp = updateSource.TimeStamp;
-                                if (source.TimeStamp < updateTimeStamp) {
+                                //Checks if the timestamp is different from the timestamp in the db
+                                if (source.TimeStamp < updateSource.TimeStamp) {
                                     using (SqlCommand updateSources = connection.CreateCommand()) {
                                         var sourceSQL = "UPDATE source SET sourceTimestamp = @Timestamp WHERE locationId = @locationId AND sourceType = @sourceType";
                                         updateSources.CommandText = sourceSQL;

@@ -49,9 +49,7 @@ namespace DatabaseAccess
                 client.Connect();
                 //iterates through the list of sources on location
                 foreach (Source source in location.Sources) {
-                    List<Source> dbSources = GetSourcesByLocation(location);
-                    foreach (Source dbSource in dbSources) {
-                        if(dbSource.TimeStamp < source.TimeStamp) {
+
                             //checks if the source exists in the database and sets its properties if it does
                             var foundSources = client.Cypher
                               .Match("(source: Source { Type: {type}})")
@@ -72,8 +70,7 @@ namespace DatabaseAccess
                                 .WithParams(new { type = source.Type, sourceTimeStamp = source.TimeStamp })
                                 .ExecuteWithoutResults();
                             }
-                        }
-                    }
+
                     // the id for the states to be inserted into the database
                     CreateStates(source, location);
                 }
