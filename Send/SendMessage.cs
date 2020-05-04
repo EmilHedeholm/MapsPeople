@@ -64,6 +64,12 @@ namespace Send {
         }
 
         public async void SendUpdateWithKafka(List<ExternalModel> messages, HashSet<string> createdKafkaTopics) {
+            using (var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = "localhost" }).Build()) {
+                Metadata metadata = adminClient.GetMetadata(new TimeSpan(0, 0, 1));
+                foreach (var topic in metadata.Topics) {
+                    createdKafkaTopics.Add(topic.Topic);
+                }
+            }
             foreach (var externalMesssage in messages) {
                 foreach (var parentId in externalMesssage.ParentIds) {
                     if (!createdKafkaTopics.Contains(parentId)) {
