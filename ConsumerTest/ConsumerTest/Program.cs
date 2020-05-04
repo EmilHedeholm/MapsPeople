@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 
 namespace ConsumerTest {
     class Program {
+        
+        static string messageBroker { get; set; }
         static void Main(string[] args) {
             Receiver receiver = new Receiver();
             var choice = true;
@@ -19,29 +21,28 @@ namespace ConsumerTest {
             Console.WriteLine("Enter the name of the database you want to use(neo4j, mongodb, mssql)");
             database = Console.ReadLine();
             }
+            Console.WriteLine("Enter a LocationID");
+            string locationID = Console.ReadLine();
+            GetAllLocations(locationID, database);
             while (choice) {
+                Console.WriteLine();
                 Console.WriteLine("input the name of the messagebroker you want to use(kafka, rabbitmq)");
-                var messageBroker = Console.ReadLine();
-                switch (messageBroker) {
+                var messageBrokerChoice = Console.ReadLine();
+                switch (messageBrokerChoice) {
                     case "kafka":
-                        Console.WriteLine("Enter a topic");
-                        string topic = Console.ReadLine();
-                        GetAllLocations(topic, database);
-                        receiver.ReceiveDataFromKafka(userName, topic);
+                        receiver.ReceiveUpdateFromKafka(userName, locationID);
                         choice = false;
                         break;
                     case "rabbitmq":
-                        Console.WriteLine("Enter a queue ID");
-                        string queueID = Console.ReadLine();
-                        GetAllLocations(queueID, database);
-                        receiver.Consume(userName, queueID);
+                        receiver.ReceiveUpdateFromRabbitMQ(userName, locationID);
                         choice = false;
                         break;
                     default:
                         Console.WriteLine("not a recognized messagebroker, try again");
                         break;
                 }
-            }  
+            }
+            
         }
 
         private static void GetAllLocations(string queueId, string database) {

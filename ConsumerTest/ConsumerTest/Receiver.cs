@@ -15,7 +15,7 @@ namespace ConsumerTest
     {
         //This method takes a username and a queue ID and creates a queue with the username and binds it to the selected queue id
         //afterwards it creates the consumer and links it to the queue.
-        public void Consume(string userQueue, string queueID)
+        public void ReceiveUpdateFromRabbitMQ(string userQueue, string queueID)
         {
             try { 
             ConnectionFactory factory = new ConnectionFactory();
@@ -39,11 +39,6 @@ namespace ConsumerTest
                     var body = ea.Body;
                     var message = Encoding.UTF8.GetString(body);
                     if (message != null) {
-                        //var deserializedMessage = JsonConvert.DeserializeObject<ExternalModel>(message);
-                        //foreach (var parentId in deserializedMessage.ParentIds){
-                        //    Console.Write(parentId + ", ");
-                        //    Console.WriteLine();
-                        //}
                         Console.WriteLine(message);
                     }
                     channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
@@ -68,7 +63,7 @@ namespace ConsumerTest
             }
         }
 
-        public void ReceiveDataFromKafka(string userName, string topic) {
+        public void ReceiveUpdateFromKafka(string userName, string topic) {
             using (var consumer = new ConsumerBuilder<Ignore, string>(new ConsumerConfig { BootstrapServers = "localhost", GroupId = userName }).Build()) {
                 consumer.Subscribe(topic);
                 while (true) {
