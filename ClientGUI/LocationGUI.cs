@@ -138,7 +138,8 @@ namespace ClientGUI {
                     if (message != null) {
                         message1 = JsonConvert.DeserializeObject<ExternalModel>(message);
                         Message message2 = ConvertMessage(message1);
-                        UpdateLocationListBox(updateMessages(Messages, message2));
+                        Messages = updateMessages(Messages, message2);
+                        UpdateLocationListBox(Messages); 
                         Console.WriteLine(message);
                     }
                     channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
@@ -173,7 +174,8 @@ namespace ClientGUI {
                     var result = consumer.Consume();
                     message = JsonConvert.DeserializeObject<ExternalModel>(result.Message.Value);
                     Message message2 = ConvertMessage(message);
-                    UpdateLocationListBox(updateMessages(Messages, message2));
+                    Messages = updateMessages(Messages, message2);
+                    UpdateLocationListBox(Messages);
                     Console.WriteLine(result.Message.Value);
                     return message;
                 }
