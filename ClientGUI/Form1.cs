@@ -125,12 +125,14 @@ namespace ClientGUI {
                     Message msg = ConvertMessage(message);
                     List<Message> updateMsgs = updateMessages(msgs, msg);
                     LocationGUI openForm = new LocationGUI(updateMsgs, messageBroker, userName, locacationId);
-                    openForm.Show();
-                    //this.Hide();
+                    this.Hide();
+                    openForm.ShowDialog();
+                    this.Show();
                 } else {
                     LocationGUI openForm = new LocationGUI(msgs, messageBroker, userName, locacationId);
-                    openForm.Show();
-                    //this.Hide();
+                    this.Hide();
+                    openForm.ShowDialog();
+                    this.Show();
 
                 }
             }

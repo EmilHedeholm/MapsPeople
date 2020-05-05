@@ -90,9 +90,7 @@ namespace ClientGUI {
         }
 
         private void backButton_Click(object sender, EventArgs e) {
-            Form1 openForm = new Form1();
-            openForm.Show();
-            this.Hide();
+            this.DialogResult = DialogResult.OK;
         }
         private List<Message> updateMessages(List<Message> msgs, Message msg) {
             List<Message> upMsgs = new List<Message>();
@@ -180,6 +178,41 @@ namespace ClientGUI {
                     return message;
                 }
             }
+        }
+
+        private void searchButton_Click(object sender, EventArgs e) {
+            warnLabel.Visible = false;
+            string locationId = locationIdTextBox.Text;
+            Message message = null;
+            if (locationId != null) {
+                message = GetMessageByLocationId(locationId);
+                if (message != null) {
+                    Source source = message.Source;
+                    if (source != null) {
+                        UpdateSoureListBox(source);
+                        warnLabel.Visible = true;
+                        warnLabel.ForeColor = Color.Green;
+                        warnLabel.Text = "Location:" +""+ locationId+""+"is found, source is updated.";
+                    } else {
+                        warnLabel.Visible = true;
+                        warnLabel.ForeColor = Color.Green;
+                        warnLabel.Text = "Location:" + "" + locationId + "" + "is found, without source.";
+                    }
+
+                } else {
+                    warnLabel.Visible = true;
+                    warnLabel.ForeColor = Color.Red;
+                    warnLabel.Text = "Location is not found, try again.";
+                }
+                
+
+            } else {
+                warnLabel.Visible = true;
+                warnLabel.ForeColor = Color.Red;
+                warnLabel.Text = "No input, nput locationId, try again.";
+            }
+
+
         }
     }
 }

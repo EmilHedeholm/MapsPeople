@@ -31,6 +31,10 @@
             this.stateLabel = new System.Windows.Forms.Label();
             this.warningLabel = new System.Windows.Forms.Label();
             this.backButton = new System.Windows.Forms.Button();
+            this.locationIdTextBox = new System.Windows.Forms.TextBox();
+            this.serachLabel = new System.Windows.Forms.Label();
+            this.searchButton = new System.Windows.Forms.Button();
+            this.warnLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.stateDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
@@ -100,7 +104,7 @@
             // 
             // backButton
             // 
-            this.backButton.Location = new System.Drawing.Point(541, 344);
+            this.backButton.Location = new System.Drawing.Point(644, 344);
             this.backButton.Name = "backButton";
             this.backButton.Size = new System.Drawing.Size(133, 45);
             this.backButton.TabIndex = 7;
@@ -108,11 +112,49 @@
             this.backButton.UseVisualStyleBackColor = true;
             this.backButton.Click += new System.EventHandler(this.backButton_Click);
             // 
+            // locationIdTextBox
+            // 
+            this.locationIdTextBox.Location = new System.Drawing.Point(313, 338);
+            this.locationIdTextBox.Name = "locationIdTextBox";
+            this.locationIdTextBox.Size = new System.Drawing.Size(241, 26);
+            this.locationIdTextBox.TabIndex = 8;
+            // 
+            // serachLabel
+            // 
+            this.serachLabel.AutoSize = true;
+            this.serachLabel.Location = new System.Drawing.Point(221, 344);
+            this.serachLabel.Name = "serachLabel";
+            this.serachLabel.Size = new System.Drawing.Size(88, 20);
+            this.serachLabel.TabIndex = 9;
+            this.serachLabel.Text = "LocationId:";
+            // 
+            // searchButton
+            // 
+            this.searchButton.Location = new System.Drawing.Point(437, 370);
+            this.searchButton.Name = "searchButton";
+            this.searchButton.Size = new System.Drawing.Size(133, 34);
+            this.searchButton.TabIndex = 10;
+            this.searchButton.Text = "Search";
+            this.searchButton.UseVisualStyleBackColor = true;
+            this.searchButton.Click += new System.EventHandler(this.searchButton_Click);
+            // 
+            // warnLabel
+            // 
+            this.warnLabel.AutoSize = true;
+            this.warnLabel.Location = new System.Drawing.Point(286, 409);
+            this.warnLabel.Name = "warnLabel";
+            this.warnLabel.Size = new System.Drawing.Size(0, 20);
+            this.warnLabel.TabIndex = 11;
+            // 
             // LocationGUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.warnLabel);
+            this.Controls.Add(this.searchButton);
+            this.Controls.Add(this.serachLabel);
+            this.Controls.Add(this.locationIdTextBox);
             this.Controls.Add(this.backButton);
             this.Controls.Add(this.warningLabel);
             this.Controls.Add(this.stateLabel);
@@ -140,5 +182,9 @@
         private System.Windows.Forms.Label stateLabel;
         private System.Windows.Forms.Label warningLabel;
         private System.Windows.Forms.Button backButton;
+        private System.Windows.Forms.TextBox locationIdTextBox;
+        private System.Windows.Forms.Label serachLabel;
+        private System.Windows.Forms.Button searchButton;
+        private System.Windows.Forms.Label warnLabel;
     }
 }
