@@ -47,7 +47,7 @@ namespace ClientGUI {
             } else {
                 foreach (var message in messages) {
                     foreach (var location in locationListBox.Items) {
-                        Message locationMessage = (Message)location;
+                        Message locationMessage = GetMessageByLocationId((string)location);
                         if (message.LocationId.Equals(locationMessage.LocationId)) {
                             locationListBox.Items[locationListBox.Items.IndexOf(location)] = message;
                         }
@@ -132,7 +132,7 @@ namespace ClientGUI {
                 parentIds.Add(id);
             }
             foreach (var location in locationListBox.Items) {
-                Message LocationMessage = (Message)location;
+                Message LocationMessage = GetMessageByLocationId((string)location);
                 if (LocationMessage.LocationId.Equals(parentIds[parentIds.Count() - 1])) {
                     msg.LocationId = LocationMessage.LocationId;
                     foreach (var source in LocationMessage.Sources) {
