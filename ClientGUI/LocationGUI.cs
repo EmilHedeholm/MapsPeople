@@ -134,11 +134,11 @@ namespace ClientGUI {
             return upMsgs;
         }
         private Message ConvertMessage(ExternalModel message) {
-            Message msg = new Message();
             if (this.locationListBox.InvokeRequired) {
                 ConvertCallBack d = new ConvertCallBack(ConvertMessage);
-                this.Invoke(d, new object[] { message });
+                return (Message)this.Invoke(d, new object[] { message });
             } else {
+                Message msg = new Message();
                 List<string> parentIds = new List<string>();
                 foreach (var id in message.ParentIds) {
                     parentIds.Add(id);
@@ -172,8 +172,8 @@ namespace ClientGUI {
                         msg.Sources.Add(message.Source);
                     }
                 }
+                return msg;
             }
-            return msg;
         }
         public ExternalModel Consume(string userQueue, string queueID) {
             ExternalModel message1 = null;
