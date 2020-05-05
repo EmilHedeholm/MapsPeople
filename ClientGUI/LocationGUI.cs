@@ -112,11 +112,17 @@ namespace ClientGUI {
         private Message ConvertMessage(ExternalModel message) {
             Message msg = new Message();
             List<string> parentIds = new List<string>();
-            foreach (var id in message.ParentIds) {
-                parentIds.Add(id);
+            if (locationListBox.Items.Contains(message)) {
+                msg = (Message)locationListBox.Items[locationListBox.Items.IndexOf(message)];
+                msg.Sources.Add(message.Source);
+            } else {
+                foreach (var id in message.ParentIds) {
+                    parentIds.Add(id);
+                }
+                msg.LocationId = parentIds[0];
+                msg.Sources.Add(message.Source);
             }
-            msg.LocationId = parentIds[0];
-            msg.Sources.Add(message.Source);
+           
             return msg;
         }
         public ExternalModel Consume(string userQueue, string queueID) {
