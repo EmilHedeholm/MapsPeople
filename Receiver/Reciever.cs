@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 namespace Receiver
 {
     public class Reciever{
-        public List<ExternalModel> Receive(IEnumerable<Location> locations, IDataAccess db) {
-            var external = new List<ExternalModel>();
+        public List<Message> Receive(IEnumerable<Location> locations, IDataAccess db) {
+            var external = new List<Message>();
             foreach (var location in locations) {
                 Location existingLocation = FindExistingLocation(location, db), update = null;
                
@@ -168,7 +168,7 @@ namespace Receiver
 
         //this method calls the external converter 
         //parameters: location is the location to be converted, db is the database to use
-        private List<ExternalModel> ConvertToExternal(Location location, IDataAccess db) {
+        private List<Message> ConvertToExternal(Location location, IDataAccess db) {
             Converter externalConverter = new Converter();
             return externalConverter.Convert(location, db);
         }

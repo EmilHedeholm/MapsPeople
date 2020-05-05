@@ -37,7 +37,7 @@ namespace Core.Controllers
             }
             if (response.StatusCode == HttpStatusCode.OK) {
                 HashSet<Location> locations = GetLocation(id);
-                List<ExternalModel> messages = new List<ExternalModel>();
+                List<Message> messages = new List<Message>();
                 foreach (var location in locations) {
                     messages.AddRange(Convert(location));
                 }
@@ -46,7 +46,7 @@ namespace Core.Controllers
             return new HttpResponseMessage(HttpStatusCode.BadRequest);
         }
 
-        private List<ExternalModel> Convert(Location location) {
+        private List<Message> Convert(Location location) {
             Converter externalConverter = new Converter();
             return externalConverter.Convert(location, dataAccess);
         }

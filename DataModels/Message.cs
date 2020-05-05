@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace DataModels {
-    public class ExternalModel {
+    public class Message {
         public Stack<string> ParentIds { get; set; }
         public Source Source { get; set; }
     }

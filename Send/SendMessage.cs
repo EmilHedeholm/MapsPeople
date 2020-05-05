@@ -14,7 +14,7 @@ namespace Send {
     public class SendMessage {
         //This method receives mapped messasages from CoreForRabbitMQ and use RabbitMQ to send messages to the system  
         //Param: Is a list of external models. 
-        public void SendUpdate(List<ExternalModel> messages) {
+        public void SendUpdate(List<Message> messages) {
             try {
                 var factory = new ConnectionFactory() { HostName = "localhost" };
                 using (var connection = factory.CreateConnection())
@@ -63,7 +63,7 @@ namespace Send {
             }
         }
 
-        public async void SendUpdateWithKafka(List<ExternalModel> messages, HashSet<string> createdKafkaTopics) {
+        public async void SendUpdateWithKafka(List<Message> messages, HashSet<string> createdKafkaTopics) {
             using (var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = "localhost" }).Build()) {
                 Metadata metadata = adminClient.GetMetadata(new TimeSpan(0, 0, 1));
                 foreach (var topic in metadata.Topics) {

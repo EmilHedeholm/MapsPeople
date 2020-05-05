@@ -34,7 +34,7 @@ namespace SystemTest {
                     var body = ea.Body.ToArray();
                     var message = Encoding.UTF8.GetString(body);
                     if (message != null) {
-                        //var deserializedMessage = JsonConvert.DeserializeObject<ExternalModel>(message);
+                        //var deserializedMessage = JsonConvert.DeserializeObject<Message>(message);
                         //foreach (var parentId in deserializedMessage.ParentIds){
                         //    Console.Write(parentId + ", ");
                         //    Console.WriteLine();

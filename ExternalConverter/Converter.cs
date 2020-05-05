@@ -13,9 +13,9 @@ namespace ExternalConverter
         //This method Converts data from the location to the external Datamodel format. 
         //Param: a Location object. 
         //Return: A list of externalmodels. 
-        public List<ExternalModel> Convert(Location location, IDataAccess db) {
-            List<ExternalModel> externalModels = new List<ExternalModel>();
-            ExternalModel externalModel = new ExternalModel();
+        public List<Message> Convert(Location location, IDataAccess db) {
+            List<Message> externalModels = new List<Message>();
+            Message externalModel = new Message();
             if (location != null) {
                 externalModel.ParentIds = FindParentIds(location, db);
                 if (location.Sources != null && location.Sources.Count() > 0) {
