@@ -56,7 +56,7 @@ namespace ClientGUI {
                             locationMessage = GetMessageByLocationId((string)listMessage);
                         }
                         if (message.LocationId.Equals(locationMessage.LocationId)) {
-                            locationListBox.Items[i] = message;
+                            locationListBox.Items[i] = message.LocationId;
                         }
                     }
                 }
@@ -138,6 +138,7 @@ namespace ClientGUI {
             foreach (var id in message.ParentIds) {
                 parentIds.Add(id);
             }
+            //when i click on a location in locationlistbox the program crashes because i thinks i am modifying a list while im iterating through it
             foreach (var location in locationListBox.Items) {
                 Message locationMessage = null;
                 //if i dont do this check the program crashes
