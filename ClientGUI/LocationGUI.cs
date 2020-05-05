@@ -20,6 +20,7 @@ namespace ClientGUI {
         public List<Message> Messages { get; set; }
         public DataTable stateTable { get; set; }
         delegate void UpdateLocationListBoxCallBack(List<Message> messages);
+        delegate Message ConvertCallBack(ExternalModel message);
         public LocationGUI(List<Message> messages, string messageBroker, string username, string locationId) {
             InitializeComponent();
             stateTable = new DataTable();
@@ -134,37 +135,42 @@ namespace ClientGUI {
         }
         private Message ConvertMessage(ExternalModel message) {
             Message msg = new Message();
-            List<string> parentIds = new List<string>();
-            foreach (var id in message.ParentIds) {
-                parentIds.Add(id);
-            }
-            //when i click on a location in locationlistbox the program crashes because i thinks i am modifying a list while im iterating through it
-            foreach (var location in locationListBox.Items) {
-                Message locationMessage = null;
-                //if i dont do this check the program crashes
-                var listMessage = locationListBox.Items[locationListBox.Items.IndexOf(location)];
-                if (listMessage.GetType() == typeof(Message)) {
-                    locationMessage = (Message)listMessage;
+            if (this.locationListBox.InvokeRequired) {
+                ConvertCallBack d = new ConvertCallBack(ConvertMessage);
+                this.Invoke(d, new object[] { message });
+            } else {
+                List<string> parentIds = new List<string>();
+                foreach (var id in message.ParentIds) {
+                    parentIds.Add(id);
                 }
-                if (listMessage.GetType() == typeof(string)) {
-                    locationMessage = GetMessageByLocationId((string)listMessage);
-                }
-                if (locationMessage.LocationId.Equals(parentIds[parentIds.Count() - 1])) {
-                    msg.LocationId = locationMessage.LocationId;
-                    foreach (var source in locationMessage.Sources) {
-                        msg.Sources.Add(source);
+                //when i click on a location in locationlistbox the program crashes because i thinks i am modifying a list while im iterating through it
+                foreach (var location in locationListBox.Items) {
+                    Message locationMessage = null;
+                    //if i dont do this check the program crashes
+                    var listMessage = locationListBox.Items[locationListBox.Items.IndexOf(location)];
+                    if (listMessage.GetType() == typeof(Message)) {
+                        locationMessage = (Message)listMessage;
                     }
-                    if (!msg.Sources.Contains(message.Source)) {
-                        msg.Sources.Add(message.Source);
+                    if (listMessage.GetType() == typeof(string)) {
+                        locationMessage = GetMessageByLocationId((string)listMessage);
+                    }
+                    if (locationMessage.LocationId.Equals(parentIds[parentIds.Count() - 1])) {
+                        msg.LocationId = locationMessage.LocationId;
+                        foreach (var source in locationMessage.Sources) {
+                            msg.Sources.Add(source);
+                        }
+                        if (!msg.Sources.Contains(message.Source)) {
+                            msg.Sources.Add(message.Source);
+                        } else {
+                            //this is because even though the contains method says they are the same the states might be different
+                            //because the equals method on source only compare type
+                            msg.Sources.Remove(message.Source);
+                            msg.Sources.Add(message.Source);
+                        }
                     } else {
-                        //this is because even though the contains method says they are the same the states might be different
-                        //because the equals method on source only compare type
-                        msg.Sources.Remove(message.Source);
+                        msg.LocationId = parentIds[parentIds.Count() - 1];
                         msg.Sources.Add(message.Source);
                     }
-                } else {
-                    msg.LocationId = parentIds[parentIds.Count() - 1];
-                    msg.Sources.Add(message.Source);
                 }
             }
             return msg;
