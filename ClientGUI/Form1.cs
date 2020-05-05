@@ -87,6 +87,7 @@ namespace ClientGUI {
         private void okButton_Click(object sender, EventArgs e) {
             string userName = userNameTextBox.Text;
             string messageBroker = messageTextBox.Text;
+            string locacationId = queTopTextBox.Text;
             ExternalModel message = null;
             warningLabel.Visible = false;
             warningLabel.ForeColor = Color.Red;
@@ -94,20 +95,20 @@ namespace ClientGUI {
            
                 switch (messageBroker) {
                     case "kafka":
-                        string topic = queTopTextBox.Text;                   
-                        if (topic !=null) {
-                           GetAllLocations(topic, Database);
-                           message = receiver.ReceiveDataFromKafka(userName, topic);                    
+                        //string topic = queTopTextBox.Text;                   
+                        if (locacationId !=null) {
+                           GetAllLocations(locacationId, Database);
+                           //message = receiver.ReceiveDataFromKafka(userName, topic);                    
                         } else {
                              warningLabel.Visible = true;
                              warningLabel.Text = "Input Topic, try again";
                         }
                         break;
                     case "rabbitmq":
-                        string queueId = queTopTextBox.Text;
-                        if (queueId != null) {
-                           GetAllLocations(queueId, Database);
-                           message = receiver.Consume(userName, queueId);
+                       // string queueId = queTopTextBox.Text;
+                        if (locacationId != null) {
+                           GetAllLocations(locacationId, Database);
+                          // message = receiver.Consume(userName, queueId);
                         } else {
                            warningLabel.Visible = true;
                            warningLabel.Text = "Input Queque ID, try again";
@@ -123,11 +124,11 @@ namespace ClientGUI {
                 if (message != null) {
                     Message msg = ConvertMessage(message);
                     List<Message> updateMsgs = updateMessages(msgs, msg);
-                    LocationGUI openForm = new LocationGUI(updateMsgs);
+                    LocationGUI openForm = new LocationGUI(updateMsgs, messageBroker, userName, locacationId);
                     openForm.Show();
                     //this.Hide();
                 } else {
-                    LocationGUI openForm = new LocationGUI(msgs);
+                    LocationGUI openForm = new LocationGUI(msgs, messageBroker, userName, locacationId);
                     openForm.Show();
                     //this.Hide();
 

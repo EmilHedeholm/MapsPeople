@@ -19,19 +19,29 @@ namespace ClientGUI {
     public partial class LocationGUI : Form {
         public List<Message> Messages { get; set; }
         public DataTable stateTable { get; set; }
-        public LocationGUI(List<Message> messages) {
+        delegate void UpdateLocationListBoxCallBack(List<Message> messages); 
+        public LocationGUI(List<Message> messages, string messageBroker, string username, string locationId) {
             InitializeComponent();
             stateTable = new DataTable();
             UpdateLocationListBox(messages);
             Messages = messages;
-          
+            if (messageBroker.Equals("kafka")) {
+                ReceiveDataFromKafka(username, locationId);
+            } else if (messageBroker.Equals("rabbitmq")) {
+                Consume(username, locationId);
+            }
 
         }
 
         private void UpdateLocationListBox(List<Message> messages) {
-            locationListBox.ClearSelected();
-            foreach( var msg in messages) {
-                locationListBox.Items.Add(msg.LocationId);
+            if (this.locationListBox.InvokeRequired) {
+                UpdateLocationListBoxCallBack d = new UpdateLocationListBoxCallBack(UpdateLocationListBox);
+                this.Invoke(d, new object[] { messages });
+            } else {
+                locationListBox.ClearSelected();
+                foreach (var msg in messages) {
+                    locationListBox.Items.Add(msg.LocationId);
+                }
             }
         }
 
