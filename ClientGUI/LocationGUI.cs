@@ -23,7 +23,7 @@ namespace ClientGUI {
         public LocationGUI(List<Message> messages, string messageBroker, string username, string locationId) {
             InitializeComponent();
             stateTable = new DataTable();
-            UpdateLocationListBox(messages);
+            UpdateLocationListBoxFirstTime(messages);
             Messages = messages;
             if (messageBroker.Equals("kafka")) {
                 ReceiveDataFromKafka(username, locationId);
@@ -33,14 +33,25 @@ namespace ClientGUI {
 
         }
 
+        private void UpdateLocationListBoxFirstTime(List<Message> messages) {
+            locationListBox.Items.Clear();
+            foreach (var msg in messages) {
+                locationListBox.Items.Add(msg.LocationId);
+            }
+        }
+
         private void UpdateLocationListBox(List<Message> messages) {
             if (this.locationListBox.InvokeRequired) {
                 UpdateLocationListBoxCallBack d = new UpdateLocationListBoxCallBack(UpdateLocationListBox);
                 this.Invoke(d, new object[] { messages });
             } else {
-                locationListBox.ClearSelected();
-                foreach (var msg in messages) {
-                    locationListBox.Items.Add(msg.LocationId);
+                foreach (var message in messages) {
+                    foreach (var location in locationListBox.Items) {
+                        Message locationMessage = (Message)location;
+                        if (message.LocationId.Equals(locationMessage.LocationId)) {
+                            locationListBox.Items[locationListBox.Items.IndexOf(location)] = message;
+                        }
+                    }
                 }
             }
         }
@@ -70,10 +81,15 @@ namespace ClientGUI {
         private void UpdateSoureListBox(List<Source> sources) {
             sourceListBox.Items.Clear();
             foreach (var source in sources) {
+                if (source != null) { 
                 sourceListBox.Items.Add(source.Type + "" + "" + source.TimeStamp.ToString());
                 List<State> states = source.State;
                 if (states.Count != 0) {
                     UpdateStateTable(states);
+                }
+                } else {
+                    List<State> noSourceList = new List<State>();
+                    UpdateStateTable(noSourceList);
                 }
             }
         }
@@ -112,17 +128,29 @@ namespace ClientGUI {
         private Message ConvertMessage(ExternalModel message) {
             Message msg = new Message();
             List<string> parentIds = new List<string>();
-            if (locationListBox.Items.Contains(message)) {
-                msg = (Message)locationListBox.Items[locationListBox.Items.IndexOf(message)];
-                msg.Sources.Add(message.Source);
-            } else {
-                foreach (var id in message.ParentIds) {
-                    parentIds.Add(id);
-                }
-                msg.LocationId = parentIds[0];
-                msg.Sources.Add(message.Source);
+            foreach (var id in message.ParentIds) {
+                parentIds.Add(id);
             }
-           
+            foreach (var location in locationListBox.Items) {
+                Message LocationMessage = (Message)location;
+                if (LocationMessage.LocationId.Equals(parentIds[parentIds.Count() - 1])) {
+                    msg.LocationId = LocationMessage.LocationId;
+                    foreach (var source in LocationMessage.Sources) {
+                        msg.Sources.Add(source);
+                    }
+                    if (!msg.Sources.Contains(message.Source)) {
+                        msg.Sources.Add(message.Source);
+                    } else {
+                        //this is because even though the contains method says they are the same the states might be different
+                        //because the equals method on source only compare type
+                        msg.Sources.Remove(message.Source);
+                        msg.Sources.Add(message.Source);
+                    }
+                } else {
+                    msg.LocationId = parentIds[parentIds.Count() - 1];
+                    msg.Sources.Add(message.Source);
+                }
+            }
             return msg;
         }
         public ExternalModel Consume(string userQueue, string queueID) {
