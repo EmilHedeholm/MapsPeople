@@ -160,7 +160,7 @@ namespace ClientGUI {
             List<Message> upMsgs = new List<Message>();
             foreach ( var message in msgs) {
                 if (message.LocationId.Equals(msg.LocationId)) {
-                    message.Source = msg.Source;
+                    message.Sources = msg.Sources;
                 }
                 upMsgs.Add(message);
 
@@ -183,7 +183,7 @@ namespace ClientGUI {
                 parentIds.Add(id);
             }
             msg.LocationId= parentIds[0];
-            msg.Source = message.Source;
+            msg.Sources.Add(message.Source);
             return msg;
         }      
     }

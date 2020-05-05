@@ -19,7 +19,7 @@ namespace ClientGUI {
     public partial class LocationGUI : Form {
         public List<Message> Messages { get; set; }
         public DataTable stateTable { get; set; }
-        delegate void UpdateLocationListBoxCallBack(List<Message> messages); 
+        delegate void UpdateLocationListBoxCallBack(List<Message> messages);
         public LocationGUI(List<Message> messages, string messageBroker, string username, string locationId) {
             InitializeComponent();
             stateTable = new DataTable();
@@ -48,11 +48,13 @@ namespace ClientGUI {
         private void locationListBox_SelectedIndexChanged(object sender, EventArgs e) {
             string locationId = locationListBox.Text;
             Message msg = GetMessageByLocationId(locationId);
-            Source source = msg.Source;
-            if (source != null) {
-                UpdateSoureListBox(source);
+            if (msg != null) {
+                List<Source> sources = msg.Sources;
+                if (sources.Count() > 0) {
+                    UpdateSoureListBox(sources);
+                    //UpdateStateWhileLocationIsSellected(msg);
+                }
             }
-          
         }
 
         private Message GetMessageByLocationId(string locationId) {
@@ -65,18 +67,22 @@ namespace ClientGUI {
             return message;
         }
 
-        private void UpdateSoureListBox(Source source) {
+        private void UpdateSoureListBox(List<Source> sources) {
             sourceListBox.Items.Clear();
-            stateTable.Clear();         
-            sourceListBox.Items.Add(source.Type + "" + "" + source.TimeStamp.ToString());
-            List<State> states = source.State;
+            foreach (var source in sources) {
+                sourceListBox.Items.Add(source.Type + "" + "" + source.TimeStamp.ToString());
+                List<State> states = source.State;
                 if (states.Count != 0) {
-                    foreach(var state in states) {
-                        stateTable.Rows.Add(locationListBox.Text, source.Type, state.Property, state.Value);
-                    }
+                    UpdateStateTable(states);
+                }
+            }
+        }
 
-               }
-            
+        private void UpdateStateTable(List<State> states) {
+            stateTable.Clear();
+            foreach (var state in states) {
+                stateTable.Rows.Add(state.Property, state.Value);
+            }
             stateDataGridView.DataSource = stateTable;
         }
 
@@ -96,7 +102,7 @@ namespace ClientGUI {
             List<Message> upMsgs = new List<Message>();
             foreach (var message in msgs) {
                 if (message.LocationId.Equals(msg.LocationId)) {
-                    message.Source = msg.Source;
+                    message.Sources = msg.Sources;
                 }
                 upMsgs.Add(message);
 
@@ -110,7 +116,7 @@ namespace ClientGUI {
                 parentIds.Add(id);
             }
             msg.LocationId = parentIds[0];
-            msg.Source = message.Source;
+            msg.Sources.Add(message.Source);
             return msg;
         }
         public ExternalModel Consume(string userQueue, string queueID) {
@@ -182,6 +188,14 @@ namespace ClientGUI {
             }
         }
 
+        //private void UpdateStateWhileLocationIsSellected(Message message) {
+        //    while (locationListBox.GetSelected(locationListBox.Items.IndexOf(message))) {
+        //        foreach (var source in message.Sources) {
+        //            UpdateStateTable(source.State);
+        //        }
+        //    }
+        //}
+
         private void searchButton_Click(object sender, EventArgs e) {
             warnLabel.Visible = false;
             string locationId = locationIdTextBox.Text;
@@ -189,8 +203,11 @@ namespace ClientGUI {
             if (locationId != null) {
                 message = GetMessageByLocationId(locationId);
                 if (message != null) {
-                    Source source = message.Source;
+                    List<Source> source = message.Sources;
                     if (source != null) {
+                        //if (locationListBox.Items.Contains(message)) {
+                        //    locationListBox.SetSelected(locationListBox.Items.IndexOf(message), true);
+                        //}
                         UpdateSoureListBox(source);
                         warnLabel.Visible = true;
                         warnLabel.ForeColor = Color.Green;
