@@ -1,18 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DataModels;
 using DatabaseAccess;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using Newtonsoft.Json;
-using RabbitMQ.Client.Exceptions;
-using System.Xml.Serialization;
-using Confluent.Kafka;
 using MessageBrokers;
-//using RabbitMQ.Client.Exceptions;
 
-namespace CoreForRabbitMQ {
+namespace Core {
     public class Program {
         static IDataAccess dataAccess { get; set; }
         static IMessageBroker messageBroker { get; set; }

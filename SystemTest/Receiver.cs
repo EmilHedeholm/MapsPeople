@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -34,19 +31,12 @@ namespace SystemTest {
                     var body = ea.Body.ToArray();
                     var message = Encoding.UTF8.GetString(body);
                     if (message != null) {
-                        //var deserializedMessage = JsonConvert.DeserializeObject<Message>(message);
-                        //foreach (var parentId in deserializedMessage.ParentIds){
-                        //    Console.Write(parentId + ", ");
-                        //    Console.WriteLine();
-                        //}
-                       // Console.WriteLine(message);
                     }
                     channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
                 };
                 channel.BasicConsume(queue: userQueue,
                                      autoAck: false,
                                      consumer: consumer);
-                //Console.ReadLine();
 
             } catch (Exception e) {
                 if (e is AlreadyClosedException) {

@@ -1,35 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Timers;
 using ConsumerAzure.JsonModel;
 using DataModels;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using RestSharp;
-using System.Diagnostics;
 
 namespace SystemTest {
     class Program {
-        static List<RootObject> oldData = new List<RootObject>();
-        
 
         static string MessageBroker { get; set; }
         static string userQueue = "testUser";
         static string queueID = "7f29498392eb4d40a1e17731";
         static KafkaTest kafka = new KafkaTest(userQueue, queueID);
         static void Main(string[] args) {
-            //Stopwatch stopWatch = new Stopwatch();
-            //stopWatch.Start();
-            //Thread.Sleep(10000);
             List<double> times = new List<double>();
-            //Stopwatch sendWatch = new Stopwatch();
 
             string spaceRefId = "GS202";
             var choice = true;
@@ -51,7 +41,6 @@ namespace SystemTest {
             for (int i = 0; i < 51; i++) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
-                //sendWatch.Start();
                 List<Location> data = GetData(spaceRefId);
                 var start = DateTime.Now;
                 if (MessageBroker.Equals("rabbitmq")) {
@@ -67,17 +56,10 @@ namespace SystemTest {
                 var stop = DateTime.Now;
 
                 var elapsedTime = stop - start;
-                //sendWatch.Stop();
-                // Get the elapsed time as a TimeSpan value.
-                //TimeSpan ts = sendWatch.Elapsed;
-                //// Format and display the TimeSpan value.
-                //string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                //    ts.Hours, ts.Minutes, ts.Seconds,
-                //    ts.Milliseconds / 10);
+         
                 Console.WriteLine("Receive RunTime " + elapsedTime);
                 Console.WriteLine();
                 times.Add(elapsedTime.TotalSeconds);
-                //sendWatch.Reset();
             }
             double total = 0;
             foreach (var time in times) {

@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MongoDB.Driver;
 using MongoDB.Bson;
 
@@ -34,14 +32,6 @@ namespace DatabaseAccess {
             }catch(MongoException me) {
                 throw new Exception("Something went wrong when trying to insert a location", me);
             }
-        }
-
-        public void DeleteLocationAndSubLocations(string locationId) {
-            throw new NotImplementedException();
-        }
-
-        public void DeleteLocationsByConsumerId(int consumerid) {
-            throw new NotImplementedException();
         }
 
         //This method gets a list of all the locations that are connected through a specified Id.
@@ -98,19 +88,6 @@ namespace DatabaseAccess {
             }
             return location;
         }
-
-        // This method gets a list of all the locations
-        //returns all locations
-        //public List<Location> GetLocations() {
-        //    List<Location> foundLocations = null;
-        //    try { 
-        //    var filter = Builders<Location>.Filter.Empty;
-        //    foundLocations = collection.Find(filter).ToList();
-        //    } catch (MongoException me) {
-        //        throw new Exception("Something went wrong when trying to get a location", me);
-        //    }
-        //    return foundLocations;
-        //}
 
         //This method updates a location if the id provided matches one in the database otherwise it inserts it.
         //parameter: location

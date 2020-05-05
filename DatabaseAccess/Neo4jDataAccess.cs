@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using DataModels;
 using Neo4jClient;
 
@@ -116,14 +114,6 @@ namespace DatabaseAccess
                 client.Dispose();
                 throw new Exception("Something went wrong when trying to insert a state", ne);
             }
-        }
-
-        public void DeleteLocationAndSubLocations(string locationId) {
-            throw new NotImplementedException();
-        }
-
-        public void DeleteLocationsByConsumerId(int consumerid) {
-            throw new NotImplementedException();
         }
 
         //this method gets a location from the database based on its externalId
@@ -294,28 +284,5 @@ namespace DatabaseAccess
                 throw new Exception("Something went wrong when trying to update a location", ne);
             }
         }
-
-        //public List<Location> GetLocations() {
-        //    List<Location> completeLocations = new List<Location>();
-        //    try {
-        //        client.Connect();
-
-        //        var locations = client.Cypher
-        //            .Match("(location:Location)")
-        //            .Return<Location>("location")
-        //            .Results;
-
-                
-        //        foreach (var location in locations) {
-        //            var foundLocation = GetLocationById(location.Id);
-        //            completeLocations.Add(foundLocation);
-        //        }
-        //        client.Dispose();  
-        //    }catch(NeoException ne) {
-        //        client.Dispose();
-        //        throw new Exception("Something went wrong when trying to get a location", ne);
-        //    }
-        //    return completeLocations;
-        //}
     }
 }

@@ -1,6 +1,5 @@
-﻿using System;
-using System.Xml.Serialization;
-using System.Collections.Generic;
+﻿using System.Xml.Serialization;
+
 namespace XMLConsumer.Models {
     [XmlRoot(ElementName = "Location", Namespace = "http://schemas.datacontract.org/2004/07/XMLSource2")]
     public class Location {

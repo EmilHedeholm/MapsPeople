@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using DataModels;
-using System.Configuration;
 using System.Data.SqlClient;
 using Dapper;
 using System.Linq;
@@ -161,13 +160,6 @@ namespace DatabaseAccess {
                 throw new Exception("something went wrong when trying to insert a state into the database", se);
             }
         }
-        public void DeleteLocationAndSubLocations(string locationId) {
-            throw new NotImplementedException();
-        }
-
-        public void DeleteLocationsByConsumerId(int consumerid) {
-            throw new NotImplementedException();
-        }
 
         //this method find a location and all the locations below it in the hierarki of locations
         public HashSet<Location> GetAllConnectedLocations(string id, HashSet<Location> foundLocations) {
@@ -267,25 +259,6 @@ namespace DatabaseAccess {
             return location;
         }
 
-        //public List<Location> GetLocations() {
-        //    List<Location> locations = new List<Location>();
-        //    using (SqlConnection connection = new SqlConnection(conString)) {
-        //        connection.Open();
-        //        using (SqlCommand cmdFoundAllLocation = connection.CreateCommand()) {
-        //            cmdFoundAllLocation.CommandText = "SELECT * FROM LocationMP";
-        //            SqlDataReader foundAllReader = cmdFoundAllLocation.ExecuteReader();
-        //            while (foundAllReader.Read()) {
-        //                locations.Add(MapLocation(foundAllReader));
-        //            }
-        //        }
-        //    }
-        //    foreach (var location in locations) {
-        //        location.Sources = FindSourcesByLocationID(location);
-        //    }
-        //    return locations;
-        //}
-
-        //this method updates a location and all its sources and states
         public void UpdateLocation(Location location) {
             SqlConnection connection = null;
             try {
