@@ -46,10 +46,12 @@ namespace ClientGUI {
                 this.Invoke(d, new object[] { messages });
             } else {
                 foreach (var message in messages) {
-                    foreach (var location in locationListBox.Items) {
-                        Message locationMessage = GetMessageByLocationId((string)location);
+                    for (int i = 0; i < locationListBox.Items.Count; i++) {
+                        //i am so confused if this is a message object or a string cause if i try to use it as a string the program says its a message and if i try to use it as a message the program says its a string
+                        var listMessage = locationListBox.Items[i];
+                        Message locationMessage = (Message)listMessage;
                         if (message.LocationId.Equals(locationMessage.LocationId)) {
-                            locationListBox.Items[locationListBox.Items.IndexOf(location)] = message;
+                            locationListBox.Items[i] = message;
                         }
                     }
                 }
