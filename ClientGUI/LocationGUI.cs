@@ -47,9 +47,14 @@ namespace ClientGUI {
             } else {
                 foreach (var message in messages) {
                     for (int i = 0; i < locationListBox.Items.Count; i++) {
-                        //i am so confused if this is a message object or a string cause if i try to use it as a string the program says its a message and if i try to use it as a message the program says its a string
+                        //if i dont do this check the program crashes no matter how i use listMessage
                         var listMessage = locationListBox.Items[i];
-                        Message locationMessage = (Message)listMessage;
+                        Message locationMessage = null;
+                        if(listMessage.GetType() == typeof(Message)) {
+                             locationMessage = (Message)listMessage;
+                        }if(listMessage.GetType() == typeof(string)) {
+                            locationMessage = GetMessageByLocationId((string)listMessage);
+                        }
                         if (message.LocationId.Equals(locationMessage.LocationId)) {
                             locationListBox.Items[i] = message;
                         }
@@ -134,10 +139,18 @@ namespace ClientGUI {
                 parentIds.Add(id);
             }
             foreach (var location in locationListBox.Items) {
-                Message LocationMessage = GetMessageByLocationId((string)location);
-                if (LocationMessage.LocationId.Equals(parentIds[parentIds.Count() - 1])) {
-                    msg.LocationId = LocationMessage.LocationId;
-                    foreach (var source in LocationMessage.Sources) {
+                Message locationMessage = null;
+                //if i dont do this check the program crashes
+                var listMessage = locationListBox.Items[locationListBox.Items.IndexOf(location)];
+                if (listMessage.GetType() == typeof(Message)) {
+                    locationMessage = (Message)listMessage;
+                }
+                if (listMessage.GetType() == typeof(string)) {
+                    locationMessage = GetMessageByLocationId((string)listMessage);
+                }
+                if (locationMessage.LocationId.Equals(parentIds[parentIds.Count() - 1])) {
+                    msg.LocationId = locationMessage.LocationId;
+                    foreach (var source in locationMessage.Sources) {
                         msg.Sources.Add(source);
                     }
                     if (!msg.Sources.Contains(message.Source)) {
