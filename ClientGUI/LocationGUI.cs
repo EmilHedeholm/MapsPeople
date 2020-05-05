@@ -9,6 +9,11 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using DatabaseAccess;
 using DataModels;
+using Confluent.Kafka;
+using Newtonsoft.Json;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
 
 namespace ClientGUI {
     public partial class LocationGUI : Form {
@@ -78,6 +83,93 @@ namespace ClientGUI {
             Form1 openForm = new Form1();
             openForm.Show();
             this.Hide();
+        }
+        private List<Message> updateMessages(List<Message> msgs, Message msg) {
+            List<Message> upMsgs = new List<Message>();
+            foreach (var message in msgs) {
+                if (message.LocationId.Equals(msg.LocationId)) {
+                    message.Source = msg.Source;
+                }
+                upMsgs.Add(message);
+
+            }
+            return upMsgs;
+        }
+        private Message ConvertMessage(ExternalModel message) {
+            Message msg = new Message();
+            List<string> parentIds = new List<string>();
+            foreach (var id in message.ParentIds) {
+                parentIds.Add(id);
+            }
+            msg.LocationId = parentIds[0];
+            msg.Source = message.Source;
+            return msg;
+        }
+        public ExternalModel Consume(string userQueue, string queueID) {
+            ExternalModel message1 = null;
+            try {
+                ConnectionFactory factory = new ConnectionFactory();
+                factory.HostName = "localhost";
+                IConnection conn = factory.CreateConnection();
+                IModel channel = conn.CreateModel();
+                channel.ExchangeDeclare(exchange: "Customer1",
+                                            type: "topic");
+                var args = new Dictionary<string, object>();
+                args.Add("x-message-ttl", 30000);
+
+                channel.QueueDeclare(queue: userQueue, durable: true,
+                                   exclusive: false,
+                                   autoDelete: true,
+                                   arguments: args);
+                channel.QueueBind(queue: userQueue, exchange: "Customer1", routingKey: $"#.{queueID}.#");
+
+                var consumer = new EventingBasicConsumer(channel);
+                consumer.Received += (sender, ea) => {
+                    var body = ea.Body;
+                    var message = Encoding.UTF8.GetString(body);
+                    if (message != null) {
+                        message1 = JsonConvert.DeserializeObject<ExternalModel>(message);
+                        Message message2 = ConvertMessage(message1);
+                        UpdateLocationListBox(updateMessages(Messages, message2));
+                        Console.WriteLine(message);
+                    }
+                    channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
+                };
+                channel.BasicConsume(queue: userQueue,
+                                     autoAck: false,
+                                     consumer: consumer);
+                Console.ReadLine();
+
+
+            } catch (Exception e) {
+                if (e is AlreadyClosedException) {
+                    Console.WriteLine("The connectionis already closed");
+                } else if (e is BrokerUnreachableException) {
+                    Console.WriteLine("The broker cannot be reached");
+                } else if (e is OperationInterruptedException) {
+                    Console.WriteLine("The operation was interupted");
+                } else if (e is ConnectFailureException) {
+                    Console.WriteLine("Could not connect to the broker broker");
+                } else {
+                    Console.WriteLine("Something went wrong");
+                }
+            }
+            return message1;
+        }
+
+        public ExternalModel ReceiveDataFromKafka(string userName, string topic) {
+            ExternalModel message = null;
+            using (var consumer = new ConsumerBuilder<Ignore, string>(new ConsumerConfig { BootstrapServers = "localhost", GroupId = userName }).Build()) {
+                consumer.Subscribe(topic);
+                while (true) {
+                    var result = consumer.Consume();
+                    message = JsonConvert.DeserializeObject<ExternalModel>(result.Message.Value);
+                    Message message2 = ConvertMessage(message);
+                    UpdateLocationListBox(updateMessages(Messages, message2));
+                    Console.WriteLine(result.Message.Value);
+                    return message;
+                }
+            }
         }
     }
 }
