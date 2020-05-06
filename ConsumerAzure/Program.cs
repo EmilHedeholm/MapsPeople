@@ -36,7 +36,7 @@ namespace ConsumerAzure {
                         break;
                 }
             }
-           while (true) {
+          while (true) {
                 //Wait for 3 sek. 
                 List<DataModels.Location> data = GetData();
                 if (!(data.Count == 0)) {
@@ -218,5 +218,37 @@ namespace ConsumerAzure {
                 }
             }
         }
+        //this method has been used for testing purposes
+        //private static void SendJSON() {
+
+        //    List<Location> testLocations = new List<Location>();
+        //    Location testLocation = new Location();
+        //    testLocation.Id = "0afa5acdb5a84d2ea1ac43b3";
+        //    testLocation.ParentId = "db8929a8474a4752a5a984a8";
+        //    testLocation.ExternalId = "B135";
+        //    testLocation.ConsumerId = 2;
+        //    List<Source> sources = new List<Source>();
+        //    Source source = new Source();
+        //    State state1 = new State();
+        //    state1.Property = "MotionDetected";
+        //    state1.Value = "True";
+        //    State state2 = new State();
+        //    state2.Property = "PersonCount";
+        //    state2.Value = "4833";
+        //    State state3 = new State();
+        //    state3.Property = "SignsOfLife";
+        //    state3.Value = "True";
+        //    source.State.Add(state1);
+        //    source.State.Add(state2);
+        //    source.State.Add(state3);
+        //    source.TimeStamp = DateTime.Today;
+        //    source.Type = "Occupancy";
+        //    sources.Add(source);
+        //    testLocation.Sources = sources;
+        //    testLocations.Add(testLocation);
+
+
+        //    SendUpdateWithRabbitMQ(testLocations);
+        //}
     }
 }

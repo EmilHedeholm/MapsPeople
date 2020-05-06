@@ -151,6 +151,16 @@ namespace Receiver {
                 update.ParentId = location.ParentId;
             }
 
+            foreach (var newSource in location.Sources) {
+                foreach (var existingSource in existingLocation.Sources) {
+                    if (newSource.Equals(existingSource)) {
+                        if(newSource.TimeStamp < existingSource.TimeStamp) {
+                            update.Sources.Remove(newSource);
+                        }
+                    }
+                }
+            }
+
             return update;
         }
 
