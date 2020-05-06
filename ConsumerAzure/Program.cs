@@ -39,8 +39,8 @@ namespace ConsumerAzure {
            // while (true) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
-                SendJSON();
-                /*
+                //SendJSON();
+                
                 List<DataModels.Location> data = GetData();
                 if (!(data.Count == 0)) {
                     if (messageBroker.Equals("kafka")) {
@@ -50,8 +50,8 @@ namespace ConsumerAzure {
                     }
                 }
                 
-                */
-            //}
+                
+            //  }
         }
 
         //This method gets data from the test data source provided by MapsPeople, and uses the method FilterData on that data. After that it returns a list of filtered data that has been converted to Internal Data Model by using the method ConvertFromJsonToInternalModel. 
@@ -249,7 +249,7 @@ namespace ConsumerAzure {
             state1.Value = "True";
             State state2 = new State();
             state2.Property = "PersonCount";
-            state2.Value = "4760";
+            state2.Value = "4733";
             State state3 = new State();
             state3.Property = "SignsOfLife";
             state3.Value = "True";
