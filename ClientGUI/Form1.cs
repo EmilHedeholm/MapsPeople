@@ -121,11 +121,9 @@ namespace ClientGUI {
                     break;
             }
             if (messages.Count != 0) {
-                List<Location> locations = ConvertMessages(messages);
-                if (message != null) {
-                    Message msg = ConvertMessage(message);
-                    List<Message> updateMsgs = updateMessages(msgs, msg);
-                    LocationGUI openForm = new LocationGUI(updateMsgs, messageBroker, userName, locacationId);
+                ConvertMessages(messages);
+                if (locations.Count > 0) {
+                    LocationGUI openForm = new LocationGUI(locations, messageBroker, userName, locacationId);
                     this.Hide();
                     openForm.ShowDialog();
                     this.Show();
@@ -169,20 +167,18 @@ namespace ClientGUI {
             return upMsgs;
         }
 
-        private List<Location> ConvertMessages(List<ExternalModel> externalMessages) {
-            List<Location> convertedLocations = new List<Location>();
+        private void ConvertMessages(List<ExternalModel> externalMessages) {
             foreach (var externalMessage in externalMessages) {
-                convertedLocations.Add(ConvertMessage(externalMessage));
+                ConvertMessage(externalMessage);
             }
-            return convertedLocations;
         }
 
-        private Location ConvertMessage(ExternalModel message) {
-            List<string> parentIds = new List<string>();
+        private void ConvertMessage(ExternalModel message) {
             bool found = false;
-            for (int i = 0; i < parentIds.Count; i++) {
-                Location location = new Location { Id = parentIds[i] };
-                if (i == parentIds.Count - 1) {
+            int loops = message.ParentIds.Count;
+            for (int i = 0; i < loops; i++) {
+                Location location = new Location { Id = message.ParentIds.Pop() };
+                if (i == loops - 1) {
                     location.Sources.Add(message.Source);
                 }
                 for (int j = 0; i < locations.Count; j++) {
@@ -190,6 +186,9 @@ namespace ClientGUI {
                         found = true;
                         locations[j] = location;
                     }
+                }
+                if (!found) {
+                    locations.Add(location);
                 }
             }
         }
