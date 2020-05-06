@@ -267,8 +267,9 @@ namespace DatabaseAccess {
                     var sql = "UPDATE LocationMP SET parentId = @parentId, externalId = @externalId, consumerId = @consumerId  WHERE id = @id;";
                     connection.Execute(sql, location);
 
-                    if (location.Sources.Count > 0) {
-                        foreach (var source in location.Sources) {
+                    List<Source> existingSources = FindSourcesByLocationID(location);
+                    foreach (var source in location.Sources) {
+                        if (existingSources.Contains(source)) {
                             using (SqlCommand updateSources = connection.CreateCommand()) {
                                 var sourceSQL = "UPDATE source SET sourceTimestamp = @Timestamp WHERE locationId = @locationId AND sourceType = @sourceType";
                                 updateSources.CommandText = sourceSQL;
@@ -290,13 +291,34 @@ namespace DatabaseAccess {
                                     }
                                 }
                             }
+                        } else {
+                            CreateSingleSource(source, location); 
                         }
-                        //If there are no sources on the location then create the source. 
-                    } else CreateSources(location);
+                    }
                 }
             } catch(SqlException se) {
                 connection.Dispose();
                 throw new Exception("something went wrong when trying to update a location", se);
+            }
+        }
+
+        private void CreateSingleSource(Source source, Location location) {
+            SqlConnection connection = null;
+            try {
+                using (connection = new SqlConnection(conString)) {
+                    connection.Open();
+                        using (SqlCommand cmdInsertSource = connection.CreateCommand()) {
+                            cmdInsertSource.CommandText = "INSERT INTO Source(locationId, sourceType, sourceTimeStamp) VALUES(@locationId, @sourceType, @sourceTimeStamp)";
+                            cmdInsertSource.Parameters.AddWithValue("@locationId", location.Id);
+                            cmdInsertSource.Parameters.AddWithValue("@sourceType", source.Type);
+                            cmdInsertSource.Parameters.AddWithValue("@sourceTimeStamp", source.TimeStamp);
+                            cmdInsertSource.ExecuteNonQuery();
+                        CreateStates(source, location);
+                    }
+                }
+            } catch (SqlException se) {
+                connection.Dispose();
+                throw new Exception("something went wrong when trying to insert a source into the database", se);
             }
         }
     }
