@@ -126,13 +126,13 @@ namespace DatabaseAccess {
         //this method maps data from a datareader to state objects
         private State MapState(IDataReader stateReader) {
             State state = new State();
-            if (!stateReader.IsDBNull(1)) {
-                state.Property = stateReader.GetString(1);
+            if (!stateReader.IsDBNull(2)) {
+                state.Property = stateReader.GetString(2);
             } else {
                 state.Property = null;
             }
-            if (!stateReader.IsDBNull(2)) {
-                state.Value = stateReader.GetString(2);
+            if (!stateReader.IsDBNull(3)) {
+                state.Value = stateReader.GetString(3);
             } else {
                 state.Value = null;
             }
@@ -267,9 +267,8 @@ namespace DatabaseAccess {
                     var sql = "UPDATE LocationMP SET parentId = @parentId, externalId = @externalId, consumerId = @consumerId  WHERE id = @id;";
                     connection.Execute(sql, location);
 
-                    List<Source> sources = FindSourcesByLocationID(location);
-                    if (sources.Count > 0) {
-                        foreach (var source in sources) {
+                    if (location.Sources.Count > 0) {
+                        foreach (var source in location.Sources) {
                             using (SqlCommand updateSources = connection.CreateCommand()) {
                                 var sourceSQL = "UPDATE source SET sourceTimestamp = @Timestamp WHERE locationId = @locationId AND sourceType = @sourceType";
                                 updateSources.CommandText = sourceSQL;
@@ -277,9 +276,8 @@ namespace DatabaseAccess {
                                 updateSources.Parameters.AddWithValue("@locationId", location.Id);
                                 updateSources.Parameters.AddWithValue("@sourceType", source.Type);
                                 updateSources.ExecuteNonQuery();
-                                List<State> states = FindStatesBySource(source, location);
-                                if (states.Count > 0) {
-                                    foreach (var state in states) {
+                                if (source.State.Count > 0) {
+                                    foreach (var state in source.State) {
                                         using (SqlCommand updateStates = connection.CreateCommand()) {
                                             var stateSQL = "UPDATE stateMP SET stateValue = @stateValue WHERE locationId = @locationId AND sourceType = @sourceType AND property = @property";
                                             updateStates.CommandText = stateSQL;

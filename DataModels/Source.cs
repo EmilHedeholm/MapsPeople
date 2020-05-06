@@ -21,5 +21,9 @@ namespace DataModels {
                 return false;
             }
         }
+
+        public override int GetHashCode() {
+            return this.Type.GetHashCode();
+        }
     }
 }

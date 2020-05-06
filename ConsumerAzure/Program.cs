@@ -35,18 +35,19 @@ namespace ConsumerAzure {
                         break;
                 }
             }
-           while (true) {
+          // while (true) {
                 //Wait for 3 sek. 
                 Thread.Sleep(3000);
-                List<DataModels.Location> data = GetData();
-                if (!(data.Count == 0)) {
-                    if (messageBroker.Equals("kafka")) {
-                        SendUpdateWithKafka(data);
-                    } else if (messageBroker.Equals("rabbitmq")) {
-                        SendUpdateWithRabbitMQ(data);
-                    }
-                }
-            }
+            SendJSON();
+                //List<DataModels.Location> data = GetData();
+               // if (!(data.Count == 0)) {
+                    //if (messageBroker.Equals("kafka")) {
+                    //    SendUpdateWithKafka(data);
+                    //} else if (messageBroker.Equals("rabbitmq")) {
+                    //    SendUpdateWithRabbitMQ(data);
+                    //}
+                //}
+            //}
         }
 
         //This method gets data from the test data source provided by MapsPeople, and uses the method FilterData on that data. After that it returns a list of filtered data that has been converted to Internal Data Model by using the method ConvertFromJsonToInternalModel. 
@@ -226,6 +227,38 @@ namespace ConsumerAzure {
                     Console.WriteLine("Something went wrong");
                 }
             }
+        }
+
+        private static void SendJSON() {
+
+            List<Location> testLocations = new List<Location>();
+            Location testLocation = new Location();
+            testLocation.Id = "0afa5acdb5a84d2ea1ac43b3";
+            testLocation.ParentId = "db8929a8474a4752a5a984a8";
+            testLocation.ExternalId = "B135";
+            testLocation.ConsumerId = 2;
+            List<Source> sources = new List<Source>();
+            Source source = new Source();
+            State state1 = new State();
+            state1.Property = "MotionDetected";
+            state1.Value = "True";
+            State state2 = new State();
+            state2.Property = "PersonCount";
+            state2.Value = "4833";
+            State state3 = new State();
+            state3.Property = "SignsOfLife";
+            state3.Value = "True";
+            source.State.Add(state1);
+            source.State.Add(state2);
+            source.State.Add(state3);
+            source.TimeStamp = DateTime.Today;
+            source.Type = "Occupancy";
+            sources.Add(source);
+            testLocation.Sources = sources;
+            testLocations.Add(testLocation);
+
+
+            SendUpdateWithRabbitMQ(testLocations);
         }
     }
 }
