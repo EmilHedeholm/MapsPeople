@@ -101,7 +101,7 @@ namespace DatabaseAccess {
                             }
                         }
                     }
-            collection.ReplaceOne(new BsonDocument("_id", location.Id), location, new ReplaceOptions { IsUpsert = true });
+            Collection.ReplaceOne(new BsonDocument("_id", location.Id), location, new ReplaceOptions { IsUpsert = true });
             } catch (MongoException me) {
                 throw new Exception("Something went wrong when trying to update a location", me);
             }
