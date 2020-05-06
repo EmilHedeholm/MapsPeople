@@ -16,7 +16,8 @@ namespace ClientGUI {
     public partial class Form1 : Form {
         Receiver receiver = new Receiver();
         List<ExternalModel> messages = new List<ExternalModel>();
-        public string Database { get; set;}
+        List<Location> locations = new List<Location>();
+        public string Database { get; set; }
         public Form1() {
             InitializeComponent();
             UpdateDatabaseListBox();
@@ -29,7 +30,7 @@ namespace ClientGUI {
             List<string> messages = new List<string>();
             messages.Add("kafka");
             messages.Add("rabbitmq");
-            foreach(string message in messages) {
+            foreach (string message in messages) {
                 messageListBox.Items.Add(message);
             }
         }
@@ -52,25 +53,25 @@ namespace ClientGUI {
         }
 
         private void messageListBox_SelectedIndexChanged(object sender, EventArgs e) {
-            
-           
-                messageTextBox.Text = messageListBox.Text;
-               string messageBroker = messageTextBox.Text;
-                choiceLabel.Text = "";
-               
-                switch (messageBroker) {
-                    case "kafka":
-                        choiceLabel.Text = "Enter a topic";
-                        QueTopicLabel.Text = "Topic";
-                        break;
-                    case "rabbitmq":
-                        choiceLabel.Text = "Enter a queue ID";
-                        QueTopicLabel.Text = "Queque ID";
-                        break;
-                    default:
-                        warningLabel.Visible = true;
-                        break;
-                }        
+
+
+            messageTextBox.Text = messageListBox.Text;
+            string messageBroker = messageTextBox.Text;
+            choiceLabel.Text = "";
+
+            switch (messageBroker) {
+                case "kafka":
+                    choiceLabel.Text = "Enter a topic";
+                    QueTopicLabel.Text = "Topic";
+                    break;
+                case "rabbitmq":
+                    choiceLabel.Text = "Enter a queue ID";
+                    QueTopicLabel.Text = "Queque ID";
+                    break;
+                default:
+                    warningLabel.Visible = true;
+                    break;
+            }
         }
 
         private List<ExternalModel> GetAllLocations(string queueId, string database) {
@@ -92,35 +93,35 @@ namespace ClientGUI {
             warningLabel.Visible = false;
             warningLabel.ForeColor = Color.Red;
             warningLabel.Text = "";
-           
-                switch (messageBroker) {
-                    case "kafka":
-                        //string topic = queTopTextBox.Text;                   
-                        if (locacationId !=null) {
-                           GetAllLocations(locacationId, Database);
-                           //message = receiver.ReceiveDataFromKafka(userName, topic);                    
-                        } else {
-                             warningLabel.Visible = true;
-                             warningLabel.Text = "Input Topic, try again";
-                        }
-                        break;
-                    case "rabbitmq":
-                       // string queueId = queTopTextBox.Text;
-                        if (locacationId != null) {
-                           GetAllLocations(locacationId, Database);
-                          // message = receiver.Consume(userName, queueId);
-                        } else {
-                           warningLabel.Visible = true;
-                           warningLabel.Text = "Input Queque ID, try again";
-                        }                   
-                        break;
-                    default:
+
+            switch (messageBroker) {
+                case "kafka":
+                    //string topic = queTopTextBox.Text;                   
+                    if (locacationId != null) {
+                        GetAllLocations(locacationId, Database);
+                        //message = receiver.ReceiveDataFromKafka(userName, topic);                    
+                    } else {
                         warningLabel.Visible = true;
-                        warningLabel.Text = "not a recognized messagebroker, try again";
-                        break;              
-                }
-            if(messages.Count != 0) {
-                List<Message> msgs = ConvertMessages(messages);
+                        warningLabel.Text = "Input Topic, try again";
+                    }
+                    break;
+                case "rabbitmq":
+                    // string queueId = queTopTextBox.Text;
+                    if (locacationId != null) {
+                        GetAllLocations(locacationId, Database);
+                        // message = receiver.Consume(userName, queueId);
+                    } else {
+                        warningLabel.Visible = true;
+                        warningLabel.Text = "Input Queque ID, try again";
+                    }
+                    break;
+                default:
+                    warningLabel.Visible = true;
+                    warningLabel.Text = "not a recognized messagebroker, try again";
+                    break;
+            }
+            if (messages.Count != 0) {
+                List<Location> locations = ConvertMessages(messages);
                 if (message != null) {
                     Message msg = ConvertMessage(message);
                     List<Message> updateMsgs = updateMessages(msgs, msg);
@@ -137,7 +138,7 @@ namespace ClientGUI {
                 }
             }
             if (userName == null) {
-                warningLabel.Visible = true;       
+                warningLabel.Visible = true;
                 warningLabel.Text = "input user name, try again";
 
             }
@@ -153,12 +154,12 @@ namespace ClientGUI {
                 warningLabel.Text = "Select a messageBroker, try again";
 
             }
-       
+
         }
 
         private List<Message> updateMessages(List<Message> msgs, Message msg) {
             List<Message> upMsgs = new List<Message>();
-            foreach ( var message in msgs) {
+            foreach (var message in msgs) {
                 if (message.LocationId.Equals(msg.LocationId)) {
                     message.Sources = msg.Sources;
                 }
@@ -168,24 +169,30 @@ namespace ClientGUI {
             return upMsgs;
         }
 
-        private List<Message> ConvertMessages(List<ExternalModel> messages) {
-            List<Message> msgs = new List<Message>();
-            foreach (var message in messages) {
-                msgs.Add(ConvertMessage(message));
+        private List<Location> ConvertMessages(List<ExternalModel> externalMessages) {
+            List<Location> convertedLocations = new List<Location>();
+            foreach (var externalMessage in externalMessages) {
+                convertedLocations.Add(ConvertMessage(externalMessage));
             }
-            return msgs;
+            return convertedLocations;
         }
 
-        private Message ConvertMessage(ExternalModel message) {
-            Message msg = new Message();
+        private Location ConvertMessage(ExternalModel message) {
             List<string> parentIds = new List<string>();
-            foreach (var id in message.ParentIds) {
-                parentIds.Add(id);
+            bool found = false;
+            for (int i = 0; i < parentIds.Count; i++) {
+                Location location = new Location { Id = parentIds[i] };
+                if (i == parentIds.Count - 1) {
+                    location.Sources.Add(message.Source);
+                }
+                for (int j = 0; i < locations.Count; j++) {
+                    if (location.Equals(locations[j])) {
+                        found = true;
+                        locations[j] = location;
+                    }
+                }
             }
-            msg.LocationId= parentIds[0];
-            msg.Sources.Add(message.Source);
-            return msg;
-        }      
+        }
     }
  }
 
