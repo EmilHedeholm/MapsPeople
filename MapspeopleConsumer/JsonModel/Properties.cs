@@ -1,7 +1,7 @@
 ﻿
 
 namespace MapspeopleConsumer.JsonModel {
-    class Properties {
+    public class Properties {
     public string name_en { get; set; }
     public string name_da { get; set; }
     public string description_en { get; set; }
@@ -10,6 +10,5 @@ namespace MapspeopleConsumer.JsonModel {
     public string imageurl_da { get; set; }
     public string tempProperty_en { get; set; }
     public string capacity_en { get; set; }
-
     }
 }

@@ -6,30 +6,30 @@ using MongoDB.Driver;
 using MongoDB.Bson;
 
 namespace DatabaseAccess {
+    //This class uses the database MongoDB. 
     public class MongoDBDataAccess : IDataAccess {
 
-        MongoClient client { get; set; }
-        IMongoDatabase database { get; set; }
-        IMongoCollection<Location> collection { get; set; }
+        MongoClient Client { get; set; }
+        IMongoDatabase Database { get; set; }
+        IMongoCollection<Location> Collection { get; set; }
 
         //Initiliazes a MongoClient and specifies the name of the database and the collection it should take from.
         public MongoDBDataAccess() {
             try {
-                client = new MongoClient("mongodb://localhost:27017");
-                database = client.GetDatabase("MapsPeople");
-                collection = database.GetCollection<Location>("Locations");
-            }catch(MongoException me) {
+                Client = new MongoClient("mongodb://localhost:27017");
+                Database = Client.GetDatabase("MapsPeople");
+                Collection = Database.GetCollection<Location>("Locations");
+            } catch(MongoException me) {
                 throw new Exception("Something went wrong when trying to connect to the database", me);
             }
-
         }
 
         //this method takes the current collection and inserts the location
         //parameter: location
         public void CreateLocation(Location location) {
             try {
-                collection.InsertOne(location);
-            }catch(MongoException me) {
+                Collection.InsertOne(location);
+            } catch(MongoException me) {
                 throw new Exception("Something went wrong when trying to insert a location", me);
             }
         }
@@ -41,7 +41,7 @@ namespace DatabaseAccess {
             try {
                 var builder = Builders<Location>.Filter;
                 var filter = builder.Or(builder.Eq("_id", id), builder.Eq("ParentId", id));
-                var locations = collection.Find(filter).ToList();
+                var locations = Collection.Find(filter).ToList();
 
                 foreach (var location in locations) {
                     if (location.Id.Equals(id)) {
@@ -51,7 +51,7 @@ namespace DatabaseAccess {
                         GetAllConnectedLocations(location.Id, foundLocations);
                     }
                 }
-            }catch(MongoException me) {
+            } catch(MongoException me) {
                 throw new Exception("Something went wrong when trying to get a location", me);
             }
             return foundLocations;
@@ -65,7 +65,7 @@ namespace DatabaseAccess {
             try { 
             if (externalId != null) {
                 var filter = Builders<Location>.Filter.Eq("ExternalId", externalId);
-                location = collection.Find(filter).FirstOrDefault();
+                location = Collection.Find(filter).FirstOrDefault();
             }
             } catch (MongoException me) {
                 throw new Exception("Something went wrong when trying to get a location", me);
@@ -81,7 +81,7 @@ namespace DatabaseAccess {
             try { 
             if (id != null) {
                 var filter = Builders<Location>.Filter.Eq("_id", id);
-                location = collection.Find(filter).FirstOrDefault();
+                location = Collection.Find(filter).FirstOrDefault();
             }
             } catch (MongoException me) {
                 throw new Exception("Something went wrong when trying to get a location", me);
@@ -93,7 +93,7 @@ namespace DatabaseAccess {
         //parameter: location
         public void UpdateLocation(Location location) {
             try { 
-            collection.ReplaceOne(new BsonDocument("_id", location.Id), location, new ReplaceOptions { IsUpsert = true });
+            Collection.ReplaceOne(new BsonDocument("_id", location.Id), location, new ReplaceOptions { IsUpsert = true });
             } catch (MongoException me) {
                 throw new Exception("Something went wrong when trying to update a location", me);
             }

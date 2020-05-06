@@ -3,9 +3,9 @@ using System.IO;
 using System.Net;
 
 namespace ConsumerTest {
-    class Program {
-        
-        static string messageBroker { get; set; }
+    //This class uses the console to make a client that can get locations. 
+    public class Program {
+        static string MessageBroker { get; set; }
         static void Main(string[] args) {
             Receiver receiver = new Receiver();
             var choice = true;
@@ -36,10 +36,10 @@ namespace ConsumerTest {
                         Console.WriteLine("not a recognized messagebroker, try again");
                         break;
                 }
-            }
-            
+            }     
         }
 
+        //This method gets all locationId's from the API. 
         private static void GetAllLocations(string queueId, string database) {
             string jsonstr;
             var request = WebRequest.Create($"https://localhost:44346/api/Send?id={queueId}&database={database}") as HttpWebRequest;

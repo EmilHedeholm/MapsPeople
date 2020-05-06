@@ -2,10 +2,9 @@
 using System;
 using System.Collections.Generic;
 
-namespace DataModels
-{
-    public class Location : IEquatable<Location>
-    {
+namespace DataModels {
+    //This class represents Location from the internal datamodel. 
+    public class Location : IEquatable<Location> {
         [BsonId]
         public string Id { get; set; }
         public string ParentId { get; set; }
@@ -13,6 +12,7 @@ namespace DataModels
         public int ConsumerId { get; set; }
         public List<Source> Sources { get; set; }
 
+        //This constructor creates default ID's on a location.
         public Location(){
             Sources = new List<Source>();
             Id = "0";

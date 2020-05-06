@@ -6,14 +6,11 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 
-namespace ConsumerTest
-{
-    class Receiver
-    {
+namespace ConsumerTest {
+    public class Receiver {
         //This method takes a username and a queue ID and creates a queue with the username and binds it to the selected queue id
         //afterwards it creates the consumer and links it to the queue.
-        public void ReceiveUpdateFromRabbitMQ(string userQueue, string queueID)
-        {
+        public void ReceiveUpdateFromRabbitMQ(string userQueue, string queueID) {
             try { 
             ConnectionFactory factory = new ConnectionFactory();
             factory.HostName = "localhost";

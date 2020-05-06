@@ -14,16 +14,17 @@ using RabbitMQ.Client.Exceptions;
 using RestSharp;
 
 namespace ConsumerAzure {
-    class Program {
+    //This class is a consumer to the test data source provided by MapsPeople. The test source represents data from a customers API.
+    public class Program {
 
         static List<RootObject> oldData = new List<RootObject>();
-        static string messageBroker { get; set; }
+        static string MessageBroker { get; set; }
         public static void Main(string[] args) {
             var choice = true;
             while (choice) {
                 Console.WriteLine("input the name of the messagebroker you want to use(kafka, rabbitmq)");
-                messageBroker = Console.ReadLine();
-                switch (messageBroker) {
+                MessageBroker = Console.ReadLine();
+                switch (MessageBroker) {
                     case "kafka":
                         choice = false;
                         break;
@@ -40,9 +41,9 @@ namespace ConsumerAzure {
                 Thread.Sleep(3000);
                 List<DataModels.Location> data = GetData();
                 if (!(data.Count == 0)) {
-                    if (messageBroker.Equals("kafka")) {
+                    if (MessageBroker.Equals("kafka")) {
                         SendUpdateWithKafka(data);
-                    } else if (messageBroker.Equals("rabbitmq")) {
+                    } else if (MessageBroker.Equals("rabbitmq")) {
                         SendUpdateWithRabbitMQ(data);
                     }
                 }
@@ -75,7 +76,7 @@ namespace ConsumerAzure {
                 Location location = new Location();
                 location.ExternalId = r.SpaceRefId;
                 location.ConsumerId = 1;
-                //Goes through the list LastReports in Root objects. - and makes a new Source object for each of them, and sets state, ID, Type and TimeStamp. 
+                //Goes through the list LastReports in Root objects. - and makes a new Source object for each of them, and sets state, Type and TimeStamp. 
                 foreach (LastReport lr in r.LastReports) {
                     Source source = new Source();
                     source.Type = "Occupancy";
@@ -83,6 +84,7 @@ namespace ConsumerAzure {
                     State MotionDetected = new State() { Property = "MotionDetected", Value = lr.MotionDetected.ToString() };
                     State PersonCount = new State() { Property = "PersonCount", Value = lr.PersonCount.ToString() };
                     State SignsOfLife = new State() { Property = "SignsOfLife", Value = lr.SignsOfLife.ToString() };
+                    //The new state is added to the state in a source. 
                     source.State.Add(MotionDetected);
                     source.State.Add(PersonCount);
                     source.State.Add(SignsOfLife);
@@ -147,37 +149,24 @@ namespace ConsumerAzure {
             return filteredData;
         }
 
-        //This method sends data to the Core Controller. 
-        //Param: Is a list of locations. 
-        private static void SendData(List<Location> locations) {
-            var client = new RestClient();
-            //TODO: indtastes post adresse
-            client.BaseUrl = new Uri("https://localhost:44346/api/Receiving");
-            string json = JsonConvert.SerializeObject(locations);
-            var request = new RestRequest(Method.POST);
-            request.AddParameter("application/json; charset=utf-8", json, ParameterType.RequestBody);
-            request.RequestFormat = DataFormat.Json;
-            var response = client.Execute(request);
-            Console.WriteLine(json + "\n");
-        }
-
-        //This method sends data to the Core Controller for MessageBrokerRabbitMQ. 
+        //This method sends data to the Core Controller with Kafka. 
         //Param: Is a list of locations. 
         private static async void SendUpdateWithKafka(List<DataModels.Location> data) {
             var topic = "Consumer_Topic";
             using (var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = "localhost" }).Build()) {
                 try {
                     await adminClient.CreateTopicsAsync(new TopicSpecification[] {
-                                                                new TopicSpecification { Name = topic,
-                                                                                         ReplicationFactor = 1,
-                                                                                         NumPartitions = 1 }
-                                                                });
+                                                        new TopicSpecification { Name = topic,
+                                                                                 ReplicationFactor = 1,
+                                                                                 NumPartitions = 1 }
+                                                        });
                 } catch (CreateTopicsException e) {
                 }
             }
             using (var producer = new ProducerBuilder<string, string>(new ProducerConfig { BootstrapServers = "localhost" }).Build()) {
                 try {
                     string json = JsonConvert.SerializeObject(data);
+                    //Asynchronously send a message to the topic.
                     var deliveryReport = await producer.ProduceAsync(
                         topic, new Message<string, string> { Key = null, Value = json });
 
@@ -188,6 +177,8 @@ namespace ConsumerAzure {
             }
         }
 
+        //This message sends data to the Core controller with RabbitMQ. 
+        //Param: data is a list of locations. 
         private static void SendUpdateWithRabbitMQ(List<DataModels.Location> data) {
             try {
                 var factory = new ConnectionFactory() { HostName = "localhost" };

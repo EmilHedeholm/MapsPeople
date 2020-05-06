@@ -12,16 +12,16 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
-
 namespace MapspeopleConsumer {
+    //This class is a consumer to the data from the MapsPeople CMS. 
     class Program {
-        static string messageBroker { get; set; }
+        static string MessageBroker { get; set; }
         public static void Main(string[] args) {
             var choice = true;
             while (choice) {
                 Console.WriteLine("input the name of the messagebroker you want to use(kafka, rabbitmq)");
-                messageBroker = Console.ReadLine();
-                switch (messageBroker) {
+                MessageBroker = Console.ReadLine();
+                switch (MessageBroker) {
                     case "kafka":
                         choice = false;
                         break;
@@ -33,18 +33,15 @@ namespace MapspeopleConsumer {
                         break;
                 }
             }
-           // while (true) {
-                //Wait for 3 sek. 
-                Thread.Sleep(3000);
                 List<DataModels.Location> data = GetData();
                 if (!(data.Count == 0)) {
-                    if (messageBroker.Equals("kafka")) {
+                    if (MessageBroker.Equals("kafka")) {
                         SendUpdateWithKafka(data);
-                    } else if (messageBroker.Equals("rabbitmq")) {
+                    } else if (MessageBroker.Equals("rabbitmq")) {
                         SendUpdateWithRabbitMQ(data);
                     }
                 }
-            //}
+                Console.ReadLine();
         }
 
         //This method request a token using a post Request using your credentials from Mapspeoples CMS, which gives you a token that you
@@ -91,13 +88,12 @@ namespace MapspeopleConsumer {
         //Return: A list of locations (internal) 
         private static List<Location> ConvertFromJsonToInternalModel(List<RootObject> sources) {
             List<Location> locations = new List<Location>();
-       
             foreach (RootObject r in sources) {
                 Location location = new Location();
                 location.ConsumerId = 2;
-                location.Id = r.id;
-                location.ExternalId = r.externalId;
-                location.ParentId = r.parentId;
+                location.Id = r.Id;
+                location.ExternalId = r.ExternalId;
+                location.ParentId = r.ParentId;
                 locations.Add(location);
             }
             return (locations);
@@ -130,6 +126,8 @@ namespace MapspeopleConsumer {
             }
         }
 
+        //This method sends data with RabbitMQ.
+        //Param: data is a list of locations.
         private static void SendUpdateWithRabbitMQ(List<DataModels.Location> data) {
             try {
                 var factory = new ConnectionFactory() { HostName = "localhost" };

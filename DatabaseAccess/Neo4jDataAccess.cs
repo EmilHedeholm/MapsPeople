@@ -4,8 +4,8 @@ using System.Linq;
 using DataModels;
 using Neo4jClient;
 
-namespace DatabaseAccess
-{
+namespace DatabaseAccess {
+    //This class uses the database Neo4j
     public class Neo4jDataAccess : IDataAccess {
 
         //makes a graph client with the vuri and the credentials for the database
@@ -38,8 +38,8 @@ namespace DatabaseAccess
                 client.Dispose();
                 throw new Exception("Something went wrong when trying to insert a location", ne);
             }
-
         }
+
         //this method creates sources relations to the location they belong and calls CreateStates to creates states for ech source
         //parameter: the location where the sources to be inserted into the database belongs to
         private void CreateSources(Location location) {
@@ -110,7 +110,7 @@ namespace DatabaseAccess
                     }
                 }
                 client.Dispose();
-            }catch(NeoException ne) {
+            } catch(NeoException ne) {
                 client.Dispose();
                 throw new Exception("Something went wrong when trying to insert a state", ne);
             }
@@ -141,7 +141,7 @@ namespace DatabaseAccess
                 }
                 client.Dispose();
                 
-            }catch(NeoException ne) {
+            } catch(NeoException ne) {
                 client.Dispose();
                 throw new Exception("Something went wrong when trying to get a location", ne);
             }
@@ -172,13 +172,14 @@ namespace DatabaseAccess
                 }
                 client.Dispose();
                 
-            }catch(NeoException ne) {
+            } catch(NeoException ne) {
                 client.Dispose();
                 throw new Exception("Something went wrong when trying to get a location", ne);
             }
             return foundLocation;
         }
 
+        //This method gets all location nodes that have a relation. 
         public HashSet<Location> GetAllConnectedLocations(string id, HashSet<Location> foundLocations) {
             try {
                 client.Connect();

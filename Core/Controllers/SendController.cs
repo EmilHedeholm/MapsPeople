@@ -6,26 +6,23 @@ using DatabaseAccess;
 using DataModels;
 using ExternalConverter;
 
-namespace Core.Controllers
-{
+namespace Core.Controllers { 
     public class SendController : ApiController {
-
-        //TODO: make possible to choose the database
-        IDataAccess dataAccess { get; set; }
+        IDataAccess DataAccess { get; set; }
 
         public HttpResponseMessage Get(string id, string database) {
             HttpResponseMessage response = new HttpResponseMessage();
                 switch (database) {
                     case "neo4j":
-                        dataAccess = new Neo4jDataAccess();
+                        DataAccess = new Neo4jDataAccess();
                         response.StatusCode = HttpStatusCode.OK;
                         break;
                     case "mongodb":
-                        dataAccess = new MongoDBDataAccess();
+                        DataAccess = new MongoDBDataAccess();
                         response.StatusCode = HttpStatusCode.OK;
                         break;
                     case "mssql":
-                        dataAccess = new SQLDataAccess();
+                        DataAccess = new SQLDataAccess();
                         response.StatusCode = HttpStatusCode.OK;
                         break;
                     default:
@@ -45,16 +42,13 @@ namespace Core.Controllers
 
         private List<Message> Convert(Location location) {
             Converter externalConverter = new Converter();
-            return externalConverter.Convert(location, dataAccess);
+            return externalConverter.Convert(location, DataAccess);
         }
 
         private HashSet<Location> GetLocation(string id) {
             HashSet<Location> foundLocations = new HashSet<Location>();
-            foundLocations = dataAccess.GetAllConnectedLocations(id, foundLocations);
+            foundLocations = DataAccess.GetAllConnectedLocations(id, foundLocations);
             return foundLocations;
         }
-
-    }
-    
-    
+    }    
 }

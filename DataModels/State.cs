@@ -1,8 +1,8 @@
 ﻿using System;
 
 namespace DataModels {
+    //This class represents state the the internal datamodel. 
     public class State : IEquatable<State> {
-
         public string Property { get; set; }
         public string Value { get; set; }
 
