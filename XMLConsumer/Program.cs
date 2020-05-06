@@ -38,7 +38,6 @@ namespace XMLConsumer {
             }
             while (true) {
                 //Wait for 3 sek. 
-                Thread.Sleep(3000);
                 List<DataModels.Location> data = GetData();
                 if (!(data.Count == 0)) {
                     if (messageBroker.Equals("kafka")) {
@@ -47,6 +46,7 @@ namespace XMLConsumer {
                         SendUpdateWithRabbitMQ(data);
                     }
                 }
+                Thread.Sleep(3000);
             }
         }
 
