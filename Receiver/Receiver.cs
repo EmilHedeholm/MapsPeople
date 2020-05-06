@@ -4,9 +4,9 @@ using ExternalConverter;
 using System;
 using System.Collections.Generic;
 
-namespace Receiver
-{
-    public class Reciever{
+namespace Receiver {
+    //This class receives data from the core, and maps the data with the existing data from MapsPeople CMS.
+    public class Receiver {
         public List<Message> Receive(IEnumerable<Location> locations, IDataAccess db) {
             var external = new List<Message>();
             foreach (var location in locations) {

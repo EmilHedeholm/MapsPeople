@@ -4,18 +4,16 @@ using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
-using Receiver;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-
-
-namespace MessageBrokers
-{
+namespace MessageBrokers {
+    //This class receives uses RabbitMQ and receives the mapped data from Receive, and sends the data to the users. 
     public class MessageBrokerRabbitMQ : IMessageBroker {
-        public void ReceiveUpdateFromConsumer(IDataAccess dataAccess) {
-            Reciever reciever = new Reciever();
+        //This method receives data from a consumer, and then sends the data to a user.
+        public void HandleUpdateFromConsumer(IDataAccess dataAccess) {
+            Receiver.Receiver receiver = new Receiver.Receiver();
             try {
                 var factory = new ConnectionFactory() { HostName = "localhost" };
                 using (var connection = factory.CreateConnection())
@@ -37,7 +35,7 @@ namespace MessageBrokers
                         if (message != null) {
                             //The message is converted from JSON to IEnumerable<Location>.
                             var deserializedMessage = JsonConvert.DeserializeObject<IEnumerable<Location>>(message);
-                            var result = reciever.Receive(deserializedMessage, dataAccess);
+                            var result = receiver.Receive(deserializedMessage, dataAccess);
                             if(result != null) {
                                 SendUpdateToUsers(result);
                             }
@@ -63,7 +61,6 @@ namespace MessageBrokers
                 }
             }
         }
-
 
         private void SendUpdateToUsers(List<Message> messages) {
             try {

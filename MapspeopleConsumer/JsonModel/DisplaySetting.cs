@@ -1,13 +1,12 @@
 ﻿
 
 namespace MapspeopleConsumer.JsonModel {
-    class DisplaySetting {
-        public string name { get; set; }
-        public string iconUrl { get; set; }
-        public double? zoomFrom { get; set; }
-        public double? iconScale { get; set; }
-        public IconSize iconSize { get; set; }
-        public string labelTemplate { get; set; }
-
+    public class DisplaySetting {
+        public string Name { get; set; }
+        public string IconUrl { get; set; }
+        public double? ZoomFrom { get; set; }
+        public double? IconScale { get; set; }
+        public IconSize IconSize { get; set; }
+        public string LabelTemplate { get; set; }
     }
 }

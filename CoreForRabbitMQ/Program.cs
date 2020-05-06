@@ -3,6 +3,7 @@ using DatabaseAccess;
 using MessageBrokers;
 
 namespace Core {
+    //This class creates a console where you choose the database and the message broker to use, and based on that is uses a method from the IMessageBroker interface to get the data.
     public class Program {
         static IDataAccess dataAccess { get; set; }
         static IMessageBroker messageBroker { get; set; }
@@ -33,6 +34,7 @@ namespace Core {
                 }
             }
             var choice2 = true;
+            //In this while loop you choose the messagebroker that you want to use. 
             while (choice2) {
                 Console.WriteLine("input the name of the messagebroker you want to use(kafka, rabbitmq)");
                 string messageBrokerChoice = Console.ReadLine();
@@ -55,9 +57,9 @@ namespace Core {
         }
 
 
-        //This method uses RabbitMQ to get data from the the customer consumers. 
+        //This method uses RabbitMQ or Kafka to get data from the the customer consumers. 
         public static void ReceiveUpdate() {
-            messageBroker.ReceiveUpdateFromConsumer(dataAccess);
+            messageBroker.HandleUpdateFromConsumer(dataAccess);
         }
     }
 }

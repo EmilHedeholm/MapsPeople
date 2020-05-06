@@ -7,6 +7,7 @@ using System.Linq;
 using System.Data;
 
 namespace DatabaseAccess {
+    //This class uses a MSSQL database.
     public class SQLDataAccess : IDataAccess {
         private string conString;
 
@@ -16,7 +17,7 @@ namespace DatabaseAccess {
             //SqlConnection conn = new SqlConnection(conString);
         }
 
-        //this method inserts a location with all its sources into the database
+        //this method inserts a location with all its sources into the database. It uses Dapper.
         public void CreateLocation(Location location) {
             SqlConnection connection = null;
             try {
@@ -29,10 +30,9 @@ namespace DatabaseAccess {
             } catch (SqlException se) {
                 connection.Dispose();
                 throw new Exception("something went wrong when trying to insert a location into the database", se);
-            }
-                
-            
+            }  
         }
+
         //this method finds sources in the database based on the location they belong to
         private List<Source> FindSourcesByLocationID(Location location) {
             List<Source> sources = new List<Source>();
@@ -53,7 +53,7 @@ namespace DatabaseAccess {
                     var foundStates = FindStatesBySource(source, location);
                     source.State.AddRange(foundStates);
                 }
-            }catch(SqlException se) {
+            } catch(SqlException se) {
                 connection.Dispose();
                 throw new Exception("something went wrong when trying to find a source", se);
             }
@@ -93,7 +93,7 @@ namespace DatabaseAccess {
                         CreateStates(source, location);
                     }
                 }
-            }catch(SqlException se) {
+            } catch(SqlException se) {
                 connection.Dispose();
                 throw new Exception("something went wrong when trying to insert a source into the database", se);
             }
@@ -116,7 +116,7 @@ namespace DatabaseAccess {
                         }
                     }
                 }
-            }catch(SqlException se) {
+            } catch(SqlException se) {
                 connection.Dispose();
                 throw new Exception("something went wrong when trying to find a state", se);
             }
@@ -155,7 +155,7 @@ namespace DatabaseAccess {
                         }
                     }
                 }
-            }catch(SqlException se) {
+            } catch(SqlException se) {
                 connection.Dispose();
                 throw new Exception("something went wrong when trying to insert a state into the database", se);
             }
@@ -186,7 +186,7 @@ namespace DatabaseAccess {
                         }
                     }
                 }
-            }catch(SqlException se) {
+            } catch(SqlException se) {
                 connection.Dispose();
                 throw new Exception("something went wrong when trying to find a location", se);
             }
@@ -232,8 +232,7 @@ namespace DatabaseAccess {
                         location.Sources = FindSourcesByLocationID(location);
                     }
                 }
-                
-            }catch(SqlException se) {
+            } catch(SqlException se) {
                 connection.Dispose();
                 throw new Exception("something went wrong when trying to find a location", se);
             }
@@ -252,13 +251,14 @@ namespace DatabaseAccess {
                     location.Sources = FindSourcesByLocationID(location);
                     }
                 }
-            }catch(SqlException se) {
+            } catch(SqlException se) {
                 connection.Dispose();
                 throw new Exception("something went wrong when trying to find a location",se);
             }
             return location;
         }
 
+        //This method updates a locations source, and if the source does not exists then it creates the source.
         public void UpdateLocation(Location location) {
             SqlConnection connection = null;
             try {
@@ -270,6 +270,7 @@ namespace DatabaseAccess {
                     List<Source> sources = FindSourcesByLocationID(location);
                     if (sources.Count > 0) {
                         foreach (var source in sources) {
+                            //Updates source
                             using (SqlCommand updateSources = connection.CreateCommand()) {
                                 var sourceSQL = "UPDATE source SET sourceTimestamp = @Timestamp WHERE locationId = @locationId AND sourceType = @sourceType";
                                 updateSources.CommandText = sourceSQL;
@@ -280,6 +281,7 @@ namespace DatabaseAccess {
                                 List<State> states = FindStatesBySource(source, location);
                                 if (states.Count > 0) {
                                     foreach (var state in states) {
+                                        // Updates state
                                         using (SqlCommand updateStates = connection.CreateCommand()) {
                                             var stateSQL = "UPDATE stateMP SET stateValue = @stateValue WHERE locationId = @locationId AND sourceType = @sourceType AND property = @property";
                                             updateStates.CommandText = stateSQL;
@@ -293,9 +295,10 @@ namespace DatabaseAccess {
                                 }
                             }
                         }
+                        //If there are no sources on the location then create the source. 
                     } else CreateSources(location);
                 }
-            }catch(SqlException se) {
+            } catch(SqlException se) {
                 connection.Dispose();
                 throw new Exception("something went wrong when trying to update a location", se);
             }

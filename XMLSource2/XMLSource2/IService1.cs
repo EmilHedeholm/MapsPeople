@@ -5,7 +5,6 @@ using System.ServiceModel;
 using System.ServiceModel.Web;
 
 namespace XMLSource2 {
-    // 
     [ServiceContract]
     public interface IXMLSource {
         [OperationContract]
