@@ -154,6 +154,8 @@ namespace Receiver {
             foreach (var newSource in location.Sources) {
                 foreach (var existingSource in existingLocation.Sources) {
                     if (newSource.Equals(existingSource)) {
+                        newSource.TimeStamp = new DateTime(newSource.TimeStamp.Year, newSource.TimeStamp.Month, newSource.TimeStamp.Day, newSource.TimeStamp.Hour, newSource.TimeStamp.Minute, newSource.TimeStamp.Second, 0);
+                        existingSource.TimeStamp = new DateTime(existingSource.TimeStamp.Year, existingSource.TimeStamp.Month, existingSource.TimeStamp.Day, existingSource.TimeStamp.Hour, existingSource.TimeStamp.Minute, existingSource.TimeStamp.Second, 0);
                         if(newSource.TimeStamp < existingSource.TimeStamp) {
                             update.Sources.Remove(newSource);
                         }
