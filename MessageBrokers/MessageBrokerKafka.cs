@@ -31,7 +31,7 @@ namespace MessageBrokers {
         }
 
 
-        private async void SendUpdateToUsers(List<Message> messages) {
+        public async void SendUpdateToUsers(List<Message> messages) {
             using (var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = "localhost" }).Build()) {
                 Metadata metadata = adminClient.GetMetadata(new TimeSpan(0, 0, 1));
                 foreach (var topic in metadata.Topics) {

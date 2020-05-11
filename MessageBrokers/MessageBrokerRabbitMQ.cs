@@ -62,7 +62,7 @@ namespace MessageBrokers {
             }
         }
 
-        private void SendUpdateToUsers(List<Message> messages) {
+       public void SendUpdateToUsers(List<Message> messages) {
             try {
                 var factory = new ConnectionFactory() { HostName = "localhost" };
                 using (var connection = factory.CreateConnection())
