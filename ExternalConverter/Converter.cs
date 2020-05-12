@@ -11,15 +11,17 @@ namespace ExternalConverter {
         //Return: A list of externalmodels. 
         public List<Message> Convert(Location location, IDataAccess db) {
             List<Message> externalModels = new List<Message>();
-            Message externalModel = new Message();
             if (location != null) {
-                externalModel.ParentIds = FindParentIds(location, db);
                 if (location.Sources != null && location.Sources.Count() > 0) {
                     for (int i = 0; i < location.Sources.Count(); i++) {
+                        Message externalModel = new Message();
+                        externalModel.ParentIds = FindParentIds(location, db);
                         externalModel.Source = location.Sources[i];
                         externalModels.Add(externalModel);
                     }
                 } else {
+                    Message externalModel = new Message();
+                    externalModel.ParentIds = FindParentIds(location, db);
                     externalModels.Add(externalModel);
                 }
             }

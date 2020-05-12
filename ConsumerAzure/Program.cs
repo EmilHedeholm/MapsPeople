@@ -47,7 +47,6 @@ namespace ConsumerAzure {
                     }
                 }
                 Thread.Sleep(3000);
-                Console.ReadLine();
             }
         }
 
