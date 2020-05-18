@@ -158,12 +158,12 @@ namespace ConsumerAzure {
                     await adminClient.CreateTopicsAsync(new TopicSpecification[] {
                                                         new TopicSpecification { Name = topic,
                                                                                  ReplicationFactor = 1,
-                                                                                 NumPartitions = 1 }
+                                                                                 NumPartitions = 2 }
                                                         });
                 } catch (CreateTopicsException e) {
                 }
             }
-            using (var producer = new ProducerBuilder<string, string>(new ProducerConfig { BootstrapServers = "localhost" }).Build()) {
+            using (var producer = new ProducerBuilder<string, string>(new ProducerConfig { BootstrapServers = "localhost" , Partitioner = Partitioner.Random}).Build()) {
                 try {
                     string json = JsonConvert.SerializeObject(data);
                     //Asynchronously send a message to the topic.
