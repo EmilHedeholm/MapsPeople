@@ -17,7 +17,7 @@ namespace MessageBrokers {
             //A list of the topics we already created on kafka. This improves performance.
             CreatedKafkaTopics = new HashSet<string>();
             var topic = "Consumer_Topic";
-            using (var consumer = new ConsumerBuilder<Ignore, string>(new ConsumerConfig { BootstrapServers = "localhost", GroupId = "Core" }).Build()) {
+            using (var consumer = new ConsumerBuilder<Ignore, string>(new ConsumerConfig { BootstrapServers = "localhost", GroupId = "Core"}).Build()) {
                 consumer.Subscribe(topic);
                 while (true) {
                     var consumedMessage = consumer.Consume();

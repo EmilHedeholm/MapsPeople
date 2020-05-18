@@ -77,8 +77,10 @@
   <ItemGroup>
     <Compile Include="JsonModel\LastReport.cs" />
     <Compile Include="JsonModel\RootObject.cs" />
+    <Compile Include="Kafka.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RabbitMQ.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -21,15 +21,19 @@ namespace ConsumerAzure {
         static string MessageBroker { get; set; }
         public static void Main(string[] args) {
             var choice = true;
+            Kafka kafka = null;
+            RabbitMQ rabbitMQ = null;
             while (choice) {
                 Console.WriteLine("input the name of the messagebroker you want to use(kafka, rabbitmq)");
                 MessageBroker = Console.ReadLine();
                 switch (MessageBroker) {
                     case "kafka":
                         choice = false;
+                        kafka = new Kafka();
                         break;
                     case "rabbitmq":
                         choice = false;
+                        rabbitMQ = new RabbitMQ();
                         break;
                     default:
                         Console.WriteLine("not a recognized messagebroker, try again");
@@ -41,9 +45,9 @@ namespace ConsumerAzure {
                 List<DataModels.Location> data = GetData();
                 if (!(data.Count == 0)) {
                     if (MessageBroker.Equals("kafka")) {
-                        SendUpdateWithKafka(data);
+                        kafka.SendUpdateWithKafka(data);
                     } else if (MessageBroker.Equals("rabbitmq")) {
-                        SendUpdateWithRabbitMQ(data);
+                        rabbitMQ.SendUpdateWithRabbitMQ(data);
                     }
                 }
                 Thread.Sleep(3000);
@@ -149,75 +153,9 @@ namespace ConsumerAzure {
             return filteredData;
         }
 
-        //This method sends data to the Core Controller with Kafka. 
-        //Param: Is a list of locations. 
-        private static async void SendUpdateWithKafka(List<DataModels.Location> data) {
-            var topic = "Consumer_Topic";
-            using (var adminClient = new AdminClientBuilder(new AdminClientConfig { BootstrapServers = "localhost" }).Build()) {
-                try {
-                    await adminClient.CreateTopicsAsync(new TopicSpecification[] {
-                                                        new TopicSpecification { Name = topic,
-                                                                                 ReplicationFactor = 1,
-                                                                                 NumPartitions = 2 }
-                                                        });
-                } catch (CreateTopicsException e) {
-                }
-            }
-            using (var producer = new ProducerBuilder<string, string>(new ProducerConfig { BootstrapServers = "localhost" , Partitioner = Partitioner.Random}).Build()) {
-                try {
-                    string json = JsonConvert.SerializeObject(data);
-                    //Asynchronously send a message to the topic.
-                    var deliveryReport = await producer.ProduceAsync(
-                        topic, new Message<string, string> { Key = null, Value = json });
+       
 
-                    Console.WriteLine($"delivered to: {deliveryReport.TopicPartitionOffset}");
-                } catch (ProduceException<string, string> e) {
-                    Console.WriteLine($"failed to deliver message: {e.Message} [{e.Error.Code}]");
-                }
-            }
-        }
-
-        //This message sends data to the Core controller with RabbitMQ. 
-        //Param: data is a list of locations. 
-        private static void SendUpdateWithRabbitMQ(List<DataModels.Location> data) {
-            try {
-                var factory = new ConnectionFactory() { HostName = "localhost" };
-                using (var connection = factory.CreateConnection())
-                using (var channel = connection.CreateModel()) {
-                    channel.QueueDeclare(queue: "Consumer_Queue",
-                                         durable: true,
-                                         exclusive: false,
-                                         autoDelete: false,
-                                         arguments: null);
-
-                    var message = JsonConvert.SerializeObject(data);
-                    var body = Encoding.UTF8.GetBytes(message);
-
-                    var properties = channel.CreateBasicProperties();
-                    properties.Persistent = true;
-
-                    channel.BasicPublish(exchange: "",
-                                         routingKey: "Consumer_Queue",
-                                         basicProperties: properties,
-                                         body: body);
-                    Console.WriteLine(message);
-                    Console.WriteLine();
-                    Console.WriteLine();
-                }
-            } catch (Exception e) {
-                if (e is AlreadyClosedException) {
-                    Console.WriteLine("The connectionis already closed");
-                } else if (e is BrokerUnreachableException) {
-                    Console.WriteLine("The broker cannot be reached");
-                } else if (e is OperationInterruptedException) {
-                    Console.WriteLine("The operation was interupted");
-                } else if (e is ConnectFailureException) {
-                    Console.WriteLine("Could not connect to the broker broker");
-                } else {
-                    Console.WriteLine("Something went wrong");
-                }
-            }
-        }
+       
         //this method has been used for testing purposes
         //private static void SendJSON() {
 
