@@ -71,11 +71,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Kafka.cs" />
     <Compile Include="Models\ArrayOfLocation.cs" />
     <Compile Include="Models\Availability.cs" />
     <Compile Include="Models\Location.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RabbitMQ.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
