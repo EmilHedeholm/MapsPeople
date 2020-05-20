@@ -41,7 +41,7 @@ namespace ConsumerAzure {
                 }
             }
           while (true) {
-                //Wait for 3 sek. 
+                
                 List<DataModels.Location> data = GetData();
                 if (!(data.Count == 0)) {
                     if (MessageBroker.Equals("kafka")) {
@@ -50,6 +50,7 @@ namespace ConsumerAzure {
                         rabbitMQ.SendUpdateWithRabbitMQ(data);
                     }
                 }
+                //Wait for 3 seconds.
                 Thread.Sleep(3000);
             }
         }
