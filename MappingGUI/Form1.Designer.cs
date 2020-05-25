@@ -32,6 +32,8 @@
             this.ConsumerIdTxt = new System.Windows.Forms.TextBox();
             this.ExternalIdTxt = new System.Windows.Forms.TextBox();
             this.ExternalIdLbl = new System.Windows.Forms.Label();
+            this.EditBtn = new System.Windows.Forms.Button();
+            this.ErrorLbl = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -52,8 +54,10 @@
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowTemplate.Height = 24;
+            this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridView1.Size = new System.Drawing.Size(427, 362);
             this.dataGridView1.TabIndex = 1;
+            this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellClick);
             // 
             // EntriesLbl
             // 
@@ -112,11 +116,31 @@
             this.ExternalIdLbl.TabIndex = 8;
             this.ExternalIdLbl.Text = "ExternalId";
             // 
+            // EditBtn
+            // 
+            this.EditBtn.Location = new System.Drawing.Point(549, 393);
+            this.EditBtn.Name = "EditBtn";
+            this.EditBtn.Size = new System.Drawing.Size(75, 23);
+            this.EditBtn.TabIndex = 9;
+            this.EditBtn.Text = "Edit";
+            this.EditBtn.UseVisualStyleBackColor = true;
+            this.EditBtn.Click += new System.EventHandler(this.EditBtn_Click);
+            // 
+            // ErrorLbl
+            // 
+            this.ErrorLbl.AutoSize = true;
+            this.ErrorLbl.Location = new System.Drawing.Point(546, 361);
+            this.ErrorLbl.Name = "ErrorLbl";
+            this.ErrorLbl.Size = new System.Drawing.Size(0, 17);
+            this.ErrorLbl.TabIndex = 10;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.ErrorLbl);
+            this.Controls.Add(this.EditBtn);
             this.Controls.Add(this.ExternalIdLbl);
             this.Controls.Add(this.ExternalIdTxt);
             this.Controls.Add(this.ConsumerIdTxt);
@@ -146,6 +170,8 @@
         private System.Windows.Forms.TextBox ConsumerIdTxt;
         private System.Windows.Forms.TextBox ExternalIdTxt;
         private System.Windows.Forms.Label ExternalIdLbl;
+        private System.Windows.Forms.Button EditBtn;
+        private System.Windows.Forms.Label ErrorLbl;
     }
 }
 
