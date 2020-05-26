@@ -7,26 +7,32 @@
 
 <h2>Choose a queue</h2>
 <form name="chooseQueue" method="post" action='@Url.Action("Index","Queue")'>
-        Queue ID
-        <input id="queueName" name="queueName" type="text" maxlength="100" />
-        <br>
-        User 
-        <input id="userQueue" name="userQueue" type="text" maxlength="100" />
-        <br>
-
-        <input type="submit" value="Choose" class="button" onclick="if ( ! validate()) return false;" language="javascript" />
-        <input type="reset" class="button2" value="Cancel" />
+    <br>
+    User
+    <input id="userQueue" name="userQueue" type="text" maxlength="100" />
+    <br>
+    Queue ID
+    <input id="queueID" name="queueID" type="text" maxlength="100" />
+    <br>
+    <input type="submit" value="Choose" class="button" onclick="if ( ! validate()) return false;" language="javascript" />
+    <input type="reset" class="button2" value="Cancel" />
 
 </form>
 @if (Model != null) {
     <h2>States</h2>
     <table>
         <tr>
-            @foreach (Client.Models.State state in Model[0].source.State) {
-                <th>
-                    ID
-                    @state.Property
-                </th>
+            @if (Model[0].source != null) {
+                foreach (Client.Models.State state in Model[0].source.State) {
+
+                    <th>
+                        ID
+                        @state.Property
+                    </th>
+                }
+
+            } else {
+                <h3>Source is null</h3>
             }
         </tr>
         <tr>

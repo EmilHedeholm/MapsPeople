@@ -12,9 +12,9 @@ namespace Client.Controllers {
         }
         [HttpPost]
         // GET: Queue
-        public ActionResult Index(string userQueue, string queueName) {
+        public ActionResult Index(string userQueue, string queueID) {
             RabbitMQAccess dataAccess = new RabbitMQAccess();
-            dataAccess.ReceiveDataFromRabbitMQ(userQueue, queueName);
+            dataAccess.ReceiveDataFromRabbitMQ(userQueue, queueID);
             //ViewBag.Situation = 2;
             return View(dataAccess.Data);
         }
