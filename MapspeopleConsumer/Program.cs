@@ -54,9 +54,13 @@ namespace MapspeopleConsumer {
         //Return Security Token
         public static Token GetToken(RestClient client)
         {
+            Console.WriteLine("Enter Username");
+            string username = Console.ReadLine();
+            Console.WriteLine("Enter Password");
+            string password = Console.ReadLine();
             client.BaseUrl = new Uri("https://auth.mapsindoors.com/connect/token");
             var request = new RestRequest(Method.POST);
-            string encodedBody = string.Format("grant_type=password&client_id=client&username=1061951@ucn.dk&password=T40M51zt4MF0f9NV");
+            string encodedBody = string.Format($"grant_type=password&client_id=client&username={username}&password={password}");
             request.AddParameter("application/x-www-form-urlencoded", encodedBody, ParameterType.RequestBody);
             request.AddParameter("Content-Type", "application/x-www-form-urlencoded", ParameterType.HttpHeader);
             var response = client.Execute<Token>(request);
@@ -77,14 +81,18 @@ namespace MapspeopleConsumer {
             var something = client.Execute(testRequest);
             string datasetJsonstr = something.Content;          
             List<Dataset> datasets= JsonConvert.DeserializeObject<List<Dataset>>(datasetJsonstr);
-            string datasetId = datasets[0].Id;
-            //This step to get geodata from Mapspeople
-            var geodataRequest = new RestRequest($"/{datasetId}/api/geodata/", Method.GET);
-            geodataRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
-            var geodataResponse = client.Execute(geodataRequest);
-            jsonstr = geodataResponse.Content;                 
-            List<RootObject> sources = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
-           
+            List<RootObject> sources = null;
+            if (datasets != null) {
+                string datasetId = datasets[0].Id;
+                //This step to get geodata from Mapspeople
+                var geodataRequest = new RestRequest($"/{datasetId}/api/geodata/", Method.GET);
+                geodataRequest.AddHeader("authorization", response.token_type + " " + response.access_token);
+                var geodataResponse = client.Execute(geodataRequest);
+                jsonstr = geodataResponse.Content;
+                sources = JsonConvert.DeserializeObject<List<RootObject>>(jsonstr);
+            } else {
+                Console.WriteLine("Username or Password was wrong");
+            }
             return ConvertFromJsonToInternalModel(sources);
         }
 
@@ -93,13 +101,15 @@ namespace MapspeopleConsumer {
         //Return: A list of locations (internal) 
         private static List<Location> ConvertFromJsonToInternalModel(List<RootObject> sources) {
             List<Location> locations = new List<Location>();
-            foreach (RootObject r in sources) {
-                Location location = new Location();
-                location.ConsumerId = 2;
-                location.Id = r.Id;
-                location.ExternalId = r.ExternalId;
-                location.ParentId = r.ParentId;
-                locations.Add(location);
+            if (sources != null) {
+                foreach (RootObject r in sources) {
+                    Location location = new Location();
+                    location.ConsumerId = 2;
+                    location.Id = r.Id;
+                    location.ExternalId = r.ExternalId;
+                    location.ParentId = r.ParentId;
+                    locations.Add(location);
+                }
             }
             return (locations);
         }
