@@ -47,7 +47,11 @@ namespace MappingGUI {
         private void EditBtn_Click(object sender, EventArgs e) {
             MappingEntry entry = new MappingEntry();
             entry.Id = IdTxt.Text;
-            entry.ConsumerId = int.Parse(ConsumerIdTxt.Text);
+            try {
+                entry.ConsumerId = int.Parse(ConsumerIdTxt.Text);
+            } catch(FormatException fe) {
+                ErrorLbl.Text = "ConsumerId is not an int";
+            }
             entry.ExternalId = ExternalIdTxt.Text;
             MappingDataAccess dataAccess = new MappingDataAccess();
             if (dataAccess.FindById(entry.Id) != null) {
