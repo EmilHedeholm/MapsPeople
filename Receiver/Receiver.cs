@@ -118,8 +118,6 @@ namespace Receiver {
                         if(newSource.TimeStamp <= existingSource.TimeStamp) {
                             update.Sources.Remove(newSource);
                         }
-                    } else {
-                        update.Sources.Add(existingSource);
                     }
                 }
             }

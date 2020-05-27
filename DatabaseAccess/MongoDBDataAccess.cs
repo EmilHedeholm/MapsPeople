@@ -92,16 +92,20 @@ namespace DatabaseAccess {
         //This method updates a location if the id provided matches one in the database otherwise it inserts it.
         //parameter: location
         public void UpdateLocation(Location location) {
+            Location update = new Location { Id = location.Id, ConsumerId = location.ConsumerId, ExternalId = location.ExternalId, ParentId = location.ParentId };
+            List<Source> sources = new List<Source>();
+            foreach(var source in location.Sources) {
+                sources.Add(source);
+            }
+            update.Sources = sources;
             try {
                 Location existingLocation = GetLocationById(location.Id);
-                if(!location.Sources.Count.Equals(existingLocation.Sources.Count)) {
                     foreach (var existingSource in existingLocation.Sources) {
                             if (!location.Sources.Contains(existingSource)) {
-                                location.Sources.Add(existingSource);
+                                update.Sources.Add(existingSource);
                             }
                         }
-                    }
-            Collection.ReplaceOne(new BsonDocument("_id", location.Id), location, new ReplaceOptions { IsUpsert = true });
+            Collection.ReplaceOne(new BsonDocument("_id", location.Id), update, new ReplaceOptions { IsUpsert = true });
             } catch (MongoException me) {
                 throw new Exception("Something went wrong when trying to update a location", me);
             }
