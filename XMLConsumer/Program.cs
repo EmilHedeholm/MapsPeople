@@ -61,26 +61,28 @@ namespace XMLConsumer {
             HttpWebResponse res = null;
 
             string url = "http://localhost:51490/Service1.svc/GetXMLData";
+            ArrayOfLocation locations = new ArrayOfLocation();
+            try {
+                req = (HttpWebRequest)WebRequest.Create(url);
+                req.Method = "GET";
+                req.ContentType = "application/xml; charset=utf-8";
+                req.Timeout = 30000;
+                req.Headers.Add("SOAPAction", url);
 
-            req = (HttpWebRequest)WebRequest.Create(url);
-            req.Method = "GET";
-            req.ContentType = "application/xml; charset=utf-8";
-            req.Timeout = 30000;
-            req.Headers.Add("SOAPAction", url);
+                res = (HttpWebResponse)req.GetResponse();
+                Stream responseStream = res.GetResponseStream();
+                var streamReader = new StreamReader(responseStream);
 
-            res = (HttpWebResponse)req.GetResponse();
-            Stream responseStream = res.GetResponseStream();
-            var streamReader = new StreamReader(responseStream);
-
-            var soapResonseXmlDocument = new XmlDocument();
-            soapResonseXmlDocument.LoadXml(streamReader.ReadToEnd());
-
-            ArrayOfLocation locations;
-            using (TextReader textReader = new StringReader(soapResonseXmlDocument.InnerXml)) {
-                using (XmlTextReader reader = new XmlTextReader(textReader)) {
-                    XmlSerializer serializer = new XmlSerializer(typeof(ArrayOfLocation));
-                    locations = (ArrayOfLocation)serializer.Deserialize(reader);
+                var soapResonseXmlDocument = new XmlDocument();
+                soapResonseXmlDocument.LoadXml(streamReader.ReadToEnd());
+                using (TextReader textReader = new StringReader(soapResonseXmlDocument.InnerXml)) {
+                    using (XmlTextReader reader = new XmlTextReader(textReader)) {
+                        XmlSerializer serializer = new XmlSerializer(typeof(ArrayOfLocation));
+                        locations = (ArrayOfLocation)serializer.Deserialize(reader);
+                    }
                 }
+            }catch(WebException we) {
+                Console.WriteLine("cannot connect to XMLSource");
             }
             ArrayOfLocation filteredData =  FilterData(locations);
             return ConvertToInternalModel(filteredData);

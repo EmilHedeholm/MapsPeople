@@ -41,11 +41,15 @@ namespace ConsumerTest {
 
         //This method gets all locationId's from the API. 
         private static void GetAllLocations(string queueId, string database) {
-            string jsonstr;
-            var request = WebRequest.Create($"https://localhost:44346/api/Send?id={queueId}&database={database}") as HttpWebRequest;
-            var response = request.GetResponse();
-            using (StreamReader sr = new StreamReader(response.GetResponseStream())) {
-                jsonstr = sr.ReadToEnd();
+            string jsonstr = "";
+            try {
+                var request = WebRequest.Create($"https://localhost:44346/api/Send?id={queueId}&database={database}") as HttpWebRequest;
+                var response = request.GetResponse();
+                using (StreamReader sr = new StreamReader(response.GetResponseStream())) {
+                    jsonstr = sr.ReadToEnd();
+                }
+            }catch(WebException we) {
+                Console.WriteLine("Cannot connext to LocationAPI");
             }
             Console.WriteLine(jsonstr);
         }
