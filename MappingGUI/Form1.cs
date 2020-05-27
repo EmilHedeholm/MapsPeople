@@ -28,7 +28,9 @@ namespace MappingGUI {
             entry.ExternalId = ExternalIdTxt.Text;
             MappingDataAccess dataAccess = new MappingDataAccess();
             try {
-                dataAccess.Insert(entry);
+                if (entry.ConsumerId != 0) {
+                    dataAccess.Insert(entry);
+                }
             }catch(Exception) {
                 ErrorLbl.Text = "cannot insert new entry with same Id as one that already exists";
             }
@@ -49,9 +51,7 @@ namespace MappingGUI {
             entry.Id = IdTxt.Text;
             try {
                 entry.ConsumerId = int.Parse(ConsumerIdTxt.Text);
-            } catch(FormatException fe) {
-                ErrorLbl.Text = "ConsumerId is not an int";
-            }
+            
             entry.ExternalId = ExternalIdTxt.Text;
             MappingDataAccess dataAccess = new MappingDataAccess();
             if (dataAccess.FindById(entry.Id) != null) {
@@ -59,6 +59,9 @@ namespace MappingGUI {
                 ErrorLbl.Text = "";
             } else {
                 ErrorLbl.Text = "Cannot update an entry that does not exist";
+            }
+            } catch (FormatException fe) {
+                ErrorLbl.Text = "ConsumerId is not an int";
             }
             DisplayData();
         }
