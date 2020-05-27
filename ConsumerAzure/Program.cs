@@ -41,7 +41,6 @@ namespace ConsumerAzure {
                 }
             }
           while (true) {
-                
                 List<DataModels.Location> data = GetData();
                 if (!(data.Count == 0)) {
                     if (MessageBroker.Equals("kafka")) {
